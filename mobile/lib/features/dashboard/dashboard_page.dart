@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'widgets/dashboard_card.dart';
+import 'widgets/historical_evidence_card.dart';
+import 'widgets/market_status_card.dart';
+import 'widgets/recommendation_card.dart';
+import 'widgets/risk_card.dart';
+import 'widgets/watchlist_card.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -11,64 +15,21 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("TradePilot AI"),
       ),
-      body: SafeArea(
+      body: const SafeArea(
         child: ListView(
-          children: const [
-
-            DashboardCard(
-              title: "Market Status",
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.circle,
-                    color: Colors.green,
-                    size: 14,
-                  ),
-                  SizedBox(width: 8),
-                  Text("Connected"),
-                ],
-              ),
-            ),
-
-            DashboardCard(
-              title: "Recommendation",
-              child: Text(
-                "Waiting for analysis...",
-              ),
-            ),
-
-            DashboardCard(
-              title: "Historical Evidence",
-              child: Text(
-                "No analysis available.",
-              ),
-            ),
-
-            DashboardCard(
-              title: "Risk",
-              child: Text(
-                "No analysis available.",
-              ),
-            ),
-
-            DashboardCard(
-              title: "Watchlist",
-              child: Text(
-                "No stocks added.",
-              ),
-            ),
-
+          children: [
+            MarketStatusCard(),
+            RecommendationCard(),
+            HistoricalEvidenceCard(),
+            RiskCard(),
+            WatchlistCard(),
             SizedBox(height: 20),
-
             Center(
               child: Text(
                 "Version 0.2",
-                style: TextStyle(
-                  color: Colors.grey,
-                ),
+                style: TextStyle(color: Colors.grey),
               ),
             ),
-
             SizedBox(height: 20),
           ],
         ),
