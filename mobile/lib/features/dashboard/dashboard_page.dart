@@ -15,9 +15,9 @@ class DashboardPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text("TradePilot AI"),
       ),
-      body: const SafeArea(
+      body: SafeArea(
         child: ListView(
-          children: [
+          children: const [
             MarketStatusCard(),
             RecommendationCard(),
             HistoricalEvidenceCard(),

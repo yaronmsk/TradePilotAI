@@ -265,6 +265,31 @@ Development focus has shifted entirely to feature implementation.
 
 ---
 
+# Session Closure Checklist
+
+Last Session Closed
+
+YES
+
+Project State Updated
+
+YES
+
+Journal Updated
+
+N/A
+
+Git Clean
+
+YES
+
+Next Task Defined
+
+YES
+
+---
+
+
 # Revision History
 
 | Version | Date | Author | Description |
