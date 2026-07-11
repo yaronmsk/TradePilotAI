@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dashboard_card.dart';
+import '../../../shared/widgets/dashboard_card.dart';
 
 class RiskCard extends StatelessWidget {
   const RiskCard({super.key});

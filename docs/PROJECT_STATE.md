@@ -187,13 +187,15 @@ docs/
 
 # Last Completed Work
 
-Implemented reusable dashboard architecture.
-
-Refactored dashboard into independent widget components.
-
-Verified application execution.
-
-Committed to GitHub.
+- Refactored DashboardCard into shared widgets.
+- Started feature-first architecture migration.
+- Introduced Recommendation feature module.
+- Designed the Evidence Framework.
+- Defined the Recommendation architecture.
+- Defined Evidence Provider architecture.
+- Defined relative indicator evaluation.
+- Defined intraday recommendation timeframe (5-minute MVP).
+- Defined explainable recommendations.
 
 ---
 
@@ -215,14 +217,8 @@ Clean
 
 # Next Planned Task
 
-Continue Sprint 2.
 
-Implement Dashboard Header.
-
-Improve Recommendation Card.
-
-Prepare dashboard for backend integration.
-
+Implement EvidenceResult and EvidenceReport models.
 ---
 
 # Known Issues

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dashboard_card.dart';
+import '../../../shared/widgets/dashboard_card.dart';
 
 class HistoricalEvidenceCard extends StatelessWidget {
   const HistoricalEvidenceCard({super.key});
