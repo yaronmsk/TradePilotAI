@@ -2,36 +2,83 @@ import 'package:flutter/material.dart';
 
 import '../recommendation/models/recommendation.dart';
 import '../recommendation/widgets/recommendation_card.dart';
+import '../watchlist/models/watchlist_item.dart';
+import '../watchlist/widgets/add_stock_dialog.dart';
+import '../watchlist/widgets/watchlist_card.dart';
+import 'controllers/dashboard_controller.dart';
 import 'widgets/historical_evidence_card.dart';
 import 'widgets/market_status_card.dart';
 import 'widgets/risk_card.dart';
-import 'widgets/watchlist_card.dart';
 
-class DashboardPage extends StatelessWidget {
-  const DashboardPage({super.key});
+class DashboardPage extends StatefulWidget {
+  const DashboardPage({required this.dashboardController, super.key});
+
+  final DashboardController dashboardController;
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  DashboardController get dashboardController => widget.dashboardController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final selectedSymbol =
+        dashboardController.watchlistController.state.selectedSymbol;
+
+    if (selectedSymbol != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        dashboardController.selectSymbol(selectedSymbol);
+      });
+    }
+  }
+
+  Future<void> _openAddStockDialog() async {
+    final WatchlistItem? item = await AddStockDialog.show(context);
+
+    if (item == null || !mounted) {
+      return;
+    }
+
+    final watchlistController = dashboardController.watchlistController;
+
+    final previousItemCount = watchlistController.state.items.length;
+
+    watchlistController.addItem(item);
+
+    final wasAdded = watchlistController.state.items.length > previousItemCount;
+
+    if (wasAdded) {
+      await dashboardController.selectSymbol(item.symbol);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final marketController = dashboardController.marketController;
+    final watchlistController = dashboardController.watchlistController;
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('TradePilot AI'),
-      ),
+      appBar: AppBar(title: const Text('TradePilot AI')),
       body: SafeArea(
         child: ListView(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           children: [
-            const MarketStatusCard(),
-            RecommendationCard(
-              recommendation: Recommendation.empty(),
-            ),
+            MarketStatusCard(controller: marketController),
+            RecommendationCard(recommendation: Recommendation.empty()),
             const HistoricalEvidenceCard(),
             const RiskCard(),
-            const WatchlistCard(),
+            WatchlistCard(
+              controller: watchlistController,
+              onSymbolSelected: dashboardController.selectSymbol,
+              onAddPressed: _openAddStockDialog,
+            ),
             const SizedBox(height: 20),
             const Center(
-              child: Text(
-                'Version 0.2',
-                style: TextStyle(color: Colors.grey),
-              ),
+              child: Text('Version 0.2', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],
