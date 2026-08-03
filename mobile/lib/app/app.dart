@@ -6,6 +6,9 @@ import '../features/dashboard/dashboard_page.dart';
 import '../features/market/controllers/market_controller.dart';
 import '../features/market/providers/mock_market_data_provider.dart';
 import '../features/market/services/market_service.dart';
+import '../features/recommendation/controllers/recommendation_controller.dart';
+import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
+import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
 import '../features/watchlist/models/watchlist_item.dart';
 import '../features/watchlist/repositories/local_watchlist_repository.dart';
@@ -23,6 +26,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
   MarketController? _marketController;
   WatchlistController? _watchlistController;
+  RecommendationController? _recommendationController;
   DashboardController? _dashboardController;
 
   static const _defaultWatchlist = [
@@ -58,13 +62,19 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
     await watchlistController.initialize();
 
+    final recommendationController = RecommendationController(
+      const RecommendationService(providers: [CandleTrendEvidenceProvider()]),
+    );
+
     final dashboardController = DashboardController(
       marketController: marketController,
       watchlistController: watchlistController,
+      recommendationController: recommendationController,
     );
 
     _marketController = marketController;
     _watchlistController = watchlistController;
+    _recommendationController = recommendationController;
     _dashboardController = dashboardController;
   }
 
@@ -72,6 +82,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
   void dispose() {
     _dashboardController?.dispose();
     _watchlistController?.dispose();
+    _recommendationController?.dispose();
     _marketController?.dispose();
     super.dispose();
   }

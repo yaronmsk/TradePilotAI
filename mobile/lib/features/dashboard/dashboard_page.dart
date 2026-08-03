@@ -60,6 +60,8 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final marketController = dashboardController.marketController;
     final watchlistController = dashboardController.watchlistController;
+    final recommendationController =
+        dashboardController.recommendationController;
 
     return Scaffold(
       appBar: AppBar(title: const Text('TradePilot AI')),
@@ -68,7 +70,17 @@ class _DashboardPageState extends State<DashboardPage> {
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           children: [
             MarketStatusCard(controller: marketController),
-            RecommendationCard(recommendation: Recommendation.empty()),
+            AnimatedBuilder(
+              animation: recommendationController,
+              builder: (context, _) {
+                final state = recommendationController.state;
+
+                return RecommendationCard(
+                  recommendation:
+                      state.recommendation ?? Recommendation.empty(),
+                );
+              },
+            ),
             const HistoricalEvidenceCard(),
             const RiskCard(),
             WatchlistCard(

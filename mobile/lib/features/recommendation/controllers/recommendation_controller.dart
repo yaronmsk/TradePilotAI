@@ -1,0 +1,44 @@
+import 'package:flutter/foundation.dart';
+
+import '../../market/models/market_snapshot.dart';
+import '../models/recommendation_state.dart';
+import '../services/recommendation_service.dart';
+
+class RecommendationController extends ChangeNotifier {
+  RecommendationController(this._service);
+
+  final RecommendationService _service;
+
+  RecommendationState _state = const RecommendationState();
+
+  RecommendationState get state => _state;
+
+  void analyze(MarketSnapshot snapshot) {
+    _state = _state.copyWith(
+      status: RecommendationStatus.analyzing,
+      clearError: true,
+    );
+    notifyListeners();
+
+    try {
+      final recommendation = _service.analyze(snapshot);
+
+      _state = RecommendationState(
+        status: RecommendationStatus.ready,
+        recommendation: recommendation,
+      );
+    } catch (error) {
+      _state = RecommendationState(
+        status: RecommendationStatus.error,
+        errorMessage: error.toString(),
+      );
+    }
+
+    notifyListeners();
+  }
+
+  void reset() {
+    _state = const RecommendationState();
+    notifyListeners();
+  }
+}
