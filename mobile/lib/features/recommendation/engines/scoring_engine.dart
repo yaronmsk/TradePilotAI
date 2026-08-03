@@ -39,9 +39,11 @@ class ScoringEngine {
         case EvidenceDirection.bullish:
           bullishWeight += effectiveWeight;
           break;
+
         case EvidenceDirection.bearish:
           bearishWeight += effectiveWeight;
           break;
+
         case EvidenceDirection.neutral:
         case EvidenceDirection.unknown:
           neutralWeight += effectiveWeight;
@@ -68,27 +70,30 @@ class ScoringEngine {
       );
     }
 
-    final weightedStrength =
-        (weightedStrengthTotal / totalEffectiveWeight).clamp(0.0, 100.0);
+    final weightedStrength = (weightedStrengthTotal / totalEffectiveWeight)
+        .clamp(0.0, 100.0);
 
     final directionalWeight = bullishWeight + bearishWeight;
 
-    double directionBalance = 0;
+    double agreementFactor;
 
-    if (directionalWeight > 0) {
-      directionBalance =
-          ((bullishWeight - bearishWeight) / directionalWeight)
-              .clamp(-1.0, 1.0);
+    if (directionalWeight == 0) {
+      agreementFactor = 0.5;
+    } else {
+      final dominantWeight = bullishWeight > bearishWeight
+          ? bullishWeight
+          : bearishWeight;
+
+      agreementFactor = (dominantWeight / directionalWeight).clamp(0.0, 1.0);
     }
 
-    final directionalScore = 50 + (directionBalance * 50);
+    final coverageFactor = report.coverage.clamp(0.0, 1.0);
 
-    final finalScore =
-        ((directionalScore * 0.70) + (weightedStrength * 0.30))
-            .clamp(0.0, 100.0);
+    final finalEvidenceScore =
+        (weightedStrength * agreementFactor * coverageFactor).clamp(0.0, 100.0);
 
     return ScoringResult(
-      score: finalScore,
+      score: finalEvidenceScore,
       coverage: report.coverage,
       bullishWeight: bullishWeight,
       bearishWeight: bearishWeight,
