@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 
 import '../recommendation/models/recommendation.dart';
+import '../recommendation/models/strategy_recommendation.dart';
+import '../recommendation/models/strategy_summary.dart';
+import '../recommendation/services/strategy_summary_service.dart';
+import '../recommendation/widgets/evidence_list.dart';
 import '../recommendation/widgets/recommendation_card.dart';
+import '../recommendation/widgets/strategy_summary_card.dart';
 import '../watchlist/models/watchlist_item.dart';
 import '../watchlist/widgets/add_stock_dialog.dart';
 import '../watchlist/widgets/watchlist_card.dart';
 import 'controllers/dashboard_controller.dart';
-import 'widgets/historical_evidence_card.dart';
 import 'widgets/market_status_card.dart';
 import 'widgets/risk_card.dart';
 
@@ -21,6 +25,8 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   DashboardController get dashboardController => widget.dashboardController;
+
+  static const _strategySummaryService = StrategySummaryService();
 
   @override
   void initState() {
@@ -74,14 +80,38 @@ class _DashboardPageState extends State<DashboardPage> {
               animation: recommendationController,
               builder: (context, _) {
                 final state = recommendationController.state;
+                final recommendation =
+                    state.recommendation ?? Recommendation.empty();
 
-                return RecommendationCard(
-                  recommendation:
-                      state.recommendation ?? Recommendation.empty(),
+                final traderRecommendation = StrategyRecommendation(
+                  strategy: StrategyType.trader,
+                  recommendation: recommendation,
+                );
+
+                final strategies = _strategySummaryService.build(
+                  traderRecommendation: traderRecommendation,
+                );
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    StrategySummaryCard(strategies: strategies),
+                    RecommendationCard(recommendation: recommendation),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Evidence',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    EvidenceList(
+                      results: recommendation.evidenceReport.results,
+                    ),
+                  ],
                 );
               },
             ),
-            const HistoricalEvidenceCard(),
             const RiskCard(),
             WatchlistCard(
               controller: watchlistController,

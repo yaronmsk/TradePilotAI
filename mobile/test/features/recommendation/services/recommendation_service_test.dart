@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/market/models/market_candle.dart';
 import 'package:mobile/features/market/models/market_snapshot.dart';
+import 'package:mobile/features/recommendation/models/evidence_definition.dart';
 import 'package:mobile/features/recommendation/models/evidence_result.dart';
 import 'package:mobile/features/recommendation/models/recommendation.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
@@ -15,10 +16,27 @@ class FakeEvidenceProvider implements EvidenceProvider {
   final EvidenceResult result;
 
   @override
+  EvidenceDefinition get definition => EvidenceDefinition(
+    name: name,
+    description: 'Test evidence provider.',
+    whyItMatters: 'Used for automated testing.',
+    calculation: 'Uses predetermined test data.',
+  );
+
+  @override
   EvidenceResult evaluate(MarketSnapshot snapshot) => result;
 }
 
 void main() {
+  EvidenceDefinition createDefinition(String providerName) {
+    return EvidenceDefinition(
+      name: providerName,
+      description: 'Test evidence provider.',
+      whyItMatters: 'Used for automated testing.',
+      calculation: 'Uses predetermined test data.',
+    );
+  }
+
   MarketSnapshot createSnapshot() {
     final candle = MarketCandle(
       timestamp: DateTime(2026, 8, 3),
@@ -42,6 +60,7 @@ void main() {
   EvidenceResult createResult(String providerName) {
     return EvidenceResult(
       providerName: providerName,
+      definition: createDefinition(providerName),
       status: EvidenceStatus.available,
       direction: EvidenceDirection.neutral,
       strength: EvidenceStrength.moderate,
@@ -87,6 +106,7 @@ void main() {
             'Bullish Provider',
             EvidenceResult(
               providerName: 'Bullish Provider',
+              definition: createDefinition('Bullish Provider'),
               status: EvidenceStatus.available,
               direction: EvidenceDirection.bullish,
               strength: EvidenceStrength.exceptional,
@@ -108,8 +128,11 @@ void main() {
       expect(recommendation.type, RecommendationType.strongBuy);
 
       expect(recommendation.evidenceScore, 90);
+
       expect(recommendation.evidenceReport.results.length, 1);
+
       expect(recommendation.timeframe, '5m');
+
       expect(recommendation.candleCount, 1);
     });
   });

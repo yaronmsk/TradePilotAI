@@ -12,7 +12,7 @@ void main() {
       final close = closes[index];
 
       return MarketCandle(
-        timestamp: DateTime(2026, 8, 2, 10, index * 5),
+        timestamp: DateTime(2026, 8, 10, 10).add(Duration(minutes: index * 5)),
         open: close,
         high: close,
         low: close,
@@ -25,7 +25,7 @@ void main() {
       symbol: 'TEST',
       timeframe: '5m',
       timestamp: candles.isEmpty
-          ? DateTime(2026, 8, 2)
+          ? DateTime(2026, 8, 10)
           : candles.last.timestamp,
       currentPrice: candles.isEmpty ? 0 : candles.last.close,
       currentVolume: candles.isEmpty ? 0 : candles.last.volume,
@@ -103,6 +103,44 @@ void main() {
       expect(result.status, EvidenceStatus.error);
       expect(result.direction, EvidenceDirection.unknown);
       expect(result.isAvailable, isFalse);
+    });
+
+    test('clean trend has higher reliability than noisy trend', () {
+      final cleanResult = provider.evaluate(
+        createSnapshot(closes: const [100, 102, 104, 106]),
+      );
+
+      final noisyResult = provider.evaluate(
+        createSnapshot(closes: const [100, 110, 95, 112, 106]),
+      );
+
+      expect(cleanResult.reliability, greaterThan(noisyResult.reliability));
+    });
+
+    test('larger candle sample increases reliability', () {
+      final shortResult = provider.evaluate(
+        createSnapshot(closes: const [100, 106]),
+      );
+
+      final longCloses = List<double>.generate(
+        48,
+        (index) => 100 + (index * 0.2),
+      );
+
+      final longResult = provider.evaluate(createSnapshot(closes: longCloses));
+
+      expect(longResult.reliability, greaterThan(shortResult.reliability));
+    });
+
+    test('reliability never exceeds 95 percent', () {
+      final closes = List<double>.generate(
+        60,
+        (index) => 100 + index.toDouble(),
+      );
+
+      final result = provider.evaluate(createSnapshot(closes: closes));
+
+      expect(result.reliability, lessThanOrEqualTo(0.95));
     });
   });
 }

@@ -8,6 +8,7 @@ import '../features/market/providers/mock_market_data_provider.dart';
 import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
+import '../features/recommendation/providers/rsi_evidence_provider.dart';
 import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
 import '../features/watchlist/models/watchlist_item.dart';
@@ -63,7 +64,9 @@ class _TradePilotAppState extends State<TradePilotApp> {
     await watchlistController.initialize();
 
     final recommendationController = RecommendationController(
-      const RecommendationService(providers: [CandleTrendEvidenceProvider()]),
+      const RecommendationService(
+        providers: [CandleTrendEvidenceProvider(), RsiEvidenceProvider()],
+      ),
     );
 
     final dashboardController = DashboardController(

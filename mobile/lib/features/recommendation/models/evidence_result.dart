@@ -1,27 +1,34 @@
-enum EvidenceStatus {
-  available,
-  unavailable,
-  insufficientData,
-  error,
-}
+import 'evidence_definition.dart';
 
-enum EvidenceDirection {
-  bullish,
-  bearish,
-  neutral,
-  unknown,
-}
+enum EvidenceStatus { available, unavailable, insufficientData, error }
 
-enum EvidenceStrength {
-  veryWeak,
-  weak,
-  moderate,
-  strong,
-  exceptional,
-}
+enum EvidenceDirection { bullish, bearish, neutral, unknown }
+
+enum EvidenceStrength { veryWeak, weak, moderate, strong, exceptional }
 
 class EvidenceResult {
+  const EvidenceResult({
+    required this.providerName,
+    required this.definition,
+    required this.status,
+    required this.direction,
+    required this.strength,
+    required this.score,
+    required this.baseWeight,
+    required this.dynamicWeight,
+    required this.reliability,
+    required this.currentValue,
+    required this.baselineValue,
+    required this.relativeValue,
+    required this.explanation,
+    this.unavailableReason,
+  });
+
   final String providerName;
+
+  /// Deterministic information explaining what this evidence represents.
+  final EvidenceDefinition definition;
+
   final EvidenceStatus status;
   final EvidenceDirection direction;
   final EvidenceStrength strength;
@@ -45,22 +52,6 @@ class EvidenceResult {
 
   final String explanation;
   final String? unavailableReason;
-
-  const EvidenceResult({
-    required this.providerName,
-    required this.status,
-    required this.direction,
-    required this.strength,
-    required this.score,
-    required this.baseWeight,
-    required this.dynamicWeight,
-    required this.reliability,
-    required this.currentValue,
-    required this.baselineValue,
-    required this.relativeValue,
-    required this.explanation,
-    this.unavailableReason,
-  });
 
   bool get isAvailable => status == EvidenceStatus.available;
 
