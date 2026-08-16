@@ -49,6 +49,72 @@ Each release shall contain:
 
 ---
 
+
+# Version 0.5.0
+
+Status
+
+Development / Validation
+
+Date
+
+2026-08-16
+
+Summary
+
+Strategy-aware family consensus architecture.
+
+### Added
+
+- EvidenceFamily classification.
+- Consensus Engine with family-level influence caps.
+- Direction score separate from confidence.
+- Bullish and bearish support metrics.
+- Agreement, conflict and family coverage metrics.
+- Strategy-aware Recommendation Insight card.
+- Strategy selection context for Recommendation, Evidence and Risk.
+- Tests for correlated-evidence de-duplication and strategy-aware UI.
+
+### Changed
+
+- Simplified the consensus presentation from six technical summary boxes to three user-facing concepts: Signal Strength, Confidence and Signal Alignment.
+- Moved agreement, conflict, coverage, reliability and evidence-group internals behind `How was this calculated?`.
+- Added plain-English `Why this confidence?` explanation and info dialogs for the three primary concepts.
+- Recommendation card is now explicitly strategy-labeled.
+- Strategy Summary is the master selector for detailed analysis.
+- ScoringEngine now delegates to the family Consensus Engine.
+- Evidence cards expose their evidence family.
+
+### Fixed
+
+- Removed ambiguity over whether the generic Recommendation card represented Trader, Swing or Investor.
+
+---
+
+# Version 0.4.0
+
+Status
+
+Completed
+
+Date
+
+2026-08-16
+
+Summary
+
+Context-aware recommendation brain foundation.
+
+### Added
+
+- Relative Volume evidence.
+- Stock Behavior profile.
+- ATR%-based volatility context.
+- Contextual evidence weighting.
+- Market History range support and chart integration.
+
+---
+
 # Version 0.1.0
 
 Status

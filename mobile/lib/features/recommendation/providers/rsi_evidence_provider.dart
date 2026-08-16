@@ -1,5 +1,6 @@
 import '../../market/models/market_snapshot.dart';
 import '../models/evidence_definition.dart';
+import '../models/evidence_family.dart';
 import '../models/evidence_result.dart';
 import 'evidence_provider.dart';
 
@@ -10,6 +11,7 @@ class RsiEvidenceProvider implements EvidenceProvider {
 
   static const EvidenceDefinition kDefinition = EvidenceDefinition(
     kind: EvidenceKind.rsi,
+    family: EvidenceFamily.momentum,
     name: 'RSI',
     description:
         'Measures the speed and magnitude of recent price changes on a scale from 0 to 100.',

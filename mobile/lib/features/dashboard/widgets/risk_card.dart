@@ -1,14 +1,20 @@
 import 'package:flutter/material.dart';
+
 import '../../../shared/widgets/dashboard_card.dart';
+import '../../recommendation/models/strategy_summary.dart';
 
 class RiskCard extends StatelessWidget {
-  const RiskCard({super.key});
+  const RiskCard({required this.strategy, super.key});
+
+  final StrategyType strategy;
 
   @override
   Widget build(BuildContext context) {
-    return const DashboardCard(
-      title: "Risk",
-      child: Text("No analysis available."),
+    return DashboardCard(
+      title: '${strategy.title} Risk',
+      child: const Text(
+        'Strategy-specific risk analysis will be added as the risk engine is implemented.',
+      ),
     );
   }
 }

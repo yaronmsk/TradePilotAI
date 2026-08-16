@@ -4,6 +4,7 @@ import '../recommendation/models/recommendation.dart';
 import '../recommendation/models/strategy_recommendation.dart';
 import '../recommendation/models/strategy_summary.dart';
 import '../recommendation/services/strategy_summary_service.dart';
+import '../recommendation/widgets/consensus_summary_card.dart';
 import '../recommendation/widgets/evidence_list.dart';
 import '../recommendation/widgets/recommendation_card.dart';
 import '../recommendation/widgets/stock_behavior_card.dart';
@@ -29,6 +30,8 @@ class _DashboardPageState extends State<DashboardPage> {
 
   static const _strategySummaryService = StrategySummaryService();
 
+  StrategyType _selectedStrategy = StrategyType.trader;
+
   Future<void> _openAddStockDialog() async {
     final WatchlistItem? item = await AddStockDialog.show(context);
 
@@ -37,7 +40,6 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     final watchlistController = dashboardController.watchlistController;
-
     final previousItemCount = watchlistController.state.items.length;
 
     watchlistController.addItem(item);
@@ -49,14 +51,21 @@ class _DashboardPageState extends State<DashboardPage> {
     }
   }
 
+  void _selectStrategy(StrategyType strategy) {
+    if (_selectedStrategy == strategy) {
+      return;
+    }
+
+    setState(() {
+      _selectedStrategy = strategy;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final marketController = dashboardController.marketController;
-
     final historyController = dashboardController.marketHistoryController;
-
     final watchlistController = dashboardController.watchlistController;
-
     final recommendationController =
         dashboardController.recommendationController;
 
@@ -74,42 +83,61 @@ class _DashboardPageState extends State<DashboardPage> {
               animation: recommendationController,
               builder: (context, _) {
                 final state = recommendationController.state;
-
                 final recommendation =
                     state.recommendation ?? Recommendation.empty();
 
-                final traderRecommendation = StrategyRecommendation(
-                  strategy: StrategyType.trader,
-                  recommendation: recommendation,
-                );
+                final strategyRecommendations = <StrategyRecommendation>[
+                  StrategyRecommendation(
+                    strategy: StrategyType.trader,
+                    recommendation: recommendation,
+                  ),
+                ];
 
                 final strategies = _strategySummaryService.build(
-                  traderRecommendation: traderRecommendation,
+                  recommendations: strategyRecommendations,
                 );
+
+                final selectedRecommendation = strategyRecommendations
+                    .firstWhere(
+                      (item) => item.strategy == _selectedStrategy,
+                      orElse: () => strategyRecommendations.first,
+                    );
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     if (state.stockBehaviorProfile != null)
                       StockBehaviorCard(profile: state.stockBehaviorProfile!),
-                    StrategySummaryCard(strategies: strategies),
-                    RecommendationCard(recommendation: recommendation),
+                    StrategySummaryCard(
+                      strategies: strategies,
+                      selectedType: selectedRecommendation.strategy,
+                      onStrategySelected: _selectStrategy,
+                    ),
+                    RecommendationCard(
+                      strategyRecommendation: selectedRecommendation,
+                    ),
+                    ConsensusSummaryCard(
+                      strategyRecommendation: selectedRecommendation,
+                    ),
                     const SizedBox(height: 8),
                     Text(
-                      'Evidence',
+                      '${selectedRecommendation.title} Evidence',
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 4),
                     EvidenceList(
-                      results: recommendation.evidenceReport.results,
+                      results: selectedRecommendation
+                          .recommendation
+                          .evidenceReport
+                          .results,
                     ),
+                    RiskCard(strategy: selectedRecommendation.strategy),
                   ],
                 );
               },
             ),
-            const RiskCard(),
             WatchlistCard(
               controller: watchlistController,
               onSymbolSelected: dashboardController.selectSymbol,
@@ -117,7 +145,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.4', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.5', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

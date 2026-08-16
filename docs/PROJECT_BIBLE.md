@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.1
+Version: 1.2
 Status: Living reference
 
 ## Mission
@@ -12,9 +12,13 @@ Build an explainable, statistically grounded investment analysis platform that h
 - Never claim to predict the market.
 - Every recommendation must be traceable to measurable evidence.
 - Supporting and opposing evidence are both displayed.
-- Confidence is earned from coverage, reliability, agreement and historical validation.
+- Direction and confidence are separate concepts.
+- Confidence is earned from coverage, reliability, agreement, independence and historical validation.
+- Correlated indicators must not gain artificial voting power merely because several versions of the same idea are present.
 - Dynamic thresholds and stock-specific baselines are preferred to one-size-fits-all thresholds.
 - Trader, Swing and Investor are separate strategies with different horizons and logic.
+- Every detailed Recommendation, Recommendation Insight, Evidence, Risk and future AI explanation must explicitly belong to a strategy.
+- The Strategy Summary is the master strategy selector for the detail analysis below it.
 - AI explains, mentors and analyzes; deterministic engines decide.
 - Business logic is independent from the visual UI.
 - Current UI is provisional and can be completely redesigned later.
@@ -29,17 +33,37 @@ Market data
 → Evidence providers
 → Contextual evidence adjuster
 → Evidence report
-→ Scoring / consensus
-→ Recommendation engine
-→ Presentation layer
-→ Explainability UI
+→ Evidence-family aggregation
+→ Consensus Engine
+→ Strategy-specific recommendation
+→ Presentation / explainability
 → Future AI Analyst / Mentor
 
 ## Current implemented evidence
 
-- Candle Trend
-- RSI
-- Relative Volume (v0.4)
+- Candle Trend — Trend family
+- RSI — Momentum family
+- Relative Volume — Participation family
+
+## Current brain outputs
+
+Internal engine outputs:
+- Direction Score
+- Confidence
+- Bullish / bearish evidence support
+- Agreement / conflict
+- Evidence Coverage
+- Family Coverage
+- Independent Family Count
+- Per-family direction summary
+
+Default user-facing Recommendation Insight:
+- Signal Strength
+- Confidence
+- Signal Alignment
+- Plain-English `Why this confidence?` explanation
+
+Technical metrics remain available behind `How was this calculated?` and info controls. The default UI must not expose engine jargon when a clearer investor-facing term exists.
 
 ## Current stock context
 
@@ -48,40 +72,40 @@ Market data
 - ATR%
 - Recent vs baseline volatility
 - Trend efficiency
-- Steady / Balanced / Volatile behavior classification
+- Steady / Balanced / Volatile current behavior classification
+
+Important: this remains a short-snapshot context model. True long-horizon Stock DNA requires a separate historical baseline.
 
 ## Strategy model
 
 ### Trader
-Minutes to days. Technical, volume, volatility, market regime and event-aware.
+Minutes to days. Technical, volume, volatility, market regime and event-aware. Active.
 
 ### Swing
-Days to weeks. Multi-timeframe trend, support/resistance, volume confirmation, market/sector regime and event-aware.
+Days to weeks. Multi-timeframe trend, support/resistance, volume confirmation, market/sector regime and event-aware. Planned.
 
 ### Investor
-Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
+Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context. Planned.
 
-## Explainability
-
-Every evidence item should answer:
-- What is it?
-- Why does it matter?
-- How is it calculated?
-- How reliable is it?
-- How did stock context change its weight?
-
-Future AI modes:
-- Mentor
-- Analyst Pro
-- Statistical Explainer
+The same stock may legitimately have different conclusions for all three strategies.
 
 ## Feature research rule
 
 Before major features are designed:
-1. Compare leading competing products.
+1. Compare leading competing products using current public sources.
 2. Identify what they do well.
 3. Identify what TradePilot AI can make more adaptive, transparent or useful.
 4. Design the architecture before coding.
+5. Avoid adding a feature merely because competitors have it.
+
+## Historical-validation discipline
+
+When the brain begins learning from historical effectiveness:
+- Separate training and validation data.
+- Prefer walk-forward evaluation.
+- Track out-of-sample results.
+- Avoid repeatedly optimizing against the same backtest period.
+- Do not promote a signal weight because of an attractive in-sample result alone.
 
 ## Development workflow
 
@@ -97,17 +121,13 @@ Before major features are designed:
 
 ## Immediate brain roadmap
 
-1. Relative Volume and Stock Behavior Profile — v0.4.
-2. Consensus Engine v2: conflict-aware confidence and evidence contribution breakdown.
-3. MACD + EMA/SMA structure.
-4. Market and sector relative strength.
-5. Multi-timeframe alignment.
-6. Real-data same-time-of-day relative volume.
-7. Earnings/event risk.
-8. Historical setup similarity and conditional win/loss statistics.
-9. Swing engine.
-10. Investor fundamental engine.
-11. AI Analyst / Mentor grounded in deterministic analysis.
+1. v0.4 — Relative Volume + current Stock Behavior context. Done.
+2. v0.5 — Strategy-aware Consensus Engine and family de-duplication. Current.
+3. v0.6 — Historical Context / true Stock DNA foundation.
+4. v0.7 — MACD, EMA/SMA, ADX, VWAP, support/resistance, market/sector relative strength and multi-timeframe Trader intelligence.
+5. v0.8 — Market regime, earnings/events, news/sentiment.
+6. v0.9 — Swing and Investor brains.
+7. v1.x — Historical setup similarity, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
 ## UI roadmap
 

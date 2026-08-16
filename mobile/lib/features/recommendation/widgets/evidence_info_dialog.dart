@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../models/evidence_definition.dart';
+import '../models/evidence_family.dart';
 
 class EvidenceInfoDialog extends StatelessWidget {
   const EvidenceInfoDialog({super.key, required this.definition});
@@ -26,6 +27,11 @@ class EvidenceInfoDialog extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              'Evidence family: ${definition.family.label}',
+              style: Theme.of(context).textTheme.labelLarge,
+            ),
+            const SizedBox(height: 16),
             const Text(
               'What is it?',
               style: TextStyle(fontWeight: FontWeight.bold),

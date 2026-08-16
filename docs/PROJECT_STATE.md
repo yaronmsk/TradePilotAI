@@ -1,314 +1,111 @@
-# TradePilot AI
-
-Document ID:
-TP-012
-
-Document:
-Project State
-
-Version:
-1.0
-
-Status:
-Active
-
-Last Updated:
-2026-07-07
-
-Owner:
-TradePilot AI
-
----
-
-# Purpose
-
-This document represents the current state of the TradePilot AI project.
-
-It serves as the project's official checkpoint ("Save Game").
-
-A new AI session should be able to continue development using this document together with the project specifications.
-
-This document shall be updated at the end of every work session.
-
----
-
-# Project Information
-
-Project Name
-
-TradePilot AI
-
-Project Type
-
-AI-powered Investment Decision Support Platform
-
-Repository
-
-https://github.com/yaronmsk/TradePilotAI
-
-Primary Branch
-
-develop
-
-Stable Branch
-
-main
-
-Current Version
-
-0.2.0
-
----
-
-# Current Status
-
-Current Phase
-
-Feature Development
-
-Current Milestone
-
-Milestone 2 – Dashboard Foundation
-
-Current Sprint
-
-Sprint 2
-
-Status
-
-In Progress
-
----
-
-# Completed Milestones
-
-## Milestone 1 – Foundation
-
-Status
-
-Completed
-
-Achievements
-
-- Project initialized
-- Flutter application created
-- GitHub repository created
-- Feature-based architecture implemented
-- Documentation completed
-- Git workflow established
-- Dashboard foundation started
-
----
-
-# Completed Documentation
-
-✅ Documentation Standard
-
-✅ Master Specification
-
-✅ Feature Specification
-
-✅ AI Specification
-
-✅ UI/UX Specification
-
-✅ Architecture Specification
-
-✅ Development Guidelines
-
-✅ Security Specification
-
-✅ Legal Specification
-
-✅ Roadmap
-
-✅ Changelog
-
-✅ Engineering Decisions
-
----
-
-# Current Architecture
-
-Frontend
-
-Flutter
-
-Backend
-
-Python (FastAPI)
-
-Architecture
-
-Feature-Based
-
-Dashboard Components
-
-- DashboardCard
-- MarketStatusCard
-- RecommendationCard
-- HistoricalEvidenceCard
-- RiskCard
-- WatchlistCard
-
-Git Strategy
-
-develop → main
-
----
-
-# Current Application Status
-
-Application builds successfully.
-
-Flutter emulator verified.
-
-Dashboard is displayed correctly.
-
-Dashboard cards are implemented as independent reusable widgets.
-
-No backend integration yet.
-
-No AI implementation yet.
-
----
-
-# Current Directory Structure
-
-TradePilotAI/
-
-backend/
-
-mobile/
-
-docs/
-
----
-
-# Last Completed Work
-
-- Refactored DashboardCard into shared widgets.
-- Started feature-first architecture migration.
-- Introduced Recommendation feature module.
-- Designed the Evidence Framework.
-- Defined the Recommendation architecture.
-- Defined Evidence Provider architecture.
-- Defined relative indicator evaluation.
-- Defined intraday recommendation timeframe (5-minute MVP).
-- Defined explainable recommendations.
-
----
-
-# Current Git Information
-
-Current Branch
-
-develop
-
-Last Known Commit
-
-refactor: split dashboard into independent widgets
-
-Repository Status
-
-Clean
-
----
-
-# Next Planned Task
-
-
-Implement EvidenceResult and EvidenceReport models.
----
-
-# Known Issues
-
-None
-
----
-
-# Vision Freeze
-
-Vision Freeze is ACTIVE.
-
-Only approved functionality may be implemented.
-
-New ideas shall be documented and evaluated after MVP completion.
-
----
-
-# AI Instructions
-
-When resuming the project:
-
-1. Read PROJECT_STATE.md.
-2. Review all project specifications.
-3. Continue from the "Next Planned Task".
-4. Preserve existing architecture.
-5. Preserve feature independence.
-6. Do not introduce unapproved features.
-7. Follow the Development Guidelines.
-
----
-
-# Session Notes
-
-The project is progressing according to the roadmap.
-
-Architecture and documentation phases are complete.
-
-Development focus has shifted entirely to feature implementation.
-
----
-
-# Session Closure Checklist
-
-Last Session Closed
-
-YES
-
-Project State Updated
-
-YES
-
-Journal Updated
-
-N/A
-
-Git Clean
-
-YES
-
-Next Task Defined
-
-YES
-
----
-
-
-# Revision History
-
-| Version | Date | Author | Description |
-|----------|------------|----------------|---------------------------|
-| 1.0 | 2026-07-07 | TradePilot AI | Initial version |
-
----
-
-# Approval
-
-Status:
-Approved
-
-Approved By:
-Project Founder
-
-Architecture Owner:
-TradePilot AI
-
----
-
-# Change Control
-
-This document shall be updated after every completed development session.
-
-It represents the official state of the project.
+# TradePilot AI Project State
+
+Document ID: TP-012
+Version: 1.1
+Status: Active
+Last Updated: 2026-08-16
+Primary Branch: develop
+
+## Current release baseline
+
+Committed baseline before this package: v0.4.0 — Context-Aware Brain Foundation.
+
+Release currently being prepared: v0.5.0 — Strategy-Aware Consensus Engine.
+
+## Current phase
+
+Brain-first feature development.
+
+The product priority is the quality, adaptability and explainability of the recommendation engine. UI remains functional/provisional until the analysis capability is mature enough for a dedicated commercial design phase.
+
+## Implemented product capabilities
+
+### Market / dashboard
+- Persistent watchlist.
+- Symbol-specific deterministic mock market behavior.
+- Market Status with historical chart.
+- Independent 1D / 5D / 1M / 3M / 1Y chart range.
+- Chart range does not recalculate recommendation evidence.
+
+### Recommendation brain
+- Candle Trend evidence.
+- RSI evidence.
+- Relative Volume evidence.
+- Stock Behavior context with volume, ATR%, volatility regime and trend efficiency.
+- Contextual evidence weight adjustment.
+- Evidence definitions and explainability dialogs.
+- Evidence families: Trend, Momentum and Participation.
+- Family-level Consensus Engine.
+- Direction score separated from confidence.
+- Bullish support, bearish support, agreement and conflict.
+- Provider coverage and evidence-family coverage.
+- User-facing Recommendation Insight simplifies consensus into Signal Strength, Confidence and Signal Alignment.
+- Detailed agreement, conflict, coverage, reliability and evidence-group metrics remain available through explainability controls.
+- Duplicate/correlated evidence protection through family influence caps.
+
+### Strategy model
+- Trader — active.
+- Swing — planned / Coming Soon.
+- Investor — planned / Coming Soon.
+- Strategy Summary is the master context selector for detailed analysis.
+- Recommendation, Recommendation Insight, Evidence and Risk are explicitly strategy-labeled.
+
+## Current architecture
+
+Market data
+→ Stock behavior profile
+→ Evidence providers
+→ Contextual evidence adjustment
+→ Evidence report
+→ Evidence-family aggregation
+→ Consensus Engine
+→ Strategy-specific recommendation
+→ Explainability / presentation
+→ Future AI Analyst / Mentor
+
+## Validation status
+
+v0.4.0 was validated with 122 passing tests before commit and push.
+
+v0.5.0 must be validated on the development Mac with:
+
+```bash
+./tools/validate-release-0.5.sh
+```
+
+Expected validation sequence:
+- dart format
+- flutter analyze
+- flutter test
+
+## Current limitations
+
+- Market data remains mocked.
+- Stock Behavior currently uses the short Trader snapshot, not a true long-horizon historical Stock DNA baseline.
+- Swing recommendation engine is not implemented.
+- Investor fundamental engine is not implemented.
+- Market/sector context, earnings/events and news/sentiment are not yet connected.
+- AI explanation is not yet connected.
+
+## Next planned brain work
+
+1. Complete and validate v0.5.0.
+2. v0.6 — Historical Context / Stock DNA foundation:
+   - 20/60/252-day volatility baselines.
+   - same-time-of-day volume baseline.
+   - structural stock volatility vs temporary volatility regime.
+   - trend persistence and gap behavior.
+3. v0.7 — richer Trader evidence and multi-timeframe analysis.
+4. v0.8 — market/sector/event/news context.
+5. v0.9 — Swing and Investor brains.
+
+## Permanent rules
+
+- Research major competitor implementations before designing major features.
+- Do not turn the brain into a simple indicator majority vote.
+- Correlated evidence cannot create artificial confidence.
+- Treat solid and volatile stocks differently using stock-specific historical context.
+- Direction and confidence remain separate.
+- Every detailed analysis output belongs to Trader, Swing or Investor.
+- AI explains deterministic analysis; AI does not invent recommendations.
+- Keep presentation replaceable without rewriting domain/business logic.

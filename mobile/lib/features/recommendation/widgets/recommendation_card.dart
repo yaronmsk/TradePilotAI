@@ -1,25 +1,31 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/dashboard_card.dart';
-import '../models/recommendation.dart';
+import '../models/strategy_recommendation.dart';
 import '../presentation/recommendation_presentation.dart';
 
 class RecommendationCard extends StatelessWidget {
-  const RecommendationCard({super.key, required this.recommendation});
+  const RecommendationCard({super.key, required this.strategyRecommendation});
 
-  final Recommendation recommendation;
+  final StrategyRecommendation strategyRecommendation;
 
   @override
   Widget build(BuildContext context) {
+    final recommendation = strategyRecommendation.recommendation;
     final presentation = RecommendationPresentation.fromType(
       recommendation.type,
     );
 
     return DashboardCard(
-      title: 'Recommendation',
+      title: '${strategyRecommendation.title} Recommendation',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            strategyRecommendation.horizon,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 10),
           Row(
             children: [
               Text(presentation.icon, style: const TextStyle(fontSize: 22)),
@@ -35,46 +41,32 @@ class RecommendationCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-
           const Text(
-            'Evidence Score',
+            'Confidence',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 6),
-
           LinearProgressIndicator(
-            value: recommendation.evidenceScore / 100,
+            value: recommendation.confidenceScore / 100,
             minHeight: 8,
             borderRadius: BorderRadius.circular(4),
           ),
-
           const SizedBox(height: 6),
-
           Text(
-            '${recommendation.evidenceScore.toStringAsFixed(0)}%',
+            '${recommendation.confidenceScore.toStringAsFixed(0)}%',
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
-
           const SizedBox(height: 16),
-
           Text(recommendation.oneLineExplanation),
-
           const SizedBox(height: 12),
-
           const Divider(),
-
           const SizedBox(height: 8),
-
-          Text('Timeframe: ${recommendation.timeframe}'),
-
+          Text('Analysis timeframe: ${recommendation.timeframe}'),
           Text('Candles analyzed: ${recommendation.candleCount}'),
-
           Text(
             'Evidence coverage: '
             '${(recommendation.evidenceReport.coverage * 100).toStringAsFixed(0)}%',
           ),
-
           Text(
             'Last analysis: ${_formatAnalysisTime(recommendation.analysisTime)}',
           ),

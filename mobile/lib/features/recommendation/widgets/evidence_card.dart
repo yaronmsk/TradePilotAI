@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../models/evidence_family.dart';
 import '../models/evidence_result.dart';
 import 'evidence_info_dialog.dart';
 
@@ -53,6 +54,7 @@ class EvidenceCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
+            _buildRow('Family', result.definition.family.label),
             _buildRow('Direction', result.direction.name.toUpperCase()),
             _buildRow('Strength', result.strength.name),
             _buildRow('Current Value', result.currentValue),

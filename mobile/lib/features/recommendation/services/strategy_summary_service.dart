@@ -6,35 +6,39 @@ class StrategySummaryService {
   const StrategySummaryService();
 
   List<StrategySummary> build({
-    required StrategyRecommendation traderRecommendation,
+    required List<StrategyRecommendation> recommendations,
   }) {
-    return [
-      StrategySummary(
-        type: StrategyType.trader,
-        title: traderRecommendation.title,
-        status: StrategyStatus.active,
-        recommendation: RecommendationFormatter.label(
-          traderRecommendation.recommendation.type,
-        ),
-        confidence: traderRecommendation.confidence,
-        horizon: traderRecommendation.horizon,
-      ),
-      const StrategySummary(
-        type: StrategyType.swing,
-        title: 'Swing',
-        status: StrategyStatus.comingSoon,
-        recommendation: null,
-        confidence: null,
-        horizon: 'Days–Weeks',
-      ),
-      const StrategySummary(
-        type: StrategyType.investor,
-        title: 'Investor',
-        status: StrategyStatus.comingSoon,
-        recommendation: null,
-        confidence: null,
-        horizon: 'Months–Years',
-      ),
-    ];
+    final byStrategy = <StrategyType, StrategyRecommendation>{
+      for (final recommendation in recommendations)
+        recommendation.strategy: recommendation,
+    };
+
+    return StrategyType.values
+        .map((type) {
+          final strategyRecommendation = byStrategy[type];
+
+          if (strategyRecommendation == null) {
+            return StrategySummary(
+              type: type,
+              title: type.title,
+              status: StrategyStatus.comingSoon,
+              recommendation: null,
+              confidence: null,
+              horizon: type.horizon,
+            );
+          }
+
+          return StrategySummary(
+            type: type,
+            title: type.title,
+            status: StrategyStatus.active,
+            recommendation: RecommendationFormatter.label(
+              strategyRecommendation.recommendation.type,
+            ),
+            confidence: strategyRecommendation.confidence,
+            horizon: type.horizon,
+          );
+        })
+        .toList(growable: false);
   }
 }

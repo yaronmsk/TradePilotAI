@@ -13,95 +13,134 @@ class RecommendationEngine {
     required DateTime analysisTime,
   }) {
     if (!scoringResult.hasSufficientCoverage) {
-      return Recommendation(
+      return _build(
         type: RecommendationType.wait,
-        evidenceScore: scoringResult.score,
-        oneLineExplanation:
-            'There is not enough reliable evidence for a clear recommendation.',
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
-        evidenceReport: evidenceReport,
+        explanation:
+            'There is not enough reliable evidence coverage for a clear recommendation.',
       );
     }
 
-    final bullishWeight = scoringResult.bullishWeight;
-    final bearishWeight = scoringResult.bearishWeight;
-    final neutralWeight = scoringResult.neutralWeight;
-    final directionalWeight = bullishWeight + bearishWeight;
+    final directionScore = _resolveDirectionScore(scoringResult);
+    final confidence = scoringResult.confidence;
 
-    if (directionalWeight == 0) {
-      return Recommendation(
+    if (directionScore >= 65 && confidence >= 80) {
+      return _build(
+        type: RecommendationType.strongBuy,
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
+        timeframe: timeframe,
+        candleCount: candleCount,
+        analysisTime: analysisTime,
+        explanation:
+            'Independent evidence families strongly align bullish with high confidence.',
+      );
+    }
+
+    if (directionScore >= 30 && confidence >= 55) {
+      return _build(
+        type: RecommendationType.buy,
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
+        timeframe: timeframe,
+        candleCount: candleCount,
+        analysisTime: analysisTime,
+        explanation:
+            'Bullish evidence leads across the available independent evidence families.',
+      );
+    }
+
+    if (directionScore <= -65 && confidence >= 80) {
+      return _build(
+        type: RecommendationType.strongSell,
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
+        timeframe: timeframe,
+        candleCount: candleCount,
+        analysisTime: analysisTime,
+        explanation:
+            'Independent evidence families strongly align bearish with high confidence.',
+      );
+    }
+
+    if (directionScore <= -30 && confidence >= 55) {
+      return _build(
+        type: RecommendationType.sell,
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
+        timeframe: timeframe,
+        candleCount: candleCount,
+        analysisTime: analysisTime,
+        explanation:
+            'Bearish evidence leads across the available independent evidence families.',
+      );
+    }
+
+    if (directionScore.abs() <= 20) {
+      return _build(
         type: RecommendationType.hold,
-        evidenceScore: scoringResult.score,
-        oneLineExplanation:
-            'The available evidence is mostly neutral and does not indicate a clear direction.',
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
-        evidenceReport: evidenceReport,
+        explanation: scoringResult.conflict >= 0.60
+            ? 'Bullish and bearish evidence families are materially conflicted, leaving no clear directional edge.'
+            : 'The current independent evidence families are broadly neutral.',
       );
     }
 
-    final bullishShare = bullishWeight / directionalWeight;
-    final bearishShare = bearishWeight / directionalWeight;
-    final score = scoringResult.score;
+    return _build(
+      type: RecommendationType.wait,
+      scoringResult: scoringResult,
+      evidenceReport: evidenceReport,
+      timeframe: timeframe,
+      candleCount: candleCount,
+      analysisTime: analysisTime,
+      explanation:
+          'A directional bias exists, but confidence or cross-family agreement is not yet strong enough to act on it.',
+    );
+  }
 
-    if (bullishShare >= 0.70) {
-      return Recommendation(
-        type: score >= 80
-            ? RecommendationType.strongBuy
-            : score >= 55
-            ? RecommendationType.buy
-            : RecommendationType.hold,
-        evidenceScore: score,
-        oneLineExplanation: score >= 80
-            ? 'Strong bullish evidence is supported by broad agreement between the available indicators.'
-            : score >= 55
-            ? 'Bullish evidence currently outweighs bearish signals.'
-            : 'Bullish signals exist, but the evidence is not strong enough for a buy recommendation.',
-        timeframe: timeframe,
-        candleCount: candleCount,
-        analysisTime: analysisTime,
-        evidenceReport: evidenceReport,
-      );
-    }
-
-    if (bearishShare >= 0.70) {
-      return Recommendation(
-        type: score >= 80
-            ? RecommendationType.strongSell
-            : score >= 55
-            ? RecommendationType.sell
-            : RecommendationType.hold,
-        evidenceScore: score,
-        oneLineExplanation: score >= 80
-            ? 'Strong bearish evidence is supported by broad agreement between the available indicators.'
-            : score >= 55
-            ? 'Bearish evidence currently outweighs bullish signals.'
-            : 'Bearish signals exist, but the evidence is not strong enough for a sell recommendation.',
-        timeframe: timeframe,
-        candleCount: candleCount,
-        analysisTime: analysisTime,
-        evidenceReport: evidenceReport,
-      );
-    }
-
-    final neutralDominates =
-        neutralWeight >= bullishWeight && neutralWeight >= bearishWeight;
-
+  Recommendation _build({
+    required RecommendationType type,
+    required ScoringResult scoringResult,
+    required EvidenceReport evidenceReport,
+    required String timeframe,
+    required int candleCount,
+    required DateTime analysisTime,
+    required String explanation,
+  }) {
     return Recommendation(
-      type: neutralDominates
-          ? RecommendationType.hold
-          : RecommendationType.wait,
-      evidenceScore: score,
-      oneLineExplanation: neutralDominates
-          ? 'The current evidence is mostly neutral.'
-          : 'The available evidence is mixed and does not support a clear direction.',
+      type: type,
+      evidenceScore: scoringResult.confidence,
+      consensus: scoringResult,
+      oneLineExplanation: explanation,
       timeframe: timeframe,
       candleCount: candleCount,
       analysisTime: analysisTime,
       evidenceReport: evidenceReport,
     );
+  }
+
+  double _resolveDirectionScore(ScoringResult result) {
+    if (result.directionScore != null) {
+      return result.directionScore!.clamp(-100.0, 100.0);
+    }
+
+    final directionalWeight = result.bullishWeight + result.bearishWeight;
+
+    if (directionalWeight <= 0) {
+      return 0;
+    }
+
+    return (((result.bullishWeight - result.bearishWeight) /
+                directionalWeight) *
+            100)
+        .clamp(-100.0, 100.0);
   }
 }

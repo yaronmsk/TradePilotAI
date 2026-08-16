@@ -8,10 +8,13 @@ import 'package:mobile/features/recommendation/services/strategy_summary_service
 void main() {
   const service = StrategySummaryService();
 
-  Recommendation createRecommendation() {
+  Recommendation createRecommendation({
+    RecommendationType type = RecommendationType.strongBuy,
+    double confidence = 91,
+  }) {
     return Recommendation(
-      type: RecommendationType.strongBuy,
-      evidenceScore: 91,
+      type: type,
+      evidenceScore: confidence,
       oneLineExplanation: 'Test recommendation.',
       timeframe: '5m',
       candleCount: 48,
@@ -23,24 +26,44 @@ void main() {
     );
   }
 
-  test('builds Trader, Swing and Investor summaries', () {
+  test('builds active Trader plus future Swing and Investor summaries', () {
     final traderRecommendation = StrategyRecommendation(
       strategy: StrategyType.trader,
       recommendation: createRecommendation(),
     );
 
-    final summaries = service.build(traderRecommendation: traderRecommendation);
+    final summaries = service.build(recommendations: [traderRecommendation]);
 
     expect(summaries.length, 3);
-
     expect(summaries[0].type, StrategyType.trader);
     expect(summaries[0].status, StrategyStatus.active);
     expect(summaries[0].confidence, 91);
-
     expect(summaries[1].type, StrategyType.swing);
     expect(summaries[1].status, StrategyStatus.comingSoon);
-
     expect(summaries[2].type, StrategyType.investor);
+    expect(summaries[2].status, StrategyStatus.comingSoon);
+  });
+
+  test('activates any strategy that has a recommendation', () {
+    final summaries = service.build(
+      recommendations: [
+        StrategyRecommendation(
+          strategy: StrategyType.trader,
+          recommendation: createRecommendation(),
+        ),
+        StrategyRecommendation(
+          strategy: StrategyType.swing,
+          recommendation: createRecommendation(
+            type: RecommendationType.hold,
+            confidence: 72,
+          ),
+        ),
+      ],
+    );
+
+    expect(summaries[1].status, StrategyStatus.active);
+    expect(summaries[1].recommendation, 'Hold');
+    expect(summaries[1].confidence, 72);
     expect(summaries[2].status, StrategyStatus.comingSoon);
   });
 }

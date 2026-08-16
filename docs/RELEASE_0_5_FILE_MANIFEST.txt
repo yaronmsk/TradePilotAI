@@ -1,0 +1,47 @@
+TradePilot AI Release 0.5 File Manifest
+=======================================
+
+Apply these files over the committed v0.4.0 repository baseline.
+
+MODIFIED docs/BRAIN_ARCHITECTURE.md
+NEW      docs/BRAIN_FEATURE_PLAN.md
+MODIFIED docs/CHANGELOG.md
+MODIFIED docs/COMPETITOR_RESEARCH.md
+MODIFIED docs/PROJECT_BIBLE.md
+MODIFIED docs/PROJECT_STATE.md
+NEW      docs/RELEASE_0_5_APPLY.md
+NEW      docs/RELEASE_0_5_FILE_MANIFEST.txt
+NEW      docs/RELEASE_0_5_STRATEGY_AWARE_CONSENSUS.md
+MODIFIED mobile/lib/features/dashboard/dashboard_page.dart
+MODIFIED mobile/lib/features/dashboard/widgets/risk_card.dart
+NEW      mobile/lib/features/recommendation/engines/consensus_engine.dart
+MODIFIED mobile/lib/features/recommendation/engines/recommendation_engine.dart
+MODIFIED mobile/lib/features/recommendation/engines/scoring_engine.dart
+MODIFIED mobile/lib/features/recommendation/models/evidence_definition.dart
+NEW      mobile/lib/features/recommendation/models/evidence_family.dart
+NEW      mobile/lib/features/recommendation/models/evidence_family_summary.dart
+MODIFIED mobile/lib/features/recommendation/models/recommendation.dart
+MODIFIED mobile/lib/features/recommendation/models/scoring_result.dart
+MODIFIED mobile/lib/features/recommendation/models/strategy_recommendation.dart
+MODIFIED mobile/lib/features/recommendation/models/strategy_summary.dart
+MODIFIED mobile/lib/features/recommendation/providers/candle_trend_evidence_provider.dart
+MODIFIED mobile/lib/features/recommendation/providers/relative_volume_evidence_provider.dart
+MODIFIED mobile/lib/features/recommendation/providers/rsi_evidence_provider.dart
+MODIFIED mobile/lib/features/recommendation/services/recommendation_service.dart
+MODIFIED mobile/lib/features/recommendation/services/strategy_summary_service.dart
+NEW      mobile/lib/features/recommendation/widgets/consensus_summary_card.dart
+MODIFIED mobile/lib/features/recommendation/widgets/evidence_card.dart
+MODIFIED mobile/lib/features/recommendation/widgets/evidence_info_dialog.dart
+MODIFIED mobile/lib/features/recommendation/widgets/recommendation_card.dart
+MODIFIED mobile/lib/features/recommendation/widgets/strategy_summary_card.dart
+NEW      mobile/test/features/recommendation/engines/consensus_engine_test.dart
+MODIFIED mobile/test/features/recommendation/engines/recommendation_engine_test.dart
+MODIFIED mobile/test/features/recommendation/models/evidence_definition_test.dart
+MODIFIED mobile/test/features/recommendation/scorig_engine_test.dart
+MODIFIED mobile/test/features/recommendation/services/strategy_summary_service_test.dart
+NEW      mobile/test/features/recommendation/widgets/recommendation_card_test.dart
+NEW      mobile/test/features/recommendation/widgets/strategy_summary_card_test.dart
+MODIFIED mobile/test/widget_test.dart
+NEW      tools/validate-release-0.5.sh
+
+Total files in patch: 40

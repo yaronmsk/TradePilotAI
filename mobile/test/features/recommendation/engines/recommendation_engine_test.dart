@@ -37,13 +37,114 @@ void main() {
           bearishWeight: 0,
           neutralWeight: 0,
           warnings: [],
+          directionScore: 90,
         ),
       );
 
       expect(recommendation.type, RecommendationType.wait);
     });
 
-    test('returns strong buy for strong bullish evidence', () {
+    test('returns strong buy for strong bullish consensus', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 90,
+          coverage: 1,
+          bullishWeight: 1,
+          bearishWeight: 0,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 82,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.strongBuy);
+      expect(recommendation.confidenceScore, 90);
+      expect(recommendation.directionScore, 82);
+    });
+
+    test('returns buy for moderate bullish consensus', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 65,
+          coverage: 1,
+          bullishWeight: 1,
+          bearishWeight: 0,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 45,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.buy);
+    });
+
+    test('returns strong sell for strong bearish consensus', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 90,
+          coverage: 1,
+          bullishWeight: 0,
+          bearishWeight: 1,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: -82,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.strongSell);
+    });
+
+    test('returns sell for moderate bearish consensus', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 65,
+          coverage: 1,
+          bullishWeight: 0,
+          bearishWeight: 1,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: -45,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.sell);
+    });
+
+    test('returns hold when directional consensus is neutral', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 70,
+          coverage: 1,
+          bullishWeight: 0.8,
+          bearishWeight: 0.8,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 0,
+          conflict: 1,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.hold);
+      expect(recommendation.oneLineExplanation, contains('conflicted'));
+    });
+
+    test('returns wait when bias exists but confidence is too low', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 45,
+          coverage: 1,
+          bullishWeight: 0.6,
+          bearishWeight: 0.2,
+          neutralWeight: 0.2,
+          warnings: [],
+          directionScore: 50,
+        ),
+      );
+
+      expect(recommendation.type, RecommendationType.wait);
+    });
+
+    test('supports legacy callers that only provide directional weights', () {
       final recommendation = createRecommendation(
         scoringResult: const ScoringResult(
           score: 90,
@@ -56,99 +157,28 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.strongBuy);
-      expect(recommendation.evidenceScore, 90);
     });
 
-    test('returns buy for moderate bullish evidence', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 65,
-          coverage: 1,
-          bullishWeight: 1,
-          bearishWeight: 0,
-          neutralWeight: 0,
-          warnings: [],
-        ),
+    test('preserves recommendation metadata and consensus', () {
+      const scoring = ScoringResult(
+        score: 65,
+        coverage: 1,
+        bullishWeight: 1,
+        bearishWeight: 0,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: 45,
+        agreement: 0.8,
+        conflict: 0.2,
       );
 
-      expect(recommendation.type, RecommendationType.buy);
-    });
-
-    test('returns strong sell for strong bearish evidence', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 90,
-          coverage: 1,
-          bullishWeight: 0,
-          bearishWeight: 1,
-          neutralWeight: 0,
-          warnings: [],
-        ),
-      );
-
-      expect(recommendation.type, RecommendationType.strongSell);
-    });
-
-    test('returns sell for moderate bearish evidence', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 65,
-          coverage: 1,
-          bullishWeight: 0,
-          bearishWeight: 1,
-          neutralWeight: 0,
-          warnings: [],
-        ),
-      );
-
-      expect(recommendation.type, RecommendationType.sell);
-    });
-
-    test('returns hold when all evidence is neutral', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 50,
-          coverage: 1,
-          bullishWeight: 0,
-          bearishWeight: 0,
-          neutralWeight: 1,
-          warnings: [],
-        ),
-      );
-
-      expect(recommendation.type, RecommendationType.hold);
-    });
-
-    test('returns wait when directional evidence is mixed', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 70,
-          coverage: 1,
-          bullishWeight: 0.55,
-          bearishWeight: 0.45,
-          neutralWeight: 0,
-          warnings: [],
-        ),
-      );
-
-      expect(recommendation.type, RecommendationType.wait);
-    });
-
-    test('preserves recommendation metadata', () {
-      final recommendation = createRecommendation(
-        scoringResult: const ScoringResult(
-          score: 65,
-          coverage: 1,
-          bullishWeight: 1,
-          bearishWeight: 0,
-          neutralWeight: 0,
-          warnings: [],
-        ),
-      );
+      final recommendation = createRecommendation(scoringResult: scoring);
 
       expect(recommendation.timeframe, '5m');
       expect(recommendation.candleCount, 48);
       expect(recommendation.analysisTime, DateTime(2026, 8, 3, 10));
+      expect(recommendation.consensus.agreement, 0.8);
+      expect(recommendation.consensus.conflict, 0.2);
     });
   });
 }

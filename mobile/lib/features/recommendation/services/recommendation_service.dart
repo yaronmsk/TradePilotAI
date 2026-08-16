@@ -2,8 +2,8 @@ import '../../market/models/market_snapshot.dart';
 import '../context/contextual_evidence_adjuster.dart';
 import '../context/stock_behavior_profile.dart';
 import '../context/stock_behavior_profile_service.dart';
+import '../engines/consensus_engine.dart';
 import '../engines/recommendation_engine.dart';
-import '../engines/scoring_engine.dart';
 import '../models/evidence_report.dart';
 import '../models/evidence_result.dart';
 import '../models/recommendation.dart';
@@ -14,14 +14,14 @@ class RecommendationService {
     required List<EvidenceProvider> providers,
     this.stockBehaviorProfileService = const StockBehaviorProfileService(),
     this.contextualEvidenceAdjuster = const ContextualEvidenceAdjuster(),
-    this.scoringEngine = const ScoringEngine(),
+    this.consensusEngine = const ConsensusEngine(),
     this.recommendationEngine = const RecommendationEngine(),
   }) : _providers = providers;
 
   final List<EvidenceProvider> _providers;
   final StockBehaviorProfileService stockBehaviorProfileService;
   final ContextualEvidenceAdjuster contextualEvidenceAdjuster;
-  final ScoringEngine scoringEngine;
+  final ConsensusEngine consensusEngine;
   final RecommendationEngine recommendationEngine;
 
   List<EvidenceProvider> get providers =>
@@ -60,10 +60,10 @@ class RecommendationService {
       expectedProviderCount: _providers.length,
     );
 
-    final scoringResult = scoringEngine.calculate(evidenceReport);
+    final consensusResult = consensusEngine.calculate(evidenceReport);
 
     return recommendationEngine.create(
-      scoringResult: scoringResult,
+      scoringResult: consensusResult,
       evidenceReport: evidenceReport,
       timeframe: snapshot.timeframe,
       candleCount: snapshot.candleCount,

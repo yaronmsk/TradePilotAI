@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
 import '../models/evidence_definition.dart';
+import '../models/evidence_family.dart';
 import '../models/evidence_result.dart';
 import 'evidence_provider.dart';
 
@@ -13,6 +14,7 @@ class RelativeVolumeEvidenceProvider implements EvidenceProvider {
 
   static const EvidenceDefinition kDefinition = EvidenceDefinition(
     kind: EvidenceKind.relativeVolume,
+    family: EvidenceFamily.participation,
     name: 'Relative Volume',
     description:
         'Compares the current trading volume with the stock\'s recent average volume.',

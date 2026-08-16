@@ -1,5 +1,6 @@
 import '../../market/models/market_snapshot.dart';
 import '../models/evidence_definition.dart';
+import '../models/evidence_family.dart';
 import '../models/evidence_result.dart';
 import 'evidence_provider.dart';
 
@@ -10,6 +11,7 @@ class CandleTrendEvidenceProvider implements EvidenceProvider {
 
   static const EvidenceDefinition kDefinition = EvidenceDefinition(
     kind: EvidenceKind.candleTrend,
+    family: EvidenceFamily.trend,
     name: 'Candle Trend',
     description:
         'Measures the overall price direction by comparing the first and last closing prices in the analyzed candle sequence.',
