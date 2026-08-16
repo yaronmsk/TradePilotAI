@@ -4,10 +4,14 @@ import '../core/storage/shared_preferences_storage_service.dart';
 import '../features/dashboard/controllers/dashboard_controller.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/market/controllers/market_controller.dart';
+import '../features/market/controllers/market_history_controller.dart';
 import '../features/market/providers/mock_market_data_provider.dart';
+import '../features/market/providers/mock_market_history_provider.dart';
+import '../features/market/services/market_history_service.dart';
 import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
+import '../features/recommendation/providers/relative_volume_evidence_provider.dart';
 import '../features/recommendation/providers/rsi_evidence_provider.dart';
 import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
@@ -26,6 +30,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
   late final Future<void> _initializationFuture;
 
   MarketController? _marketController;
+  MarketHistoryController? _marketHistoryController;
   WatchlistController? _watchlistController;
   RecommendationController? _recommendationController;
   DashboardController? _dashboardController;
@@ -55,6 +60,10 @@ class _TradePilotAppState extends State<TradePilotApp> {
       const MarketService(MockMarketDataProvider()),
     );
 
+    final marketHistoryController = MarketHistoryController(
+      const MarketHistoryService(MockMarketHistoryProvider()),
+    );
+
     final watchlistController = WatchlistController(
       repository: watchlistRepository,
       initialItems: _defaultWatchlist,
@@ -65,17 +74,29 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
     final recommendationController = RecommendationController(
       const RecommendationService(
-        providers: [CandleTrendEvidenceProvider(), RsiEvidenceProvider()],
+        providers: [
+          CandleTrendEvidenceProvider(),
+          RsiEvidenceProvider(),
+          RelativeVolumeEvidenceProvider(),
+        ],
       ),
     );
 
     final dashboardController = DashboardController(
       marketController: marketController,
+      marketHistoryController: marketHistoryController,
       watchlistController: watchlistController,
       recommendationController: recommendationController,
     );
 
+    final selectedSymbol = watchlistController.state.selectedSymbol;
+
+    if (selectedSymbol != null) {
+      await dashboardController.selectSymbol(selectedSymbol);
+    }
+
     _marketController = marketController;
+    _marketHistoryController = marketHistoryController;
     _watchlistController = watchlistController;
     _recommendationController = recommendationController;
     _dashboardController = dashboardController;
@@ -86,7 +107,9 @@ class _TradePilotAppState extends State<TradePilotApp> {
     _dashboardController?.dispose();
     _watchlistController?.dispose();
     _recommendationController?.dispose();
+    _marketHistoryController?.dispose();
     _marketController?.dispose();
+
     super.dispose();
   }
 

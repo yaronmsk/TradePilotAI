@@ -17,10 +17,7 @@ class MarketController extends ChangeNotifier {
     required String timeframe,
     required int candleCount,
   }) async {
-    _state = _state.copyWith(
-      status: MarketStatus.loading,
-      clearError: true,
-    );
+    _state = _state.copyWith(status: MarketStatus.loading, clearError: true);
     notifyListeners();
 
     try {
@@ -30,10 +27,7 @@ class MarketController extends ChangeNotifier {
         candleCount: candleCount,
       );
 
-      _state = MarketState(
-        status: MarketStatus.loaded,
-        snapshot: snapshot,
-      );
+      _state = MarketState(status: MarketStatus.loaded, snapshot: snapshot);
     } catch (error) {
       _state = MarketState(
         status: MarketStatus.error,

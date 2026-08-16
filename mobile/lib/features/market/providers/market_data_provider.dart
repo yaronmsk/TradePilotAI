@@ -6,4 +6,4 @@ abstract interface class MarketDataProvider {
     required String timeframe,
     required int candleCount,
   });
-} 
+}

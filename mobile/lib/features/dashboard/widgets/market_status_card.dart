@@ -2,139 +2,177 @@ import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/dashboard_card.dart';
 import '../../market/controllers/market_controller.dart';
-import '../../market/models/market_state.dart';
+import '../../market/controllers/market_history_controller.dart';
+import '../../market/widgets/market_history_chart.dart';
+import '../../market/widgets/market_history_range_selector.dart';
 
 class MarketStatusCard extends StatelessWidget {
-  const MarketStatusCard({required this.controller, super.key});
+  const MarketStatusCard({
+    required this.marketController,
+    required this.historyController,
+    super.key,
+  });
 
-  final MarketController controller;
+  final MarketController marketController;
+  final MarketHistoryController historyController;
 
   @override
   Widget build(BuildContext context) {
     return AnimatedBuilder(
-      animation: controller,
+      animation: marketController,
       builder: (context, _) {
-        final state = controller.state;
+        return AnimatedBuilder(
+          animation: historyController,
+          builder: (context, _) {
+            final snapshot = marketController.state.snapshot;
 
-        return DashboardCard(
-          title: 'Market Status',
-          child: _buildContent(context, state),
+            if (snapshot == null) {
+              return const DashboardCard(
+                title: 'Market Status',
+                child: Text('Waiting for market data.'),
+              );
+            }
+
+            return DashboardCard(
+              title: 'Market Status',
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 760;
+
+                  final summary = _MarketSummary(
+                    symbol: snapshot.symbol,
+                    currentPrice: snapshot.currentPrice,
+                    timeframe: snapshot.timeframe,
+                    candleCount: snapshot.candles.length,
+                    currentVolume: snapshot.currentVolume,
+                  );
+
+                  final history = _HistorySection(
+                    controller: historyController,
+                  );
+
+                  if (wide) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 250, child: summary),
+                        const SizedBox(width: 24),
+                        Expanded(child: history),
+                      ],
+                    );
+                  }
+
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [summary, const SizedBox(height: 20), history],
+                  );
+                },
+              ),
+            );
+          },
         );
       },
     );
   }
-
-  Widget _buildContent(BuildContext context, MarketState state) {
-    switch (state.status) {
-      case MarketStatus.initial:
-        return const Row(
-          children: [
-            Icon(Icons.circle_outlined, size: 14),
-            SizedBox(width: 8),
-            Text('Waiting for market data'),
-          ],
-        );
-
-      case MarketStatus.loading:
-        return const Row(
-          children: [
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 2),
-            ),
-            SizedBox(width: 12),
-            Text('Loading market data...'),
-          ],
-        );
-
-      case MarketStatus.loaded:
-        final snapshot = state.snapshot;
-
-        if (snapshot == null) {
-          return const Text('Market data is unavailable.');
-        }
-
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.circle, color: Colors.green, size: 14),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    '${snapshot.symbol} connected',
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              '\$${snapshot.currentPrice.toStringAsFixed(2)}',
-              style: Theme.of(
-                context,
-              ).textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 20,
-              runSpacing: 8,
-              children: [
-                _MarketValue(label: 'Timeframe', value: snapshot.timeframe),
-                _MarketValue(
-                  label: 'Candles',
-                  value: snapshot.candleCount.toString(),
-                ),
-                _MarketValue(
-                  label: 'Volume',
-                  value: snapshot.currentVolume.toStringAsFixed(0),
-                ),
-              ],
-            ),
-          ],
-        );
-
-      case MarketStatus.error:
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(
-              Icons.error_outline,
-              color: Theme.of(context).colorScheme.error,
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                state.errorMessage ?? 'Unable to load market data.',
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ),
-          ],
-        );
-    }
-  }
 }
 
-class _MarketValue extends StatelessWidget {
-  const _MarketValue({required this.label, required this.value});
+class _MarketSummary extends StatelessWidget {
+  const _MarketSummary({
+    required this.symbol,
+    required this.currentPrice,
+    required this.timeframe,
+    required this.candleCount,
+    required this.currentVolume,
+  });
 
-  final String label;
-  final String value;
+  final String symbol;
+  final double currentPrice;
+  final String timeframe;
+  final int candleCount;
+  final double currentVolume;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      label: '$label: $value',
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 2),
-          Text(value, style: const TextStyle(fontWeight: FontWeight.w600)),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon(Icons.circle, size: 12, color: Colors.green),
+            const SizedBox(width: 8),
+            Text(
+              '$symbol connected',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'Current Price',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          '\$${currentPrice.toStringAsFixed(2)}',
+          style: Theme.of(context).textTheme.headlineSmall,
+        ),
+        const SizedBox(height: 18),
+        Text('Analysis timeframe: $timeframe'),
+        Text('Candles analyzed: $candleCount'),
+        Text(
+          'Current volume: '
+          '${currentVolume.toStringAsFixed(0)}',
+        ),
+      ],
+    );
+  }
+}
+
+class _HistorySection extends StatelessWidget {
+  const _HistorySection({required this.controller});
+
+  final MarketHistoryController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = controller.state;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Price History',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (state.isLoading) ...[
+              const SizedBox(width: 12),
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 12),
+        MarketHistoryChart(candles: state.candles),
+        const SizedBox(height: 12),
+        MarketHistoryRangeSelector(
+          selectedRange: state.range,
+          onSelected: (range) {
+            controller.selectRange(range);
+          },
+        ),
+        if (state.errorMessage != null) ...[
+          const SizedBox(height: 8),
+          Text(
+            state.errorMessage!,
+            style: TextStyle(color: Theme.of(context).colorScheme.error),
+          ),
         ],
-      ),
+      ],
     );
   }
 }

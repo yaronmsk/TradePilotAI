@@ -23,9 +23,7 @@ ThemeData buildTradePilotTheme() {
     cardTheme: CardThemeData(
       elevation: 2,
       color: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(14),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
     ),
   );
 }

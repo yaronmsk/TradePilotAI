@@ -6,6 +6,7 @@ import '../recommendation/models/strategy_summary.dart';
 import '../recommendation/services/strategy_summary_service.dart';
 import '../recommendation/widgets/evidence_list.dart';
 import '../recommendation/widgets/recommendation_card.dart';
+import '../recommendation/widgets/stock_behavior_card.dart';
 import '../recommendation/widgets/strategy_summary_card.dart';
 import '../watchlist/models/watchlist_item.dart';
 import '../watchlist/widgets/add_stock_dialog.dart';
@@ -27,20 +28,6 @@ class _DashboardPageState extends State<DashboardPage> {
   DashboardController get dashboardController => widget.dashboardController;
 
   static const _strategySummaryService = StrategySummaryService();
-
-  @override
-  void initState() {
-    super.initState();
-
-    final selectedSymbol =
-        dashboardController.watchlistController.state.selectedSymbol;
-
-    if (selectedSymbol != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        dashboardController.selectSymbol(selectedSymbol);
-      });
-    }
-  }
 
   Future<void> _openAddStockDialog() async {
     final WatchlistItem? item = await AddStockDialog.show(context);
@@ -65,7 +52,11 @@ class _DashboardPageState extends State<DashboardPage> {
   @override
   Widget build(BuildContext context) {
     final marketController = dashboardController.marketController;
+
+    final historyController = dashboardController.marketHistoryController;
+
     final watchlistController = dashboardController.watchlistController;
+
     final recommendationController =
         dashboardController.recommendationController;
 
@@ -75,11 +66,15 @@ class _DashboardPageState extends State<DashboardPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           children: [
-            MarketStatusCard(controller: marketController),
+            MarketStatusCard(
+              marketController: marketController,
+              historyController: historyController,
+            ),
             AnimatedBuilder(
               animation: recommendationController,
               builder: (context, _) {
                 final state = recommendationController.state;
+
                 final recommendation =
                     state.recommendation ?? Recommendation.empty();
 
@@ -95,6 +90,8 @@ class _DashboardPageState extends State<DashboardPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (state.stockBehaviorProfile != null)
+                      StockBehaviorCard(profile: state.stockBehaviorProfile!),
                     StrategySummaryCard(strategies: strategies),
                     RecommendationCard(recommendation: recommendation),
                     const SizedBox(height: 8),
@@ -120,7 +117,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.2', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.4', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

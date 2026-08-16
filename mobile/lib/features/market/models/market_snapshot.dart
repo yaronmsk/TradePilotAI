@@ -21,6 +21,5 @@ class MarketSnapshot {
 
   bool get hasCandles => candles.isNotEmpty;
 
-  MarketCandle? get latestCandle =>
-      candles.isEmpty ? null : candles.last;
+  MarketCandle? get latestCandle => candles.isEmpty ? null : candles.last;
 }

@@ -39,7 +39,7 @@ class EvidenceResult {
   /// Default importance assigned to this evidence provider.
   final double baseWeight;
 
-  /// Runtime adjustment based on the wider market context.
+  /// Runtime adjustment based on stock and market context.
   final double dynamicWeight;
 
   /// Data reliability from 0 to 1.
@@ -57,4 +57,41 @@ class EvidenceResult {
 
   double get effectiveWeight =>
       isAvailable ? baseWeight * dynamicWeight * reliability : 0;
+
+  EvidenceResult copyWith({
+    String? providerName,
+    EvidenceDefinition? definition,
+    EvidenceStatus? status,
+    EvidenceDirection? direction,
+    EvidenceStrength? strength,
+    double? score,
+    double? baseWeight,
+    double? dynamicWeight,
+    double? reliability,
+    String? currentValue,
+    String? baselineValue,
+    String? relativeValue,
+    String? explanation,
+    String? unavailableReason,
+    bool clearUnavailableReason = false,
+  }) {
+    return EvidenceResult(
+      providerName: providerName ?? this.providerName,
+      definition: definition ?? this.definition,
+      status: status ?? this.status,
+      direction: direction ?? this.direction,
+      strength: strength ?? this.strength,
+      score: score ?? this.score,
+      baseWeight: baseWeight ?? this.baseWeight,
+      dynamicWeight: dynamicWeight ?? this.dynamicWeight,
+      reliability: reliability ?? this.reliability,
+      currentValue: currentValue ?? this.currentValue,
+      baselineValue: baselineValue ?? this.baselineValue,
+      relativeValue: relativeValue ?? this.relativeValue,
+      explanation: explanation ?? this.explanation,
+      unavailableReason: clearUnavailableReason
+          ? null
+          : unavailableReason ?? this.unavailableReason,
+    );
+  }
 }

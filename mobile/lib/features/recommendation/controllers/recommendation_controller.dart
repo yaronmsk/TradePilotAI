@@ -21,11 +21,13 @@ class RecommendationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final recommendation = _service.analyze(snapshot);
+      final profile = _service.stockBehaviorProfileService.evaluate(snapshot);
+      final recommendation = _service.analyze(snapshot, profile: profile);
 
       _state = RecommendationState(
         status: RecommendationStatus.ready,
         recommendation: recommendation,
+        stockBehaviorProfile: profile,
       );
     } catch (error) {
       _state = RecommendationState(

@@ -49,11 +49,12 @@ class EvidenceReport {
       );
     }
 
-    final availableCount =
-        results.where((result) => result.isAvailable).length;
+    final availableCount = results.where((result) => result.isAvailable).length;
 
-    final calculatedCoverage =
-        (availableCount / expectedProviderCount).clamp(0.0, 1.0);
+    final calculatedCoverage = (availableCount / expectedProviderCount).clamp(
+      0.0,
+      1.0,
+    );
 
     return EvidenceReport(
       results: List.unmodifiable(results),

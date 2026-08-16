@@ -1,11 +1,6 @@
 import 'market_snapshot.dart';
 
-enum MarketStatus {
-  initial,
-  loading,
-  loaded,
-  error,
-}
+enum MarketStatus { initial, loading, loaded, error }
 
 class MarketState {
   const MarketState({

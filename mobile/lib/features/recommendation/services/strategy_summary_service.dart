@@ -1,5 +1,6 @@
 import '../models/strategy_recommendation.dart';
 import '../models/strategy_summary.dart';
+import '../utils/recommendation_formatter.dart';
 
 class StrategySummaryService {
   const StrategySummaryService();
@@ -12,7 +13,9 @@ class StrategySummaryService {
         type: StrategyType.trader,
         title: traderRecommendation.title,
         status: StrategyStatus.active,
-        recommendation: traderRecommendation.recommendation.type.name,
+        recommendation: RecommendationFormatter.label(
+          traderRecommendation.recommendation.type,
+        ),
         confidence: traderRecommendation.confidence,
         horizon: traderRecommendation.horizon,
       ),

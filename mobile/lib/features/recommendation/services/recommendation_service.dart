@@ -1,4 +1,7 @@
 import '../../market/models/market_snapshot.dart';
+import '../context/contextual_evidence_adjuster.dart';
+import '../context/stock_behavior_profile.dart';
+import '../context/stock_behavior_profile_service.dart';
 import '../engines/recommendation_engine.dart';
 import '../engines/scoring_engine.dart';
 import '../models/evidence_report.dart';
@@ -9,11 +12,15 @@ import '../providers/evidence_provider.dart';
 class RecommendationService {
   const RecommendationService({
     required List<EvidenceProvider> providers,
+    this.stockBehaviorProfileService = const StockBehaviorProfileService(),
+    this.contextualEvidenceAdjuster = const ContextualEvidenceAdjuster(),
     this.scoringEngine = const ScoringEngine(),
     this.recommendationEngine = const RecommendationEngine(),
   }) : _providers = providers;
 
   final List<EvidenceProvider> _providers;
+  final StockBehaviorProfileService stockBehaviorProfileService;
+  final ContextualEvidenceAdjuster contextualEvidenceAdjuster;
   final ScoringEngine scoringEngine;
   final RecommendationEngine recommendationEngine;
 
@@ -26,8 +33,27 @@ class RecommendationService {
         .toList(growable: false);
   }
 
-  Recommendation analyze(MarketSnapshot snapshot) {
-    final evidenceResults = collectEvidence(snapshot);
+  List<EvidenceResult> collectContextualEvidence(MarketSnapshot snapshot) {
+    final rawResults = collectEvidence(snapshot);
+    final profile = stockBehaviorProfileService.evaluate(snapshot);
+
+    return contextualEvidenceAdjuster.adjust(
+      results: rawResults,
+      profile: profile,
+    );
+  }
+
+  Recommendation analyze(
+    MarketSnapshot snapshot, {
+    StockBehaviorProfile? profile,
+  }) {
+    final resolvedProfile =
+        profile ?? stockBehaviorProfileService.evaluate(snapshot);
+    final rawResults = collectEvidence(snapshot);
+    final evidenceResults = contextualEvidenceAdjuster.adjust(
+      results: rawResults,
+      profile: resolvedProfile,
+    );
 
     final evidenceReport = EvidenceReport.fromResults(
       results: evidenceResults,

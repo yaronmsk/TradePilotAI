@@ -9,6 +9,7 @@ class RsiEvidenceProvider implements EvidenceProvider {
   final int period;
 
   static const EvidenceDefinition kDefinition = EvidenceDefinition(
+    kind: EvidenceKind.rsi,
     name: 'RSI',
     description:
         'Measures the speed and magnitude of recent price changes on a scale from 0 to 100.',

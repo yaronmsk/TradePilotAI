@@ -29,16 +29,12 @@ void main() {
       );
 
       expect(
-        snapshot.candles[0].timestamp.isBefore(
-          snapshot.candles[1].timestamp,
-        ),
+        snapshot.candles[0].timestamp.isBefore(snapshot.candles[1].timestamp),
         isTrue,
       );
 
       expect(
-        snapshot.candles[1].timestamp.isBefore(
-          snapshot.candles[2].timestamp,
-        ),
+        snapshot.candles[1].timestamp.isBefore(snapshot.candles[2].timestamp),
         isTrue,
       );
     });

@@ -9,6 +9,7 @@ class CandleTrendEvidenceProvider implements EvidenceProvider {
   static const int _targetCandleCount = 48;
 
   static const EvidenceDefinition kDefinition = EvidenceDefinition(
+    kind: EvidenceKind.candleTrend,
     name: 'Candle Trend',
     description:
         'Measures the overall price direction by comparing the first and last closing prices in the analyzed candle sequence.',

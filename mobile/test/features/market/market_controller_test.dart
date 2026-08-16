@@ -9,9 +9,7 @@ void main() {
 
   setUp(() {
     controller = MarketController(
-      const MarketService(
-        MockMarketDataProvider(),
-      ),
+      const MarketService(MockMarketDataProvider()),
     );
   });
 

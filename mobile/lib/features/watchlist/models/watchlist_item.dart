@@ -34,8 +34,7 @@ class WatchlistItem {
     return WatchlistItem(
       symbol: json['symbol'] as String,
       displayName: json['displayName'] as String,
-      isNotificationsEnabled:
-          json['isNotificationsEnabled'] as bool? ?? false,
+      isNotificationsEnabled: json['isNotificationsEnabled'] as bool? ?? false,
     );
   }
 
@@ -49,6 +48,5 @@ class WatchlistItem {
   }
 
   @override
-  int get hashCode =>
-      Object.hash(symbol, displayName, isNotificationsEnabled);
+  int get hashCode => Object.hash(symbol, displayName, isNotificationsEnabled);
 }
