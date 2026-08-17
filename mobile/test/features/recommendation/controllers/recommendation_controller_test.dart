@@ -41,6 +41,25 @@ void main() {
     );
   }
 
+  List<MarketCandle> createDailyHistory() {
+    var close = 100.0;
+
+    return List<MarketCandle>.generate(252, (index) {
+      final open = close;
+      final move = index.isEven ? 0.004 : -0.0037;
+      close = open * (1 + move);
+
+      return MarketCandle(
+        timestamp: DateTime(2025, 1, 1).add(Duration(days: index)),
+        open: open,
+        high: (open > close ? open : close) * 1.004,
+        low: (open < close ? open : close) * 0.996,
+        close: close,
+        volume: 1000000,
+      );
+    }, growable: false);
+  }
+
   group('RecommendationController', () {
     late RecommendationController controller;
 
@@ -101,6 +120,21 @@ void main() {
       controller.analyze(createSnapshot(firstClose: 100, lastClose: 106));
 
       expect(notificationCount, 2);
+    });
+
+    test('stores a one-year Stock DNA profile when history is supplied', () {
+      controller.analyze(
+        createSnapshot(firstClose: 100, lastClose: 106),
+        historicalDailyCandles: createDailyHistory(),
+      );
+
+      expect(controller.state.status, RecommendationStatus.ready);
+      expect(controller.state.stockBehaviorProfile, isNotNull);
+      expect(
+        controller.state.stockBehaviorProfile!.hasHistoricalBaseline,
+        isTrue,
+      );
+      expect(controller.state.stockBehaviorProfile!.historicalSampleSize, 252);
     });
   });
 }

@@ -1,22 +1,22 @@
 # TradePilot AI Project State
 
-Document ID: TP-012
-Version: 1.1
-Status: Active
-Last Updated: 2026-08-16
+Document ID: TP-012  
+Version: 1.2  
+Status: Active  
+Last Updated: 2026-08-17  
 Primary Branch: develop
 
 ## Current release baseline
 
-Committed baseline before this package: v0.4.0 — Context-Aware Brain Foundation.
+Committed baseline before this package: v0.5.0 — Strategy-Aware Consensus Engine / Recommendation Insight.
 
-Release currently being prepared: v0.5.0 — Strategy-Aware Consensus Engine.
+Release currently being prepared: v0.6.0 — Historical Context / Stock DNA.
 
 ## Current phase
 
 Brain-first feature development.
 
-The product priority is the quality, adaptability and explainability of the recommendation engine. UI remains functional/provisional until the analysis capability is mature enough for a dedicated commercial design phase.
+The priority is recommendation quality, stock-specific context and explainability. UI remains functional/provisional until the analysis capability is mature enough for a dedicated commercial design phase.
 
 ## Implemented product capabilities
 
@@ -26,22 +26,32 @@ The product priority is the quality, adaptability and explainability of the reco
 - Market Status with historical chart.
 - Independent 1D / 5D / 1M / 3M / 1Y chart range.
 - Chart range does not recalculate recommendation evidence.
+- Fixed one-year daily history feed for Stock DNA, separate from visual chart selection.
 
 ### Recommendation brain
 - Candle Trend evidence.
 - RSI evidence.
 - Relative Volume evidence.
-- Stock Behavior context with volume, ATR%, volatility regime and trend efficiency.
-- Contextual evidence weight adjustment.
-- Evidence definitions and explainability dialogs.
 - Evidence families: Trend, Momentum and Participation.
-- Family-level Consensus Engine.
+- Family-level Consensus Engine with correlated-evidence protection.
 - Direction score separated from confidence.
 - Bullish support, bearish support, agreement and conflict.
 - Provider coverage and evidence-family coverage.
-- User-facing Recommendation Insight simplifies consensus into Signal Strength, Confidence and Signal Alignment.
-- Detailed agreement, conflict, coverage, reliability and evidence-group metrics remain available through explainability controls.
-- Duplicate/correlated evidence protection through family influence caps.
+- Strategy-aware Recommendation Insight with Signal Strength, Confidence and Signal Alignment.
+- Technical consensus details behind explainability controls rather than six default jargon-heavy boxes.
+
+### Historical Context / Stock DNA
+- Preferred one-year daily historical baseline with short-snapshot fallback.
+- Typical normalized daily ATR%.
+- Current vs historical realized-volatility percentile.
+- 20D and 60D average daily volume.
+- Daily-volume variability.
+- 20D/60D volume trend ratio.
+- 20D/60D trend efficiency.
+- Structural Stock Type: Steady / Balanced / Volatile.
+- Current Volatility Regime: Calm / Normal / Elevated relative to the stock's own history.
+- Stock-DNA-aware weighting for RSI, Candle Trend and Relative Volume.
+- User-facing Stock DNA card with plain-English explanation and technical detail on demand.
 
 ### Strategy model
 - Trader — active.
@@ -52,8 +62,8 @@ The product priority is the quality, adaptability and explainability of the reco
 
 ## Current architecture
 
-Market data
-→ Stock behavior profile
+Market snapshot + fixed historical baseline
+→ Stock DNA / current regime
 → Evidence providers
 → Contextual evidence adjustment
 → Evidence report
@@ -65,12 +75,14 @@ Market data
 
 ## Validation status
 
-v0.4.0 was validated with 122 passing tests before commit and push.
+v0.4.0 was validated with 122 passing tests.
 
-v0.5.0 must be validated on the development Mac with:
+v0.5.0 was validated with at least 131 passing tests before the Recommendation Insight refinement.
+
+v0.6.0 must be validated on the development Mac with:
 
 ```bash
-./tools/validate-release-0.5.sh
+./tools/validate-release-0.6.sh
 ```
 
 Expected validation sequence:
@@ -80,8 +92,10 @@ Expected validation sequence:
 
 ## Current limitations
 
-- Market data remains mocked.
-- Stock Behavior currently uses the short Trader snapshot, not a true long-horizon historical Stock DNA baseline.
+- Market and historical data remain mocked.
+- Same-time-of-day historical RVOL is not yet implemented; it requires real prior intraday sessions at matching clock offsets.
+- Stock DNA uses one-year daily history, not yet sector/peer percentiles.
+- Earnings-gap and general gap-behavior profiling are not yet implemented.
 - Swing recommendation engine is not implemented.
 - Investor fundamental engine is not implemented.
 - Market/sector context, earnings/events and news/sentiment are not yet connected.
@@ -89,22 +103,27 @@ Expected validation sequence:
 
 ## Next planned brain work
 
-1. Complete and validate v0.5.0.
-2. v0.6 — Historical Context / Stock DNA foundation:
-   - 20/60/252-day volatility baselines.
-   - same-time-of-day volume baseline.
-   - structural stock volatility vs temporary volatility regime.
-   - trend persistence and gap behavior.
-3. v0.7 — richer Trader evidence and multi-timeframe analysis.
-4. v0.8 — market/sector/event/news context.
-5. v0.9 — Swing and Investor brains.
+1. Validate and checkpoint v0.6.0.
+2. v0.7 — richer Trader evidence and multi-timeframe intelligence:
+   - EMA/SMA structure.
+   - MACD.
+   - ADX/trend quality.
+   - VWAP.
+   - support/resistance.
+   - relative strength vs market/sector.
+   - multi-timeframe alignment.
+3. v0.8 — market/sector/event/news context.
+4. v0.9 — Swing and Investor brains.
+5. v1.x — out-of-sample historical setup validation and AI Analyst/Mentor.
 
 ## Permanent rules
 
 - Research major competitor implementations before designing major features.
 - Do not turn the brain into a simple indicator majority vote.
 - Correlated evidence cannot create artificial confidence.
-- Treat solid and volatile stocks differently using stock-specific historical context.
+- Treat steady and volatile stocks differently using stock-specific historical context.
+- Separate structural stock behavior from the current volatility regime.
+- Do not fake data that the provider does not actually have.
 - Direction and confidence remain separate.
 - Every detailed analysis output belongs to Trader, Swing or Investor.
 - AI explains deterministic analysis; AI does not invent recommendations.

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/market/models/market_history_range.dart';
 import 'package:mobile/features/market/providers/mock_market_history_provider.dart';
+import 'package:mobile/features/recommendation/context/historical_stock_profile_service.dart';
 
 void main() {
   const provider = MockMarketHistoryProvider();
@@ -55,5 +56,34 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'creates distinct long-term behavior for steady and volatile symbols',
+      () async {
+        final aaplHistory = await provider.fetchHistory(
+          symbol: 'AAPL',
+          range: MarketHistoryRange.oneYear,
+          endPrice: 150,
+        );
+        final tslaHistory = await provider.fetchHistory(
+          symbol: 'TSLA',
+          range: MarketHistoryRange.oneYear,
+          endPrice: 150,
+        );
+
+        const profileService = HistoricalStockProfileService();
+        final aaplProfile = profileService.evaluate(aaplHistory);
+        final tslaProfile = profileService.evaluate(tslaHistory);
+
+        expect(
+          aaplProfile.typicalRealizedVolatilityPercent,
+          lessThan(tslaProfile.typicalRealizedVolatilityPercent),
+        );
+        expect(
+          aaplProfile.volumeVariability,
+          lessThan(tslaProfile.volumeVariability),
+        );
+      },
+    );
   });
 }

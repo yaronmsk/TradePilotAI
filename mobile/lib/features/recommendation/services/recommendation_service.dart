@@ -1,3 +1,4 @@
+import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
 import '../context/contextual_evidence_adjuster.dart';
 import '../context/stock_behavior_profile.dart';
@@ -33,9 +34,15 @@ class RecommendationService {
         .toList(growable: false);
   }
 
-  List<EvidenceResult> collectContextualEvidence(MarketSnapshot snapshot) {
+  List<EvidenceResult> collectContextualEvidence(
+    MarketSnapshot snapshot, {
+    List<MarketCandle> historicalDailyCandles = const [],
+  }) {
     final rawResults = collectEvidence(snapshot);
-    final profile = stockBehaviorProfileService.evaluate(snapshot);
+    final profile = stockBehaviorProfileService.evaluate(
+      snapshot,
+      historicalDailyCandles: historicalDailyCandles,
+    );
 
     return contextualEvidenceAdjuster.adjust(
       results: rawResults,
@@ -46,9 +53,14 @@ class RecommendationService {
   Recommendation analyze(
     MarketSnapshot snapshot, {
     StockBehaviorProfile? profile,
+    List<MarketCandle> historicalDailyCandles = const [],
   }) {
     final resolvedProfile =
-        profile ?? stockBehaviorProfileService.evaluate(snapshot);
+        profile ??
+        stockBehaviorProfileService.evaluate(
+          snapshot,
+          historicalDailyCandles: historicalDailyCandles,
+        );
     final rawResults = collectEvidence(snapshot);
     final evidenceResults = contextualEvidenceAdjuster.adjust(
       results: rawResults,

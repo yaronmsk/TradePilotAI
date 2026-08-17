@@ -82,4 +82,105 @@ void main() {
 
     expect(adjusted.single.dynamicWeight, 1.3);
   });
+
+  test(
+    'discounts RSI further when long-term Stock DNA confirms volatility',
+    () {
+      const historicalVolatileProfile = StockBehaviorProfile(
+        behaviorType: StockBehaviorType.volatile,
+        volatilityRegime: VolatilityRegime.elevated,
+        averageVolume: 1000000,
+        relativeVolume: 1.1,
+        atrPercent: 1.5,
+        baselineAtrPercent: 1.2,
+        volatilityRatio: 1.25,
+        trendEfficiency: 0.8,
+        sampleSize: 48,
+        baselineSource: StockBaselineSource.oneYearDailyHistory,
+        historicalSampleSize: 252,
+        typicalDailyAtrPercent: 3.4,
+        recentRealizedVolatilityPercent: 68,
+        typicalRealizedVolatilityPercent: 52,
+        volatilityPercentile: 88,
+        volumeVariability: 0.7,
+      );
+
+      final adjusted = adjuster.adjust(
+        results: [createEvidence(EvidenceKind.rsi)],
+        profile: historicalVolatileProfile,
+      );
+
+      final legacyAdjusted = adjuster.adjust(
+        results: [createEvidence(EvidenceKind.rsi)],
+        profile: volatileProfile,
+      );
+
+      expect(
+        adjusted.single.dynamicWeight,
+        lessThan(legacyAdjusted.single.dynamicWeight),
+      );
+      expect(adjusted.single.explanation, contains('Stock DNA'));
+    },
+  );
+
+  test(
+    'stable historical volume makes a large volume expansion more important',
+    () {
+      const stableVolumeProfile = StockBehaviorProfile(
+        behaviorType: StockBehaviorType.steady,
+        volatilityRegime: VolatilityRegime.normal,
+        averageVolume: 1000000,
+        relativeVolume: 1.6,
+        atrPercent: 0.5,
+        baselineAtrPercent: 0.5,
+        volatilityRatio: 1,
+        trendEfficiency: 0.5,
+        sampleSize: 48,
+        baselineSource: StockBaselineSource.oneYearDailyHistory,
+        historicalSampleSize: 252,
+        typicalDailyAtrPercent: 1.2,
+        recentRealizedVolatilityPercent: 18,
+        typicalRealizedVolatilityPercent: 19,
+        volatilityPercentile: 50,
+        volumeVariability: 0.15,
+      );
+
+      final adjusted = adjuster.adjust(
+        results: [createEvidence(EvidenceKind.relativeVolume)],
+        profile: stableVolumeProfile,
+      );
+
+      expect(adjusted.single.dynamicWeight, greaterThan(1.15));
+      expect(adjusted.single.explanation, contains('usually stable'));
+    },
+  );
+
+  test('erratic historical volume discounts a moderate volume spike', () {
+    const erraticVolumeProfile = StockBehaviorProfile(
+      behaviorType: StockBehaviorType.volatile,
+      volatilityRegime: VolatilityRegime.normal,
+      averageVolume: 1000000,
+      relativeVolume: 1.6,
+      atrPercent: 1.2,
+      baselineAtrPercent: 1.2,
+      volatilityRatio: 1,
+      trendEfficiency: 0.5,
+      sampleSize: 48,
+      baselineSource: StockBaselineSource.oneYearDailyHistory,
+      historicalSampleSize: 252,
+      typicalDailyAtrPercent: 3.2,
+      recentRealizedVolatilityPercent: 48,
+      typicalRealizedVolatilityPercent: 50,
+      volatilityPercentile: 50,
+      volumeVariability: 0.75,
+    );
+
+    final adjusted = adjuster.adjust(
+      results: [createEvidence(EvidenceKind.relativeVolume)],
+      profile: erraticVolumeProfile,
+    );
+
+    expect(adjusted.single.dynamicWeight, lessThan(1.15));
+    expect(adjusted.single.explanation, contains('highly variable volume'));
+  });
 }

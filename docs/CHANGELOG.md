@@ -50,6 +50,47 @@ Each release shall contain:
 ---
 
 
+# Version 0.6.0
+
+Status
+
+Development / Validation
+
+Date
+
+2026-08-17
+
+Summary
+
+Historical Context / Stock DNA foundation.
+
+### Added
+
+- One-year daily historical Stock DNA baseline.
+- HistoricalStockProfile and deterministic historical profile service.
+- Rolling normalized ATR% and annualized realized-volatility baselines.
+- Current volatility percentile versus the stock's own history.
+- 20D/60D average daily volume, volume trend and volume variability.
+- 20D/60D historical trend efficiency.
+- Structural Steady / Balanced / Volatile Stock Type.
+- Calm / Normal / Elevated current volatility regime relative to the same stock's history.
+- Stock DNA UI with plain-English explanation and technical detail on demand.
+- Tests for historical stock classification, volatility regime, volume behavior, contextual weights and Stock DNA UI.
+
+### Changed
+
+- Stock behavior profiling now prefers long-term daily history instead of classifying the stock only from the 48-candle Trader snapshot.
+- RSI, Candle Trend and Relative Volume context weights can now respond to historical Stock DNA.
+- Deterministic mock historical data now has symbol-specific volatility and volume characteristics so steady and volatile paths can be tested.
+- The recommendation brain uses a fixed one-year history request independent of the visual Market History range.
+
+### Fixed / guarded
+
+- Historical-data failure falls back to the short-term profile instead of blocking recommendation generation.
+- Same-time-of-day RVOL is intentionally not simulated from daily candles; it remains deferred until true matching intraday data is available.
+
+---
+
 # Version 0.5.0
 
 Status

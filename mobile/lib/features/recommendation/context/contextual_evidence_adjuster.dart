@@ -27,19 +27,37 @@ class ContextualEvidenceAdjuster {
     }
 
     double multiplier = 1;
-    String? contextReason;
+    final reasons = <String>[];
 
     switch (evidence.definition.kind) {
       case EvidenceKind.candleTrend:
         if (profile.behaviorType == StockBehaviorType.volatile) {
           if (profile.trendEfficiency >= 0.65) {
             multiplier = 1.15;
-            contextReason =
-                'Trend evidence receives more weight because this volatile stock is moving directionally rather than randomly.';
+            reasons.add(
+              'Trend evidence receives more weight because this volatile stock is moving directionally rather than randomly.',
+            );
           } else {
             multiplier = 0.75;
-            contextReason =
-                'Trend evidence receives less weight because this volatile stock is currently noisy and directionally inconsistent.';
+            reasons.add(
+              'Trend evidence receives less weight because this volatile stock is currently noisy and directionally inconsistent.',
+            );
+          }
+        }
+
+        if (profile.hasHistoricalBaseline &&
+            profile.volatilityRegime == VolatilityRegime.elevated) {
+          if (profile.trendEfficiency >= 0.65 &&
+              profile.relativeVolume >= 1.20) {
+            multiplier *= 1.10;
+            reasons.add(
+              'The move also has participation while volatility is high versus the stock\'s own one-year history, which strengthens directional confirmation.',
+            );
+          } else if (profile.trendEfficiency < 0.55) {
+            multiplier *= 0.85;
+            reasons.add(
+              'Current volatility is high versus the stock\'s own history without a clean directional path, so trend conviction is reduced.',
+            );
           }
         }
         break;
@@ -47,34 +65,73 @@ class ContextualEvidenceAdjuster {
       case EvidenceKind.rsi:
         if (profile.behaviorType == StockBehaviorType.steady) {
           multiplier = 1.10;
-          contextReason =
-              'RSI receives slightly more weight because mean-reversion signals are more informative in a steadier price profile.';
+          reasons.add(
+            'RSI receives slightly more weight because mean-reversion signals are more informative in a steadier price profile.',
+          );
         } else if (profile.behaviorType == StockBehaviorType.volatile) {
           multiplier = 0.75;
-          contextReason =
-              'RSI receives less weight because overbought and oversold readings occur more frequently in volatile stocks.';
+          reasons.add(
+            'RSI receives less weight because overbought and oversold readings occur more frequently in volatile stocks.',
+          );
         }
 
         if (profile.trendEfficiency >= 0.70) {
           multiplier *= 0.80;
-          contextReason =
-              'RSI is discounted because the current move is strongly directional, where extreme RSI readings can persist instead of reversing immediately.';
+          reasons.add(
+            'RSI is discounted because the current move is strongly directional, where extreme RSI readings can persist instead of reversing immediately.',
+          );
+        }
+
+        if (profile.volatilityRegime == VolatilityRegime.elevated) {
+          multiplier *= 0.90;
+          reasons.add(
+            profile.hasHistoricalBaseline
+                ? 'RSI is further discounted because realized volatility is elevated versus this stock\'s own one-year history.'
+                : 'RSI is further discounted because short-term volatility is elevated relative to this stock\'s recent baseline.',
+          );
+        }
+
+        if (profile.hasHistoricalBaseline &&
+            profile.behaviorType == StockBehaviorType.volatile) {
+          multiplier *= 0.90;
+          reasons.add(
+            'The long-term Stock DNA confirms that this is an inherently volatile name, so a single oscillator extreme carries less standalone weight.',
+          );
         }
         break;
 
       case EvidenceKind.relativeVolume:
         if (profile.relativeVolume >= 2) {
           multiplier = 1.30;
-          contextReason =
-              'Volume evidence receives more weight because current activity is at least twice the stock\'s recent average.';
+          reasons.add(
+            'Volume evidence receives more weight because current activity is at least twice the stock\'s recent average.',
+          );
         } else if (profile.relativeVolume >= 1.50) {
           multiplier = 1.15;
-          contextReason =
-              'Volume evidence receives more weight because trading activity is materially above the stock\'s recent average.';
+          reasons.add(
+            'Volume evidence receives more weight because trading activity is materially above the stock\'s recent average.',
+          );
         } else if (profile.relativeVolume <= 0.70) {
           multiplier = 0.75;
-          contextReason =
-              'Volume evidence receives less weight because current activity is unusually light.';
+          reasons.add(
+            'Volume evidence receives less weight because current activity is unusually light.',
+          );
+        }
+
+        if (profile.hasHistoricalBaseline) {
+          if (profile.volumeVariability <= 0.25 &&
+              profile.relativeVolume >= 1.50) {
+            multiplier *= 1.10;
+            reasons.add(
+              'Daily volume is usually stable for this stock, so today\'s volume expansion is more unusual and receives extra importance.',
+            );
+          } else if (profile.volumeVariability >= 0.50 &&
+              profile.relativeVolume < 2.0) {
+            multiplier *= 0.85;
+            reasons.add(
+              'This stock historically has highly variable volume, so a moderate volume spike is less exceptional than it would be for a stable-volume stock.',
+            );
+          }
         }
         break;
 
@@ -82,25 +139,19 @@ class ContextualEvidenceAdjuster {
         break;
     }
 
-    if (profile.volatilityRegime == VolatilityRegime.elevated &&
-        evidence.definition.kind == EvidenceKind.rsi) {
-      multiplier *= 0.90;
-      contextReason =
-          'RSI is further discounted because short-term volatility is elevated relative to this stock\'s own recent baseline.';
-    }
-
     final adjustedWeight = (evidence.dynamicWeight * multiplier).clamp(
       0.50,
       1.50,
     );
 
-    if (contextReason == null || adjustedWeight == evidence.dynamicWeight) {
+    if (reasons.isEmpty || adjustedWeight == evidence.dynamicWeight) {
       return evidence;
     }
 
     return evidence.copyWith(
       dynamicWeight: adjustedWeight,
-      explanation: '${evidence.explanation} Context adjustment: $contextReason',
+      explanation:
+          '${evidence.explanation} Context adjustment: ${reasons.join(' ')}',
     );
   }
 }

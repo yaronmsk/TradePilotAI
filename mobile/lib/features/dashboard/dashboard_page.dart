@@ -145,7 +145,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.5', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.6', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

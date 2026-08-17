@@ -1,6 +1,6 @@
 # TradePilot AI Brain Architecture
 
-Version: 0.5 strategy-aware consensus
+Version: 0.6 historical-context consensus
 Status: Living design
 
 ## Core rule
@@ -9,8 +9,8 @@ A recommendation is not an indicator vote. It is a strategy-specific, context-aw
 
 ## Decision pipeline
 
-Market data
-→ Stock behavior profile
+Active market snapshot + fixed historical baseline
+→ Historical Stock DNA + current regime
 → Evidence providers
 → Contextual evidence weighting
 → Evidence report
@@ -19,6 +19,8 @@ Market data
 → Strategy-specific recommendation
 → Deterministic explanation
 → Future AI Mentor / Analyst explanation
+
+The Stock DNA baseline is a brain input, not a chart setting. The visual Market History range remains independent from recommendation analysis.
 
 ## Strategy ownership
 
@@ -122,22 +124,53 @@ Examples:
 - Current volatility vs its historical volatility regime.
 - Momentum and trend persistence vs the stock's own history.
 
+## Historical Stock DNA and current regime
+
+v0.6 separates two concepts that must not be confused:
+
+**Stock Type** is structural behavior learned from one-year daily history:
+- Steady
+- Balanced
+- Volatile
+
+**Volatility Regime** is the current 20-session realized-volatility state compared with that same stock's own historical distribution:
+- Calm: <= 25th percentile
+- Normal: 25th–75th percentile
+- Elevated: >= 75th percentile
+
+Long-term inputs currently include rolling normalized ATR%, rolling annualized realized volatility, 20D/60D daily-volume baselines, volume variability and 20D/60D trend efficiency. At least 60 valid daily sessions are required for historical Stock DNA.
+
+If historical data is unavailable, the recommendation engine falls back to the short active-analysis snapshot.
+
 ## Current context-aware weighting
 
-Implemented in v0.4 and consumed by v0.5:
-- RSI is discounted when a stock is volatile or strongly directional.
-- Candle Trend is boosted when a volatile stock moves with high directional efficiency.
-- Candle Trend is discounted when a volatile stock is noisy.
-- Relative Volume receives more weight when current volume is materially abnormal.
+Implemented through v0.6:
+- RSI is discounted when a stock is historically volatile or when the current move is strongly directional.
+- RSI can receive slightly more trust in historically steady stocks.
+- RSI is further discounted when current volatility is elevated versus the stock's own history.
+- Candle Trend is boosted when an inherently volatile stock moves with high directional efficiency.
+- Candle Trend is discounted when volatile movement is noisy.
+- Elevated historical volatility requires cleaner directional/participation confirmation before Trend receives extra conviction.
+- Relative Volume receives more weight when current analysis-window volume is materially abnormal.
+- A moderate volume spike carries more weight when the stock's historical daily volume is normally stable, and less weight when daily volume is naturally erratic.
+
+Stock DNA never emits Buy/Sell by itself. It only changes the interpretation and weight of evidence.
 
 ## Brain roadmap
 
 ### v0.6 — Historical Context / Stock DNA foundation
-- Separate short-term regime from long-term stock personality.
-- 20/60/252-day volatility baselines.
-- Daily and same-time-of-day volume baselines.
-- Volatility percentiles rather than only fixed thresholds.
-- Trend persistence and gap behavior.
+Implemented:
+- Separate current regime from long-term stock personality.
+- One-year daily history as the preferred baseline.
+- Rolling normalized ATR% and realized-volatility baselines.
+- Current volatility percentile against the stock's own history.
+- 20D/60D daily volume and volume variability.
+- 20D/60D trend efficiency.
+- Historical context integrated into evidence weighting.
+
+Deferred intentionally:
+- Same-time-of-day RVOL until true matching intraday history is available.
+- Gap/earnings-gap behavior until event-aware data is available.
 
 ### v0.7 — Multi-factor Trader intelligence
 - EMA/SMA structure.

@@ -60,8 +60,12 @@ class _TradePilotAppState extends State<TradePilotApp> {
       const MarketService(MockMarketDataProvider()),
     );
 
+    const marketHistoryService = MarketHistoryService(
+      MockMarketHistoryProvider(),
+    );
+
     final marketHistoryController = MarketHistoryController(
-      const MarketHistoryService(MockMarketHistoryProvider()),
+      marketHistoryService,
     );
 
     final watchlistController = WatchlistController(
@@ -85,6 +89,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
     final dashboardController = DashboardController(
       marketController: marketController,
       marketHistoryController: marketHistoryController,
+      stockHistoryService: marketHistoryService,
       watchlistController: watchlistController,
       recommendationController: recommendationController,
     );

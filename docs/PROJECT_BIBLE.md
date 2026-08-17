@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.2
+Version: 1.3
 Status: Living reference
 
 ## Mission
@@ -65,16 +65,22 @@ Default user-facing Recommendation Insight:
 
 Technical metrics remain available behind `How was this calculated?` and info controls. The default UI must not expose engine jargon when a clearer investor-facing term exists.
 
-## Current stock context
+## Current stock context / Stock DNA
 
-- Average recent volume
-- Relative volume
-- ATR%
-- Recent vs baseline volatility
-- Trend efficiency
-- Steady / Balanced / Volatile current behavior classification
+Preferred baseline: one trading year of daily price and volume history. If long-history data is unavailable, the engine falls back to the short Trader snapshot rather than blocking the recommendation.
 
-Important: this remains a short-snapshot context model. True long-horizon Stock DNA requires a separate historical baseline.
+Current Stock DNA inputs:
+- Typical normalized daily ATR%.
+- Recent and typical annualized realized volatility.
+- Current volatility percentile versus the stock's own history.
+- 20D and 60D average daily volume.
+- Daily-volume variability and 20D/60D volume trend.
+- 20D and 60D trend efficiency.
+- Short-window relative volume and trend efficiency for the active Trader analysis.
+
+The engine separates **Stock Type** (Steady / Balanced / Volatile structural behavior) from **Volatility Now** (Calm / Normal / Elevated relative to that stock's own history). This context changes evidence weights; it does not create a Buy/Sell signal by itself.
+
+Same-time-of-day historical RVOL is intentionally deferred until the data provider supplies real prior intraday sessions at matching clock offsets. Daily data must not be used as a fake substitute.
 
 ## Strategy model
 
@@ -121,9 +127,9 @@ When the brain begins learning from historical effectiveness:
 
 ## Immediate brain roadmap
 
-1. v0.4 — Relative Volume + current Stock Behavior context. Done.
-2. v0.5 — Strategy-aware Consensus Engine and family de-duplication. Current.
-3. v0.6 — Historical Context / true Stock DNA foundation.
+1. v0.4 — Relative Volume + short-window Stock Behavior context. Done.
+2. v0.5 — Strategy-aware Consensus Engine, evidence-family de-duplication and Recommendation Insight. Done.
+3. v0.6 — One-year Historical Context / Stock DNA foundation. Current.
 4. v0.7 — MACD, EMA/SMA, ADX, VWAP, support/resistance, market/sector relative strength and multi-timeframe Trader intelligence.
 5. v0.8 — Market regime, earnings/events, news/sentiment.
 6. v0.9 — Swing and Investor brains.

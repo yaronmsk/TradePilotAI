@@ -36,6 +36,28 @@ void main() {
     );
   }
 
+  List<MarketCandle> createDailyHistory({
+    required double movePercent,
+    required double rangePercent,
+  }) {
+    var close = 100.0;
+
+    return List<MarketCandle>.generate(252, (index) {
+      final open = close;
+      final signedMove = index.isEven ? movePercent : -movePercent * 0.92;
+      close = open * (1 + signedMove);
+
+      return MarketCandle(
+        timestamp: DateTime(2025, 1, 1).add(Duration(days: index)),
+        open: open,
+        high: (open > close ? open : close) * (1 + rangePercent),
+        low: (open < close ? open : close) * (1 - rangePercent),
+        close: close,
+        volume: 1000000,
+      );
+    }, growable: false);
+  }
+
   test('classifies a low-range stock as steady', () {
     final profile = service.evaluate(
       createSnapshot(
@@ -98,4 +120,46 @@ void main() {
     expect(profile.behaviorType, StockBehaviorType.unknown);
     expect(profile.hasSufficientData, isFalse);
   });
+
+  test('uses one-year daily history as the preferred stock-type baseline', () {
+    final snapshot = createSnapshot(
+      closes: List<double>.generate(20, (index) => 100 + (index * 0.02)),
+      rangePadding: 0.05,
+    );
+
+    final profile = service.evaluate(
+      snapshot,
+      historicalDailyCandles: createDailyHistory(
+        movePercent: 0.04,
+        rangePercent: 0.02,
+      ),
+    );
+
+    expect(profile.hasHistoricalBaseline, isTrue);
+    expect(profile.baselineSource, StockBaselineSource.oneYearDailyHistory);
+    expect(profile.historicalSampleSize, 252);
+    expect(profile.behaviorType, StockBehaviorType.volatile);
+  });
+
+  test(
+    'falls back to the short-term snapshot when daily history is too short',
+    () {
+      final snapshot = createSnapshot(
+        closes: List<double>.generate(20, (index) => 100 + (index * 0.05)),
+        rangePadding: 0.10,
+      );
+
+      final profile = service.evaluate(
+        snapshot,
+        historicalDailyCandles: createDailyHistory(
+          movePercent: 0.04,
+          rangePercent: 0.02,
+        ).take(30).toList(),
+      );
+
+      expect(profile.hasHistoricalBaseline, isFalse);
+      expect(profile.baselineSource, StockBaselineSource.shortTermSnapshot);
+      expect(profile.behaviorType, StockBehaviorType.steady);
+    },
+  );
 }

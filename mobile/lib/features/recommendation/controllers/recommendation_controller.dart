@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 
+import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
 import '../models/recommendation_state.dart';
 import '../services/recommendation_service.dart';
@@ -13,7 +14,10 @@ class RecommendationController extends ChangeNotifier {
 
   RecommendationState get state => _state;
 
-  void analyze(MarketSnapshot snapshot) {
+  void analyze(
+    MarketSnapshot snapshot, {
+    List<MarketCandle> historicalDailyCandles = const [],
+  }) {
     _state = _state.copyWith(
       status: RecommendationStatus.analyzing,
       clearError: true,
@@ -21,8 +25,15 @@ class RecommendationController extends ChangeNotifier {
     notifyListeners();
 
     try {
-      final profile = _service.stockBehaviorProfileService.evaluate(snapshot);
-      final recommendation = _service.analyze(snapshot, profile: profile);
+      final profile = _service.stockBehaviorProfileService.evaluate(
+        snapshot,
+        historicalDailyCandles: historicalDailyCandles,
+      );
+      final recommendation = _service.analyze(
+        snapshot,
+        profile: profile,
+        historicalDailyCandles: historicalDailyCandles,
+      );
 
       _state = RecommendationState(
         status: RecommendationStatus.ready,

@@ -1,0 +1,37 @@
+TradePilot AI v0.6.0 patch manifest
+
+Documentation
+- docs/BRAIN_ARCHITECTURE.md
+- docs/CHANGELOG.md
+- docs/COMPETITOR_RESEARCH.md
+- docs/PROJECT_BIBLE.md
+- docs/PROJECT_STATE.md
+- docs/RELEASE_0_6_APPLY.md
+- docs/RELEASE_0_6_HISTORICAL_STOCK_DNA.md
+- docs/RELEASE_0_6_FILE_MANIFEST.txt
+
+Application
+- mobile/lib/app/app.dart
+- mobile/lib/features/dashboard/controllers/dashboard_controller.dart
+- mobile/lib/features/dashboard/dashboard_page.dart
+- mobile/lib/features/market/providers/mock_market_history_provider.dart
+- mobile/lib/features/recommendation/context/contextual_evidence_adjuster.dart
+- mobile/lib/features/recommendation/context/historical_stock_profile.dart
+- mobile/lib/features/recommendation/context/historical_stock_profile_service.dart
+- mobile/lib/features/recommendation/context/stock_behavior_profile.dart
+- mobile/lib/features/recommendation/context/stock_behavior_profile_service.dart
+- mobile/lib/features/recommendation/controllers/recommendation_controller.dart
+- mobile/lib/features/recommendation/services/recommendation_service.dart
+- mobile/lib/features/recommendation/widgets/stock_behavior_card.dart
+
+Tests
+- mobile/test/features/market/mock_market_history_provider_test.dart
+- mobile/test/features/recommendation/context/contextual_evidence_adjuster_test.dart
+- mobile/test/features/recommendation/context/historical_stock_profile_service_test.dart
+- mobile/test/features/recommendation/context/stock_behavior_profile_service_test.dart
+- mobile/test/features/recommendation/controllers/recommendation_controller_test.dart
+- mobile/test/features/recommendation/widgets/stock_behavior_card_test.dart
+- mobile/test/widget_test.dart
+
+Tools
+- tools/validate-release-0.6.sh

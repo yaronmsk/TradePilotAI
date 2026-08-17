@@ -124,3 +124,81 @@ TradePilot AI enhancement:
 - Keep agreement, conflict, coverage, reliability and evidence-group internals one level deeper under `How was this calculated?`.
 - Preserve info buttons so users can learn the meaning of each primary metric without cluttering the default dashboard.
 - Never describe Confidence as a guaranteed probability of profit.
+
+## v0.6 research — Historical Context / Stock DNA
+
+### TradingView: volume and volatility are relative to context
+
+TradingView's Relative Volume calculation divides current volume by average volume. Its Relative Volume at Time goes further by comparing volume at a particular moment with historical volume at matching time offsets across prior periods. TradingView's ATR and Historical Volatility documentation also treat volatility as a measurable property of the instrument rather than a directional Buy/Sell signal.
+
+Useful pattern:
+- Compare activity with a historical norm instead of presenting raw volume alone.
+- Treat volatility as context/risk information, not direction.
+- Intraday volume comparisons should respect time-of-day effects when the required history exists.
+
+TradePilot AI enhancement:
+- Use long-term behavior as an input to the recommendation engine, not only as a chart indicator.
+- Separate structural stock volatility from a temporary high/low volatility regime.
+- Do not implement fake same-time-of-day RVOL from daily candles. Keep that capability reserved for a provider with real matching intraday sessions.
+
+Sources:
+- https://www.tradingview.com/support/solutions/43000635874-how-do-we-calculate-relative-volume-and-relative-volume-at-time/
+- https://www.tradingview.com/support/solutions/43000705489-relative-volume-at-time/
+- https://www.tradingview.com/support/solutions/43000501823-average-true-range-atr/
+- https://www.tradingview.com/support/solutions/43000589145-historical-volatility/
+
+### TrendSpider: normalize volatility and compare volume with historical norms
+
+TrendSpider's Normalized ATR divides ATR by closing price and expresses it as a percentage, making volatility more comparable across different price levels and conditions. TrendSpider's Relative Volume compares the volume of a bar with average volume over prior bars to identify unusual activity.
+
+Useful pattern:
+- Normalize volatility by price.
+- Compare volume with its own prior baseline.
+- Use relative volatility to adapt strategy/risk interpretation.
+
+TradePilot AI enhancement:
+- Keep normalized ATR as one part of a broader historical profile rather than a standalone signal.
+- Add realized-volatility percentile, volume stability and trend efficiency to describe the stock's normal behavior.
+- Let that profile change evidence weights deterministically and explain why a weight changed.
+
+Sources:
+- https://help.trendspider.com/kb/indicators/atr-normalized
+- https://help.trendspider.com/kb/indicators/relative-volume
+
+### Seeking Alpha: relative comparisons and higher-level factor organization
+
+Seeking Alpha's public Quant documentation describes more than 100 metrics organized into five factor groups, with metrics compared against sector peers. It also states that the overall Quant Rating is not a simple average of the factor grades.
+
+Useful pattern:
+- Raw metrics become more useful when compared to a relevant reference set.
+- Many metrics should be organized into interpretable higher-level factors.
+- An overall conclusion need not be a naïve average.
+
+TradePilot AI enhancement for v0.6:
+- First compare each stock against its own historical behavior because this directly addresses the difference between normally steady and normally volatile names.
+- Preserve evidence-family de-duplication from v0.5.
+- Add sector/peer cross-sectional context later when real market/sector data is connected rather than simulating it in mock data.
+
+Sources:
+- https://help.seekingalpha.com/premium/quant-ratings-and-factor-grades-faq
+- https://help.seekingalpha.com/premium/what-are-quant-ratings-and-how-do-i-use-them
+
+### Research discipline: volatility should affect risk interpretation
+
+Moreira and Muir's volatility-managed-portfolio research documents materially different risk-adjusted outcomes when portfolio exposure is adjusted according to volatility. TradePilot AI does not copy that portfolio strategy or treat it as proof that high volatility predicts a price direction. The relevant design lesson is narrower: volatility is a meaningful state variable that should affect how confidently the system interprets other signals and risk.
+
+Source:
+- https://www.nber.org/papers/w22208
+
+## Adopted in v0.6
+
+- One-year daily historical profile as preferred stock-context baseline.
+- Normalized daily ATR% baseline.
+- Realized-volatility percentile against the stock's own history.
+- Structural Stock Type separated from current Volatility Regime.
+- 20D/60D average daily volume and historical volume variability.
+- Trend efficiency over 20D/60D windows.
+- Historical context changes RSI, Trend and Relative Volume weighting.
+- User-facing Stock DNA card with simple language and deeper details on demand.
+- Short-window fallback if history is unavailable.
+- Same-time-of-day RVOL explicitly deferred until suitable intraday history exists.

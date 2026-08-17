@@ -2,21 +2,28 @@ import 'dart:math' as math;
 
 import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
+import 'historical_stock_profile.dart';
+import 'historical_stock_profile_service.dart';
 import 'stock_behavior_profile.dart';
 
 class StockBehaviorProfileService {
   const StockBehaviorProfileService({
     this.atrPeriod = 14,
     this.volumeLookback = 20,
+    this.historicalStockProfileService = const HistoricalStockProfileService(),
   });
 
   final int atrPeriod;
   final int volumeLookback;
+  final HistoricalStockProfileService historicalStockProfileService;
 
-  StockBehaviorProfile evaluate(MarketSnapshot snapshot) {
+  StockBehaviorProfile evaluate(
+    MarketSnapshot snapshot, {
+    List<MarketCandle> historicalDailyCandles = const [],
+  }) {
     final candles = snapshot.candles;
 
-    if (candles.length < 3 || snapshot.currentPrice <= 0) {
+    if (candles.isEmpty || snapshot.currentPrice <= 0) {
       return const StockBehaviorProfile.unknown();
     }
 
@@ -26,46 +33,97 @@ class StockBehaviorProfileService {
         : snapshot.currentVolume / averageVolume;
 
     final trueRanges = _trueRanges(candles);
+    final trendEfficiency = _trendEfficiency(candles);
 
-    if (trueRanges.isEmpty) {
-      return StockBehaviorProfile(
-        behaviorType: StockBehaviorType.unknown,
-        volatilityRegime: VolatilityRegime.unknown,
+    double atrPercent = 0;
+    double baselineAtrPercent = 0;
+    double volatilityRatio = 1;
+
+    if (trueRanges.isNotEmpty) {
+      final recentCount = math.min(atrPeriod, trueRanges.length);
+      final recentRanges = trueRanges.sublist(trueRanges.length - recentCount);
+
+      final recentAtr = _average(recentRanges);
+      final baselineAtr = _average(trueRanges);
+
+      atrPercent = (recentAtr / snapshot.currentPrice) * 100;
+      baselineAtrPercent = (baselineAtr / snapshot.currentPrice) * 100;
+      volatilityRatio = baselineAtrPercent <= 0
+          ? 1.0
+          : atrPercent / baselineAtrPercent;
+    }
+
+    final historicalProfile = historicalStockProfileService.evaluate(
+      historicalDailyCandles,
+    );
+
+    if (historicalProfile.hasSufficientData) {
+      return _buildHistoricalProfile(
+        snapshot: snapshot,
+        historicalProfile: historicalProfile,
         averageVolume: averageVolume,
         relativeVolume: relativeVolume,
-        atrPercent: 0,
-        baselineAtrPercent: 0,
-        volatilityRatio: 1,
-        trendEfficiency: _trendEfficiency(candles),
-        sampleSize: candles.length,
+        atrPercent: atrPercent,
+        baselineAtrPercent: baselineAtrPercent,
+        volatilityRatio: volatilityRatio,
+        trendEfficiency: trendEfficiency,
       );
     }
 
-    final recentCount = math.min(atrPeriod, trueRanges.length);
-    final recentRanges = trueRanges.sublist(trueRanges.length - recentCount);
-
-    final recentAtr = _average(recentRanges);
-    final baselineAtr = _average(trueRanges);
-
-    final atrPercent = (recentAtr / snapshot.currentPrice) * 100;
-    final baselineAtrPercent = (baselineAtr / snapshot.currentPrice) * 100;
-    final volatilityRatio = baselineAtrPercent <= 0
-        ? 1.0
-        : atrPercent / baselineAtrPercent;
+    if (candles.length < 3) {
+      return const StockBehaviorProfile.unknown();
+    }
 
     return StockBehaviorProfile(
-      behaviorType: _behaviorType(
+      behaviorType: _snapshotBehaviorType(
         timeframe: snapshot.timeframe,
         baselineAtrPercent: baselineAtrPercent,
       ),
-      volatilityRegime: _volatilityRegime(volatilityRatio),
+      volatilityRegime: _snapshotVolatilityRegime(volatilityRatio),
       averageVolume: averageVolume,
       relativeVolume: relativeVolume,
       atrPercent: atrPercent,
       baselineAtrPercent: baselineAtrPercent,
       volatilityRatio: volatilityRatio,
-      trendEfficiency: _trendEfficiency(candles),
+      trendEfficiency: trendEfficiency,
       sampleSize: candles.length,
+    );
+  }
+
+  StockBehaviorProfile _buildHistoricalProfile({
+    required MarketSnapshot snapshot,
+    required HistoricalStockProfile historicalProfile,
+    required double averageVolume,
+    required double relativeVolume,
+    required double atrPercent,
+    required double baselineAtrPercent,
+    required double volatilityRatio,
+    required double trendEfficiency,
+  }) {
+    return StockBehaviorProfile(
+      behaviorType: _historicalBehaviorType(historicalProfile),
+      volatilityRegime: _historicalVolatilityRegime(historicalProfile),
+      averageVolume: averageVolume,
+      relativeVolume: relativeVolume,
+      atrPercent: atrPercent,
+      baselineAtrPercent: baselineAtrPercent,
+      volatilityRatio: volatilityRatio,
+      trendEfficiency: trendEfficiency,
+      sampleSize: snapshot.candles.length,
+      baselineSource: StockBaselineSource.oneYearDailyHistory,
+      historicalSampleSize: historicalProfile.sampleSize,
+      typicalDailyAtrPercent: historicalProfile.typicalAtrPercent,
+      recentRealizedVolatilityPercent:
+          historicalProfile.recentRealizedVolatilityPercent,
+      typicalRealizedVolatilityPercent:
+          historicalProfile.typicalRealizedVolatilityPercent,
+      volatilityPercentile: historicalProfile.volatilityPercentile,
+      averageDailyVolume20: historicalProfile.averageDailyVolume20,
+      averageDailyVolume60: historicalProfile.averageDailyVolume60,
+      volumeTrendRatio: historicalProfile.volumeTrendRatio,
+      volumeVariability: historicalProfile.volumeVariability,
+      historicalTrendEfficiency20: historicalProfile.trendEfficiency20,
+      historicalTrendEfficiency60: historicalProfile.trendEfficiency60,
     );
   }
 
@@ -133,7 +191,7 @@ class StockBehaviorProfileService {
     return total / values.length;
   }
 
-  StockBehaviorType _behaviorType({
+  StockBehaviorType _snapshotBehaviorType({
     required String timeframe,
     required double baselineAtrPercent,
   }) {
@@ -160,7 +218,7 @@ class StockBehaviorProfileService {
     return StockBehaviorType.volatile;
   }
 
-  VolatilityRegime _volatilityRegime(double volatilityRatio) {
+  VolatilityRegime _snapshotVolatilityRegime(double volatilityRatio) {
     if (volatilityRatio < 0.80) {
       return VolatilityRegime.calm;
     }
@@ -170,5 +228,39 @@ class StockBehaviorProfileService {
     }
 
     return VolatilityRegime.elevated;
+  }
+
+  StockBehaviorType _historicalBehaviorType(
+    HistoricalStockProfile historicalProfile,
+  ) {
+    final atr = historicalProfile.typicalAtrPercent;
+    final realizedVolatility =
+        historicalProfile.typicalRealizedVolatilityPercent;
+
+    if (atr <= 1.80 && realizedVolatility <= 30) {
+      return StockBehaviorType.steady;
+    }
+
+    if (atr >= 3.00 || realizedVolatility >= 50) {
+      return StockBehaviorType.volatile;
+    }
+
+    return StockBehaviorType.balanced;
+  }
+
+  VolatilityRegime _historicalVolatilityRegime(
+    HistoricalStockProfile historicalProfile,
+  ) {
+    final percentile = historicalProfile.volatilityPercentile;
+
+    if (percentile <= 25) {
+      return VolatilityRegime.calm;
+    }
+
+    if (percentile >= 75) {
+      return VolatilityRegime.elevated;
+    }
+
+    return VolatilityRegime.normal;
   }
 }

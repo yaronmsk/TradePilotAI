@@ -22,7 +22,7 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
 
-    expect(find.text('Stock Behavior'), findsOneWidget);
+    expect(find.text('Stock DNA'), findsOneWidget);
     expect(find.text('Strategy Summary'), findsOneWidget);
     expect(find.text('Trader Recommendation'), findsOneWidget);
     expect(find.text('Trader Recommendation Insight'), findsOneWidget);
