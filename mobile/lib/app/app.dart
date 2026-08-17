@@ -13,6 +13,7 @@ import '../features/recommendation/controllers/recommendation_controller.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
 import '../features/recommendation/providers/relative_volume_evidence_provider.dart';
 import '../features/recommendation/providers/rsi_evidence_provider.dart';
+import '../features/recommendation/services/recommendation_context_service.dart';
 import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
 import '../features/watchlist/models/watchlist_item.dart';
@@ -56,9 +57,8 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
     final watchlistRepository = LocalWatchlistRepository(storageService);
 
-    final marketController = MarketController(
-      const MarketService(MockMarketDataProvider()),
-    );
+    const marketService = MarketService(MockMarketDataProvider());
+    final marketController = MarketController(marketService);
 
     const marketHistoryService = MarketHistoryService(
       MockMarketHistoryProvider(),
@@ -86,10 +86,15 @@ class _TradePilotAppState extends State<TradePilotApp> {
       ),
     );
 
+    final recommendationContextService = RecommendationContextService(
+      marketService: marketService,
+    );
+
     final dashboardController = DashboardController(
       marketController: marketController,
       marketHistoryController: marketHistoryController,
       stockHistoryService: marketHistoryService,
+      recommendationContextService: recommendationContextService,
       watchlistController: watchlistController,
       recommendationController: recommendationController,
     );

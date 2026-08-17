@@ -1,0 +1,49 @@
+TradePilot AI v0.7.0 patch manifest
+
+Documentation
+- docs/BRAIN_ARCHITECTURE.md
+- docs/BRAIN_FEATURE_PLAN.md
+- docs/CHANGELOG.md
+- docs/COMPETITOR_RESEARCH.md
+- docs/PROJECT_BIBLE.md
+- docs/PROJECT_STATE.md
+- docs/RELEASE_0_7_APPLY.md
+- docs/RELEASE_0_7_MULTI_TIMEFRAME_MARKET_CONTEXT.md
+- docs/RELEASE_0_7_FILE_MANIFEST.txt
+
+Application
+- mobile/lib/app/app.dart
+- mobile/lib/features/dashboard/controllers/dashboard_controller.dart
+- mobile/lib/features/dashboard/dashboard_page.dart
+- mobile/lib/features/market/providers/mock_market_data_provider.dart
+- mobile/lib/features/recommendation/context/contextual_evidence_adjuster.dart
+- mobile/lib/features/recommendation/context/market_context_profile.dart
+- mobile/lib/features/recommendation/context/market_context_profile_service.dart
+- mobile/lib/features/recommendation/context/market_context_target.dart
+- mobile/lib/features/recommendation/context/mock_security_context_resolver.dart
+- mobile/lib/features/recommendation/context/multi_timeframe_profile.dart
+- mobile/lib/features/recommendation/context/multi_timeframe_profile_service.dart
+- mobile/lib/features/recommendation/context/recommendation_analysis_context.dart
+- mobile/lib/features/recommendation/context/security_context_resolver.dart
+- mobile/lib/features/recommendation/context/strategy_timeframe_plan.dart
+- mobile/lib/features/recommendation/controllers/recommendation_controller.dart
+- mobile/lib/features/recommendation/models/evidence_definition.dart
+- mobile/lib/features/recommendation/models/recommendation_state.dart
+- mobile/lib/features/recommendation/providers/market_context_evidence_provider.dart
+- mobile/lib/features/recommendation/providers/multi_timeframe_trend_evidence_provider.dart
+- mobile/lib/features/recommendation/services/recommendation_context_service.dart
+- mobile/lib/features/recommendation/services/recommendation_service.dart
+- mobile/lib/features/recommendation/widgets/analysis_context_card.dart
+
+Tests
+- mobile/test/features/market/mock_market_data_provider_test.dart
+- mobile/test/features/recommendation/context/market_context_profile_service_test.dart
+- mobile/test/features/recommendation/context/multi_timeframe_profile_service_test.dart
+- mobile/test/features/recommendation/providers/context_evidence_provider_test.dart
+- mobile/test/features/recommendation/services/recommendation_context_service_test.dart
+- mobile/test/features/recommendation/services/recommendation_service_context_test.dart
+- mobile/test/features/recommendation/widgets/analysis_context_card_test.dart
+- mobile/test/widget_test.dart
+
+Tools
+- tools/validate-release-0.7.sh

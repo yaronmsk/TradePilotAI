@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 
 import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
+import '../context/recommendation_analysis_context.dart';
 import '../models/recommendation_state.dart';
 import '../services/recommendation_service.dart';
 
@@ -17,6 +18,7 @@ class RecommendationController extends ChangeNotifier {
   void analyze(
     MarketSnapshot snapshot, {
     List<MarketCandle> historicalDailyCandles = const [],
+    RecommendationAnalysisContext? analysisContext,
   }) {
     _state = _state.copyWith(
       status: RecommendationStatus.analyzing,
@@ -33,12 +35,14 @@ class RecommendationController extends ChangeNotifier {
         snapshot,
         profile: profile,
         historicalDailyCandles: historicalDailyCandles,
+        analysisContext: analysisContext,
       );
 
       _state = RecommendationState(
         status: RecommendationStatus.ready,
         recommendation: recommendation,
         stockBehaviorProfile: profile,
+        analysisContext: analysisContext,
       );
     } catch (error) {
       _state = RecommendationState(

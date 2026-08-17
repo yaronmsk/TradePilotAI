@@ -169,13 +169,16 @@ Family de-duplication, conflict/agreement, direction vs confidence, explicit str
 ### v0.6 — Historical Context / Stock DNA
 Long-term baselines, structural volatility, same-time volume foundation, current-vs-normal regime.
 
-### v0.7 — Multi-Factor Trader Brain
-MACD, EMA/SMA, ADX, VWAP, support/resistance, relative strength, multi-timeframe analysis.
+### v0.7 — Multi-Timeframe + Market Context Intelligence
+Trader timeframe hierarchy, higher-timeframe alignment, stock-vs-market and stock-vs-sector relative strength, and Market Context evidence.
 
-### v0.8 — Market / Sector / Event Context
-Market breadth/regime, sector context, earnings/events, news/sentiment.
+### v0.8 — Multi-Factor Trader Brain
+MACD, EMA/SMA, ADX, VWAP and support/resistance with explicit family de-duplication.
 
-### v0.9 — Swing + Investor Engines
+### v0.9 — Market / Sector / Event Context
+Market breadth/regime, volatility/risk context, earnings/events and news/sentiment.
+
+### v1.0 — Swing + Investor Engines
 Separate strategy-specific data and logic, all visible in the Strategy Summary.
 
 ### v1.x — Historical Conditional Validation + AI Analyst

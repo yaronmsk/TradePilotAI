@@ -135,6 +135,8 @@ class ContextualEvidenceAdjuster {
         }
         break;
 
+      case EvidenceKind.multiTimeframeTrend:
+      case EvidenceKind.marketContext:
       case EvidenceKind.generic:
         break;
     }

@@ -71,5 +71,51 @@ void main() {
         throwsArgumentError,
       );
     });
+
+    test(
+      'uses different deterministic trends across Trader timeframes',
+      () async {
+        final shortTerm = await provider.fetchSnapshot(
+          symbol: 'PLTR',
+          timeframe: '5m',
+          candleCount: 48,
+        );
+        final confirmation = await provider.fetchSnapshot(
+          symbol: 'PLTR',
+          timeframe: '1h',
+          candleCount: 48,
+        );
+        final regime = await provider.fetchSnapshot(
+          symbol: 'PLTR',
+          timeframe: '1d',
+          candleCount: 48,
+        );
+
+        expect(shortTerm.currentPrice, lessThan(shortTerm.candles.first.close));
+        expect(
+          confirmation.currentPrice,
+          greaterThan(confirmation.candles.first.close),
+        );
+        expect(regime.currentPrice, greaterThan(regime.candles.first.close));
+      },
+    );
+
+    test('provides explicit broad-market and sector proxy behavior', () async {
+      final spy = await provider.fetchSnapshot(
+        symbol: 'SPY',
+        timeframe: '1d',
+        candleCount: 48,
+      );
+      final xlk = await provider.fetchSnapshot(
+        symbol: 'XLK',
+        timeframe: '1d',
+        candleCount: 48,
+      );
+
+      expect(spy.symbol, 'SPY');
+      expect(xlk.symbol, 'XLK');
+      expect(spy.currentPrice, greaterThan(spy.candles.first.close));
+      expect(xlk.currentPrice, greaterThan(xlk.candles.first.close));
+    });
   });
 }

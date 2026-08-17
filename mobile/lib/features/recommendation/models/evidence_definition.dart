@@ -1,6 +1,13 @@
 import 'evidence_family.dart';
 
-enum EvidenceKind { generic, candleTrend, rsi, relativeVolume }
+enum EvidenceKind {
+  generic,
+  candleTrend,
+  rsi,
+  relativeVolume,
+  multiTimeframeTrend,
+  marketContext,
+}
 
 class EvidenceDefinition {
   const EvidenceDefinition({

@@ -202,3 +202,50 @@ Source:
 - User-facing Stock DNA card with simple language and deeper details on demand.
 - Short-window fallback if history is unavailable.
 - Same-time-of-day RVOL explicitly deferred until suitable intraday history exists.
+
+
+## v0.7 research — Multi-Timeframe + Market Context
+
+### TradingView
+
+TradingView Multi-Timeframe Analysis lets users view a ticker or indicator from a higher timeframe in the context of the current chart. Its Compare tool supports benchmarking assets against each other and explicitly mentions both broad-market comparison and same-sector company comparison.
+
+TradePilot enhancement:
+- Timeframes receive strategy-specific roles instead of equal votes.
+- Trader uses 5m Primary, 1h Confirmation and 1D Regime.
+- Multi-timeframe trend remains in the Trend family so correlated timeframe observations cannot inflate independent-family confidence.
+- Benchmark comparison becomes deterministic brain evidence rather than only a visual overlay.
+
+Sources:
+- https://www.tradingview.com/support/solutions/43000591555-leveraging-multi-timeframe-analysis/
+- https://www.tradingview.com/support/solutions/43000543053-how-to-use-the-compare-tool/
+
+### TrendSpider
+
+TrendSpider Market Scanner supports different timeframes in the same scan and documents up to three timeframes for multi-timeframe scanning.
+
+TradePilot enhancement:
+- The brain automatically loads the timeframe hierarchy appropriate to the selected strategy.
+- Higher-timeframe opposition reduces confirmation but does not automatically veto a valid primary signal.
+- The relationship is exposed in plain language as Timeframe Alignment.
+
+Sources:
+- https://help.trendspider.com/kb/scanner/multiple-timeframes-and-the-current-candle
+- https://trendspider.com/learning-center/real-time-scanning/
+
+### StockCharts
+
+StockCharts Price Relative/Relative Strength compares a stock with a benchmark and can evaluate performance relative to a sector or industry. Relative Rotation Graphs compare relative-strength trends against a common benchmark.
+
+TradePilot enhancement:
+- Stock-vs-market and stock-vs-sector leadership become a separate Market Context evidence family.
+- Context prioritizes the stock's own relative leadership rather than simply treating a rising market as bullish evidence.
+- Sector-vs-market and broad-market trend contribute smaller environmental weights.
+
+Sources:
+- https://chartschool.stockcharts.com/table-of-contents/technical-indicators-and-overlays/technical-indicators/price-relative-relative-strength
+- https://chartschool.stockcharts.com/table-of-contents/chart-analysis/chart-types/relative-rotation-graphs-rrg-charts
+
+### v0.7 product rule
+
+Multi-timeframe analysis is hierarchical, not democratic. A 5m, 1h and 1D trend observation may improve trend reliability, but those observations are still related price-trend evidence and must not be counted as three independent evidence families.

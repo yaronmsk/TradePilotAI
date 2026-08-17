@@ -28,7 +28,9 @@ Build an explainable, statistically grounded investment analysis platform that h
 ## Current architecture
 
 Market data
-→ Market snapshot / history
+→ Primary market snapshot / historical Stock DNA
+→ Strategy timeframe context (Trader: 5m Primary / 1H Confirmation / 1D Regime)
+→ Broad-market / sector relative context
 → Stock behavior profile
 → Evidence providers
 → Contextual evidence adjuster
@@ -42,8 +44,10 @@ Market data
 ## Current implemented evidence
 
 - Candle Trend — Trend family
+- Multi-Timeframe Trend — Trend family (same family by design; higher timeframes cannot create duplicate independent votes)
 - RSI — Momentum family
 - Relative Volume — Participation family
+- Market & Sector Context — Market Context family
 
 ## Current brain outputs
 
@@ -129,12 +133,23 @@ When the brain begins learning from historical effectiveness:
 
 1. v0.4 — Relative Volume + short-window Stock Behavior context. Done.
 2. v0.5 — Strategy-aware Consensus Engine, evidence-family de-duplication and Recommendation Insight. Done.
-3. v0.6 — One-year Historical Context / Stock DNA foundation. Current.
-4. v0.7 — MACD, EMA/SMA, ADX, VWAP, support/resistance, market/sector relative strength and multi-timeframe Trader intelligence.
-5. v0.8 — Market regime, earnings/events, news/sentiment.
-6. v0.9 — Swing and Investor brains.
-7. v1.x — Historical setup similarity, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
+3. v0.6 — One-year Historical Context / Stock DNA foundation. Done.
+4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Current.
+5. v0.8 — MACD, EMA/SMA, ADX, VWAP and support/resistance with evidence-family de-duplication.
+6. v0.9 — Market regime, earnings/events, news/sentiment.
+7. v1.0 — Swing and Investor brains.
+8. v1.x — Historical setup similarity, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
 ## UI roadmap
 
 Current UI remains functional/provisional. A dedicated commercial look-and-feel redesign will occur after the product intelligence is sufficiently mature.
+
+
+## Multi-Timeframe / Market Context
+
+Trader context uses a hierarchy rather than equal timeframe votes. User-facing wording emphasizes role and candle interval rather than a bare timeframe label:
+- Short-term trend (5-minute candles) — Primary
+- Near-term trend (1-hour candles) — Confirmation
+- Daily backdrop (1-day candles) — Regime
+
+Higher-timeframe trend remains part of the Trend evidence family. Market/sector relative strength is a separate Market Context family. The user-facing label is Market Environment. Strategy Summary comes before Analysis Context so the selected strategy always establishes the meaning of the detailed context below it. Context may strengthen or weaken confidence but never replaces the full deterministic evidence set.

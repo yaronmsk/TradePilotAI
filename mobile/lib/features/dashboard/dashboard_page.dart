@@ -4,6 +4,7 @@ import '../recommendation/models/recommendation.dart';
 import '../recommendation/models/strategy_recommendation.dart';
 import '../recommendation/models/strategy_summary.dart';
 import '../recommendation/services/strategy_summary_service.dart';
+import '../recommendation/widgets/analysis_context_card.dart';
 import '../recommendation/widgets/consensus_summary_card.dart';
 import '../recommendation/widgets/evidence_list.dart';
 import '../recommendation/widgets/recommendation_card.dart';
@@ -106,13 +107,18 @@ class _DashboardPageState extends State<DashboardPage> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    if (state.stockBehaviorProfile != null)
-                      StockBehaviorCard(profile: state.stockBehaviorProfile!),
                     StrategySummaryCard(
                       strategies: strategies,
                       selectedType: selectedRecommendation.strategy,
                       onStrategySelected: _selectStrategy,
                     ),
+                    if (state.analysisContext != null)
+                      AnalysisContextCard(
+                        strategy: selectedRecommendation.strategy,
+                        analysisContext: state.analysisContext!,
+                      ),
+                    if (state.stockBehaviorProfile != null)
+                      StockBehaviorCard(profile: state.stockBehaviorProfile!),
                     RecommendationCard(
                       strategyRecommendation: selectedRecommendation,
                     ),
@@ -145,7 +151,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.6', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.7', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

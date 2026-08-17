@@ -172,22 +172,26 @@ Deferred intentionally:
 - Same-time-of-day RVOL until true matching intraday history is available.
 - Gap/earnings-gap behavior until event-aware data is available.
 
-### v0.7 — Multi-factor Trader intelligence
+### v0.7 — Multi-Timeframe + Market Context Intelligence
+- Strategy-role hierarchy: 5m Primary, 1h Confirmation, 1D Regime.
+- Higher-timeframe trend stays inside the Trend family.
+- Relative strength vs broad market and sector.
+- Market Context as an independent evidence family.
+
+### v0.8 — Richer Trader evidence
 - EMA/SMA structure.
 - MACD.
 - ADX / trend quality.
 - VWAP.
 - Support/resistance.
-- Relative strength vs market and sector.
-- Multi-timeframe alignment.
 
-### v0.8 — Event and market context
+### v0.9 — Event / environment context
 - Earnings calendar/risk.
 - News and sentiment.
 - Market breadth/regime.
-- Sector context.
+- Volatility/risk regime.
 
-### v0.9 — Swing and Investor brains
+### v1.0 — Swing and Investor brains
 - Swing-specific daily/weekly evidence.
 - Investor fundamentals, valuation, growth, quality and revisions.
 
@@ -210,3 +214,24 @@ Every recommendation should eventually answer:
 - How did stock context change its weight?
 - What would change the recommendation?
 - How did similar historical conditions perform out of sample?
+
+
+## v0.7 environment/context layer
+
+The brain now adds two context paths before consensus:
+
+```text
+Primary 5m snapshot
+      +
+1h confirmation + 1D regime
+      -> Multi-Timeframe Trend -> Trend family
+
+Stock 1h/1D
++ SPY 1h/1D
++ sector proxy 1h/1D
+      -> Market Context -> Market Context family
+```
+
+The first path is deliberately kept in the Trend family so higher-timeframe observations improve trend interpretation without becoming false independent votes. The second path is independent environmental evidence because relative stock/sector/market behavior measures a different question from the stock's own momentum or trend.
+
+Trader timeframe roles are explicit. Future Swing and Investor strategies must define their own timeframe hierarchy rather than reusing Trader weights.

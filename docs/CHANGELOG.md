@@ -50,6 +50,47 @@ Each release shall contain:
 ---
 
 
+# Version 0.7.0
+
+Status
+
+Development / Validation
+
+Date
+
+2026-08-17
+
+Summary
+
+Strategy-aware multi-timeframe and market/sector context intelligence.
+
+### Added
+
+- Trader timeframe hierarchy: 5m Primary, 1h Confirmation, 1D Regime.
+- MultiTimeframeProfile and adaptive trend-alignment service.
+- Multi-Timeframe Trend evidence inside the existing Trend family.
+- MarketContextProfile with stock-vs-market, stock-vs-sector, sector-vs-market and broad-market context.
+- Market & Sector Context as an independent evidence family.
+- Mock security-to-sector resolver and deterministic SPY/XLK/XLC/XLY benchmark behavior.
+- Trader Analysis Context card with Timeframe Alignment, Market Environment and Relative Strength.
+- Tests for timeframe alignment, market relative strength, family de-duplication, context loading and user-facing explainability.
+
+### Changed
+
+- Recommendation startup now loads Stock DNA and strategy analysis context in parallel before running consensus.
+- The recommendation report can include five providers: Candle Trend, RSI, Relative Volume, Multi-Timeframe Trend and Market & Sector Context.
+- Mock stock behavior is timeframe-specific so development scenarios can exercise aligned, mixed and opposed higher-timeframe conditions.
+- Strategy Summary now precedes Analysis Context so strategy selection establishes the context for all detailed analysis below it.
+- Trader timeframe labels now describe both role and candle interval: Short-term trend (5-minute candles), Near-term trend (1-hour candles), and Daily backdrop (1-day candles).
+
+### Guarded
+
+- Multi-timeframe trend remains in the Trend family so extra timeframes cannot inflate independent-family confidence.
+- Missing context data falls back cleanly instead of fabricating benchmark information.
+- Mock sector mappings are explicitly development-only and must be replaced by authoritative metadata with real market data.
+
+---
+
 # Version 0.6.0
 
 Status

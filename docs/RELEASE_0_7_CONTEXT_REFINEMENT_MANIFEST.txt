@@ -1,0 +1,10 @@
+docs/CHANGELOG.md
+docs/PROJECT_BIBLE.md
+docs/RELEASE_0_7_APPLY.md
+docs/RELEASE_0_7_CONTEXT_REFINEMENT.md
+docs/RELEASE_0_7_CONTEXT_REFINEMENT_MANIFEST.txt
+docs/RELEASE_0_7_MULTI_TIMEFRAME_MARKET_CONTEXT.md
+mobile/lib/features/dashboard/dashboard_page.dart
+mobile/lib/features/recommendation/widgets/analysis_context_card.dart
+mobile/test/features/recommendation/widgets/analysis_context_card_test.dart
+mobile/test/widget_test.dart
