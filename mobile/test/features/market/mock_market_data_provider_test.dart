@@ -39,11 +39,27 @@ void main() {
       );
     });
 
+    test(
+      'supports strategy analysis intervals beyond the default 5m',
+      () async {
+        for (final timeframe in <String>['30m', '4h', '1w', '1mo', '3mo']) {
+          final snapshot = await provider.fetchSnapshot(
+            symbol: 'AAPL',
+            timeframe: timeframe,
+            candleCount: 12,
+          );
+
+          expect(snapshot.timeframe, timeframe);
+          expect(snapshot.candleCount, 12);
+        }
+      },
+    );
+
     test('rejects unsupported timeframe', () {
       expect(
         () => provider.fetchSnapshot(
           symbol: 'AAPL',
-          timeframe: '30m',
+          timeframe: '2m',
           candleCount: 48,
         ),
         throwsArgumentError,

@@ -113,9 +113,30 @@ class _DashboardPageState extends State<DashboardPage> {
                       onStrategySelected: _selectStrategy,
                     ),
                     if (state.analysisContext != null)
-                      AnalysisContextCard(
-                        strategy: selectedRecommendation.strategy,
-                        analysisContext: state.analysisContext!,
+                      AnimatedBuilder(
+                        animation: dashboardController,
+                        builder: (context, _) {
+                          final strategy = selectedRecommendation.strategy;
+                          final plan = dashboardController.analysisPlanFor(
+                            strategy,
+                          );
+
+                          return AnalysisContextCard(
+                            strategy: strategy,
+                            analysisContext: state.analysisContext!,
+                            timeframePlan: plan,
+                            availablePrimaryTimeframes: dashboardController
+                                .availablePrimaryTimeframesFor(strategy),
+                            onPrimaryTimeframeSelected: (timeframe) {
+                              dashboardController.selectAnalysisTimeframe(
+                                strategy,
+                                timeframe,
+                              );
+                            },
+                            isReloading:
+                                dashboardController.isAnalysisReloading,
+                          );
+                        },
                       ),
                     if (state.stockBehaviorProfile != null)
                       StockBehaviorCard(profile: state.stockBehaviorProfile!),
@@ -138,6 +159,10 @@ class _DashboardPageState extends State<DashboardPage> {
                           .recommendation
                           .evidenceReport
                           .results,
+                      familySummaries: selectedRecommendation
+                          .recommendation
+                          .consensus
+                          .familySummaries,
                     ),
                     RiskCard(strategy: selectedRecommendation.strategy),
                   ],
@@ -151,7 +176,7 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.7', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.8', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

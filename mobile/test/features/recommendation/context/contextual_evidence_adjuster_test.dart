@@ -183,4 +183,52 @@ void main() {
     expect(adjusted.single.dynamicWeight, lessThan(1.15));
     expect(adjusted.single.explanation, contains('highly variable volume'));
   });
+
+  test('applies the same trend-context discipline to EMA structure', () {
+    final adjusted = adjuster.adjust(
+      results: [createEvidence(EvidenceKind.emaStructure)],
+      profile: volatileProfile,
+    );
+
+    expect(adjusted.single.dynamicWeight, greaterThan(1));
+  });
+
+  test('boosts MACD when momentum sits inside a clean directional move', () {
+    final adjusted = adjuster.adjust(
+      results: [createEvidence(EvidenceKind.macdMomentum)],
+      profile: volatileProfile,
+    );
+
+    expect(adjusted.single.dynamicWeight, greaterThan(1));
+  });
+
+  test('volume confirmation inherits stock-specific volume weighting', () {
+    const profile = StockBehaviorProfile(
+      behaviorType: StockBehaviorType.balanced,
+      volatilityRegime: VolatilityRegime.normal,
+      averageVolume: 1000000,
+      relativeVolume: 2.1,
+      atrPercent: 0.8,
+      baselineAtrPercent: 0.8,
+      volatilityRatio: 1,
+      trendEfficiency: 0.5,
+      sampleSize: 48,
+    );
+
+    final adjusted = adjuster.adjust(
+      results: [createEvidence(EvidenceKind.volumeConfirmation)],
+      profile: profile,
+    );
+
+    expect(adjusted.single.dynamicWeight, 1.3);
+  });
+
+  test('discounts extension risk slightly inside a very clean trend', () {
+    final adjusted = adjuster.adjust(
+      results: [createEvidence(EvidenceKind.priceExtension)],
+      profile: volatileProfile,
+    );
+
+    expect(adjusted.single.dynamicWeight, lessThan(1));
+  });
 }

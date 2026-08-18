@@ -6,6 +6,7 @@ import '../models/evidence_family_summary.dart';
 import '../models/evidence_result.dart';
 import '../models/scoring_result.dart';
 import '../models/strategy_recommendation.dart';
+import 'recommendation_contribution_panel.dart';
 
 class ConsensusSummaryCard extends StatelessWidget {
   const ConsensusSummaryCard({required this.strategyRecommendation, super.key});
@@ -79,6 +80,8 @@ class ConsensusSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _WhyConfidencePanel(consensus: consensus),
+                const SizedBox(height: 16),
+                RecommendationContributionPanel(consensus: consensus),
                 const SizedBox(height: 8),
                 _TechnicalDetails(consensus: consensus),
               ],
@@ -402,6 +405,8 @@ class _WhyConfidencePanel extends StatelessWidget {
         return 'Momentum';
       case EvidenceFamily.participation:
         return 'Volume activity';
+      case EvidenceFamily.priceStructure:
+        return 'Price structure';
       case EvidenceFamily.volatility:
         return 'Volatility';
       case EvidenceFamily.marketContext:
@@ -592,6 +597,8 @@ class _FamilyRow extends StatelessWidget {
         return 'Momentum';
       case EvidenceFamily.participation:
         return 'Volume activity';
+      case EvidenceFamily.priceStructure:
+        return 'Price structure';
       case EvidenceFamily.volatility:
         return 'Volatility';
       case EvidenceFamily.marketContext:

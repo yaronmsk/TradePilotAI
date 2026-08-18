@@ -9,6 +9,7 @@ class MarketController extends ChangeNotifier {
   final MarketService _service;
 
   MarketState _state = const MarketState();
+  int _requestId = 0;
 
   MarketState get state => _state;
 
@@ -17,6 +18,8 @@ class MarketController extends ChangeNotifier {
     required String timeframe,
     required int candleCount,
   }) async {
+    final requestId = ++_requestId;
+
     _state = _state.copyWith(status: MarketStatus.loading, clearError: true);
     notifyListeners();
 
@@ -27,8 +30,16 @@ class MarketController extends ChangeNotifier {
         candleCount: candleCount,
       );
 
+      if (requestId != _requestId) {
+        return;
+      }
+
       _state = MarketState(status: MarketStatus.loaded, snapshot: snapshot);
     } catch (error) {
+      if (requestId != _requestId) {
+        return;
+      }
+
       _state = MarketState(
         status: MarketStatus.error,
         errorMessage: error.toString(),
@@ -39,6 +50,7 @@ class MarketController extends ChangeNotifier {
   }
 
   void reset() {
+    _requestId++;
     _state = const MarketState();
     notifyListeners();
   }

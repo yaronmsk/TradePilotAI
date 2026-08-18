@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.3
+Version: 1.5
 Status: Living reference
 
 ## Mission
@@ -29,7 +29,7 @@ Build an explainable, statistically grounded investment analysis platform that h
 
 Market data
 → Primary market snapshot / historical Stock DNA
-→ Strategy timeframe context (Trader: 5m Primary / 1H Confirmation / 1D Regime)
+→ Strategy-selected primary analysis interval + automatic confirmation / broader backdrop
 → Broad-market / sector relative context
 → Stock behavior profile
 → Evidence providers
@@ -44,9 +44,15 @@ Market data
 ## Current implemented evidence
 
 - Candle Trend — Trend family
+- EMA Structure — Trend family
 - Multi-Timeframe Trend — Trend family (same family by design; higher timeframes cannot create duplicate independent votes)
 - RSI — Momentum family
+- MACD Momentum — Momentum family
 - Relative Volume — Participation family
+- Volume Confirmation — Participation family
+- VWAP Position — Price Structure family
+- Support & Resistance — Price Structure family
+- Price Extension — Volatility family
 - Market & Sector Context — Market Context family
 
 ## Current brain outputs
@@ -134,8 +140,8 @@ When the brain begins learning from historical effectiveness:
 1. v0.4 — Relative Volume + short-window Stock Behavior context. Done.
 2. v0.5 — Strategy-aware Consensus Engine, evidence-family de-duplication and Recommendation Insight. Done.
 3. v0.6 — One-year Historical Context / Stock DNA foundation. Done.
-4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Current.
-5. v0.8 — MACD, EMA/SMA, ADX, VWAP and support/resistance with evidence-family de-duplication.
+4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Done.
+5. v0.8 — Advanced Trader evidence + selectable Trader primary analysis interval with strategy-specific timeframe policy. Current.
 6. v0.9 — Market regime, earnings/events, news/sentiment.
 7. v1.0 — Swing and Investor brains.
 8. v1.x — Historical setup similarity, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
@@ -147,9 +153,26 @@ Current UI remains functional/provisional. A dedicated commercial look-and-feel 
 
 ## Multi-Timeframe / Market Context
 
-Trader context uses a hierarchy rather than equal timeframe votes. User-facing wording emphasizes role and candle interval rather than a bare timeframe label:
-- Short-term trend (5-minute candles) — Primary
-- Near-term trend (1-hour candles) — Confirmation
-- Daily backdrop (1-day candles) — Regime
+Trader context uses a hierarchy rather than equal timeframe votes. The user selects the **Primary Analysis Interval** inside Trader Analysis Context; confirmation and broader-backdrop intervals are chosen automatically so the strategy remains coherent. Current Trader choices are 1m, 5m, 15m, 30m and 1h, with 5m as the default.
+
+Examples:
+- 1m primary → 5m confirmation → 1h broader backdrop.
+- 5m primary → 1h confirmation → 1d broader backdrop.
+- 15m primary → 1h confirmation → 1d broader backdrop.
+- 30m / 1h primary → 4h confirmation → 1d broader backdrop.
+
+The visual Price History range remains independent. Changing 1D/5D/1M/3M/1Y does not recalculate the recommendation; changing the Primary Analysis Interval does.
+
+Future strategy defaults are intentionally different: Swing defaults to daily analysis with weekly/monthly context; Investor defaults to weekly technical context with monthly/quarterly backdrop, while fundamentals remain the dominant Investor inputs. Investor technical timeframes are therefore secondary rather than the main recommendation driver.
 
 Higher-timeframe trend remains part of the Trend evidence family. Market/sector relative strength is a separate Market Context family. The user-facing label is Market Environment. Strategy Summary comes before Analysis Context so the selected strategy always establishes the meaning of the detailed context below it. Context may strengthen or weaken confidence but never replaces the full deterministic evidence set.
+
+
+## Advanced Trader evidence rule
+
+v0.8 expands provider-level detail without multiplying independent confidence. Trend contains Candle Trend, EMA Structure and Multi-Timeframe Trend; Momentum contains RSI and MACD; Participation contains Relative Volume and Volume Confirmation; Price Structure contains VWAP Position and Support & Resistance; Price Extension belongs to Volatility. The default Evidence UI groups providers by evidence family and keeps provider detail expandable. A bullish trend can be opposed by extension/entry-risk evidence without claiming the trend itself has reversed.
+
+
+## Recommendation attribution rule
+
+Every strategy recommendation must be able to explain both **direction** and **confidence** quantitatively. Direction influence and confidence contribution are separate concepts. Family-level percentages are shown first; exact provider-level impact remains expandable. Attribution must reconcile to the same deterministic Consensus Engine math used to create the recommendation. Correlated providers remain capped inside their evidence family, so adding another EMA/trend-style signal cannot manufacture extra independent influence. Confidence attribution must also show the global coverage, alignment and reliability adjustments that transform evidence strength into final confidence.

@@ -50,6 +50,55 @@ Each release shall contain:
 ---
 
 
+# Version 0.8.0
+
+Status
+
+Development / Validation
+
+Date
+
+2026-08-18
+
+Summary
+
+Advanced Trader evidence with explicit family de-duplication and clearer grouped explainability.
+
+### Added
+
+- EMA Structure in the Trend evidence group.
+- MACD Momentum in the Momentum evidence group.
+- Volume Confirmation in the Participation evidence group.
+- VWAP Position and Support & Resistance in the new Price Structure evidence group.
+- ATR-normalized Price Extension in the Volatility evidence group.
+- Shared technical-indicator math utilities for EMA, ATR and analysis-window VWAP.
+- Context-aware weighting rules for all new evidence kinds.
+- Expandable evidence-family UI so many provider-level signals do not overwhelm the default dashboard.
+- Provider, utility, context and integration tests for the v0.8 brain.
+- Selectable Trader Primary Analysis Interval: 1m, 5m, 15m, 30m and 1h.
+- Strategy-specific timeframe policy with future Swing and Investor defaults.
+- Deterministic recommendation attribution for every independent evidence group.
+- Provider-level direction and confidence attribution that respects family de-duplication.
+- Exact confidence build-up from evidence-strength baseline through coverage, alignment and reliability adjustments.
+
+### Changed
+
+- Trader evidence can now contain eleven provider-level signals while the Consensus Engine sees at most six independent evidence groups.
+- Dashboard version label updated to 0.8.
+- Recommendation Insight recognizes Price Structure as a user-facing evidence group.
+- Analysis Context now owns the analysis-interval selector; Market Status no longer presents strategy analysis settings.
+- Trader confirmation/backdrop intervals adapt automatically to the selected primary interval.
+- Price History range remains independent from recommendation analysis.
+- Recommendation Insight now shows family-level direction influence and confidence share, with provider-level details expandable.
+- Direction attribution and confidence attribution are explicitly separated so percentages are not misleading.
+
+### Deliberately deferred
+
+- ADX and Bollinger Bands until historical validation proves incremental value beyond existing trend/volatility measures.
+- True session VWAP until real market data provides authoritative intraday session boundaries.
+
+---
+
 # Version 0.7.0
 
 Status

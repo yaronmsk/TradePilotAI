@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import '../models/evidence_contribution.dart';
 import '../models/evidence_family.dart';
 import '../models/evidence_family_summary.dart';
 import '../models/evidence_report.dart';
@@ -134,13 +135,29 @@ class ConsensusEngine {
     final agreementFactor = 0.70 + (agreement * 0.30);
     final reliabilityFactor = 0.85 + (averageReliability * 0.15);
 
-    final confidence =
-        (averageStrength *
-                providerCoverageFactor *
-                familyCoverageFactor *
-                agreementFactor *
-                reliabilityFactor)
-            .clamp(0.0, 100.0);
+    final confidenceScale =
+        providerCoverageFactor *
+        familyCoverageFactor *
+        agreementFactor *
+        reliabilityFactor;
+
+    final confidence = (averageStrength * confidenceScale).clamp(0.0, 100.0);
+
+    final confidenceModifiers = _buildConfidenceModifiers(
+      baseEvidenceStrength: averageStrength,
+      providerCoverageFactor: providerCoverageFactor,
+      familyCoverageFactor: familyCoverageFactor,
+      agreementFactor: agreementFactor,
+      reliabilityFactor: reliabilityFactor,
+    );
+
+    final attribution = _buildAttribution(
+      grouped: grouped,
+      familySummaries: familySummaries,
+      totalFamilyWeight: totalFamilyWeight,
+      finalConfidence: confidence,
+      confidenceScale: confidenceScale,
+    );
 
     final warnings = <String>[];
 
@@ -179,6 +196,10 @@ class ConsensusEngine {
       bearishSupportPercent: bearishSupportPercent,
       independentFamilyCount: familySummaries.length,
       familySummaries: List.unmodifiable(familySummaries),
+      baseEvidenceStrength: averageStrength,
+      familyContributions: attribution.familyContributions,
+      providerContributions: attribution.providerContributions,
+      confidenceModifiers: List.unmodifiable(confidenceModifiers),
     );
   }
 
@@ -256,4 +277,211 @@ class ConsensusEngine {
       evidenceCount: evidence.length,
     );
   }
+
+  List<ConfidenceModifierImpact> _buildConfidenceModifiers({
+    required double baseEvidenceStrength,
+    required double providerCoverageFactor,
+    required double familyCoverageFactor,
+    required double agreementFactor,
+    required double reliabilityFactor,
+  }) {
+    final modifiers = <ConfidenceModifierImpact>[];
+    var current = baseEvidenceStrength;
+
+    void add(String label, double factor) {
+      final after = current * factor;
+      modifiers.add(
+        ConfidenceModifierImpact(
+          label: label,
+          factor: factor,
+          before: current,
+          after: after,
+        ),
+      );
+      current = after;
+    }
+
+    add('Provider coverage', providerCoverageFactor);
+    add('Evidence-group coverage', familyCoverageFactor);
+    add('Signal alignment', agreementFactor);
+    add('Data reliability', reliabilityFactor);
+
+    return modifiers;
+  }
+
+  _AttributionResult _buildAttribution({
+    required Map<EvidenceFamily, List<EvidenceResult>> grouped,
+    required List<EvidenceFamilySummary> familySummaries,
+    required double totalFamilyWeight,
+    required double finalConfidence,
+    required double confidenceScale,
+  }) {
+    final rawFamilies = <_RawFamilyContribution>[];
+
+    for (final familySummary in familySummaries) {
+      final evidence =
+          grouped[familySummary.family] ?? const <EvidenceResult>[];
+      final totalEvidenceWeight = evidence.fold<double>(
+        0,
+        (sum, result) => sum + result.effectiveWeight,
+      );
+
+      if (totalEvidenceWeight <= 0) {
+        continue;
+      }
+
+      final familyWeightShare =
+          familySummary.effectiveWeight / totalFamilyWeight;
+      final rawProviders = <_RawProviderContribution>[];
+
+      for (final result in evidence) {
+        final evidenceWeightShare =
+            result.effectiveWeight / totalEvidenceWeight;
+        final signedScore = _signedScore(result);
+
+        final directionImpactPoints =
+            familyWeightShare * evidenceWeightShare * signedScore;
+
+        final confidenceContributionPoints =
+            familyWeightShare *
+            evidenceWeightShare *
+            result.score *
+            confidenceScale;
+
+        rawProviders.add(
+          _RawProviderContribution(
+            result: result,
+            directionImpactPoints: directionImpactPoints,
+            confidenceContributionPoints: confidenceContributionPoints,
+          ),
+        );
+      }
+
+      final familyDirectionImpact = rawProviders.fold<double>(
+        0,
+        (sum, provider) => sum + provider.directionImpactPoints,
+      );
+      final familyConfidenceContribution = rawProviders.fold<double>(
+        0,
+        (sum, provider) => sum + provider.confidenceContributionPoints,
+      );
+
+      rawFamilies.add(
+        _RawFamilyContribution(
+          summary: familySummary,
+          directionImpactPoints: familyDirectionImpact,
+          confidenceContributionPoints: familyConfidenceContribution,
+          providers: rawProviders,
+        ),
+      );
+    }
+
+    final totalAbsoluteFamilyDirection = rawFamilies.fold<double>(
+      0,
+      (sum, family) => sum + family.directionImpactPoints.abs(),
+    );
+
+    final familyContributions = <EvidenceFamilyContribution>[];
+    final providerContributions = <EvidenceContribution>[];
+
+    for (final rawFamily in rawFamilies) {
+      final totalAbsoluteProviderDirection = rawFamily.providers.fold<double>(
+        0,
+        (sum, provider) => sum + provider.directionImpactPoints.abs(),
+      );
+
+      final providers = rawFamily.providers
+          .map((rawProvider) {
+            final provider = EvidenceContribution(
+              providerName: rawProvider.result.providerName,
+              family: rawFamily.summary.family,
+              direction: rawProvider.result.direction,
+              directionImpactPoints: rawProvider.directionImpactPoints,
+              directionShareWithinFamily: totalAbsoluteProviderDirection == 0
+                  ? 0
+                  : rawProvider.directionImpactPoints.abs() /
+                        totalAbsoluteProviderDirection,
+              confidenceContributionPoints:
+                  rawProvider.confidenceContributionPoints,
+              confidenceShare: finalConfidence <= 0
+                  ? 0
+                  : rawProvider.confidenceContributionPoints / finalConfidence,
+            );
+
+            providerContributions.add(provider);
+            return provider;
+          })
+          .toList(growable: false);
+
+      familyContributions.add(
+        EvidenceFamilyContribution(
+          family: rawFamily.summary.family,
+          direction: rawFamily.summary.direction,
+          directionImpactPoints: rawFamily.directionImpactPoints,
+          directionShare: totalAbsoluteFamilyDirection == 0
+              ? 0
+              : rawFamily.directionImpactPoints.abs() /
+                    totalAbsoluteFamilyDirection,
+          confidenceContributionPoints: rawFamily.confidenceContributionPoints,
+          confidenceShare: finalConfidence <= 0
+              ? 0
+              : rawFamily.confidenceContributionPoints / finalConfidence,
+          providers: List.unmodifiable(providers),
+        ),
+      );
+    }
+
+    return _AttributionResult(
+      familyContributions: List.unmodifiable(familyContributions),
+      providerContributions: List.unmodifiable(providerContributions),
+    );
+  }
+
+  double _signedScore(EvidenceResult result) {
+    switch (result.direction) {
+      case EvidenceDirection.bullish:
+        return result.score;
+      case EvidenceDirection.bearish:
+        return -result.score;
+      case EvidenceDirection.neutral:
+      case EvidenceDirection.unknown:
+        return 0;
+    }
+  }
+}
+
+class _RawProviderContribution {
+  const _RawProviderContribution({
+    required this.result,
+    required this.directionImpactPoints,
+    required this.confidenceContributionPoints,
+  });
+
+  final EvidenceResult result;
+  final double directionImpactPoints;
+  final double confidenceContributionPoints;
+}
+
+class _RawFamilyContribution {
+  const _RawFamilyContribution({
+    required this.summary,
+    required this.directionImpactPoints,
+    required this.confidenceContributionPoints,
+    required this.providers,
+  });
+
+  final EvidenceFamilySummary summary;
+  final double directionImpactPoints;
+  final double confidenceContributionPoints;
+  final List<_RawProviderContribution> providers;
+}
+
+class _AttributionResult {
+  const _AttributionResult({
+    required this.familyContributions,
+    required this.providerContributions,
+  });
+
+  final List<EvidenceFamilyContribution> familyContributions;
+  final List<EvidenceContribution> providerContributions;
 }

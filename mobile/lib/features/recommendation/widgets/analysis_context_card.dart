@@ -4,6 +4,7 @@ import '../../../shared/widgets/dashboard_card.dart';
 import '../context/market_context_profile.dart';
 import '../context/multi_timeframe_profile.dart';
 import '../context/recommendation_analysis_context.dart';
+import '../context/strategy_timeframe_plan.dart';
 import '../models/evidence_result.dart';
 import '../models/strategy_summary.dart';
 
@@ -11,11 +12,19 @@ class AnalysisContextCard extends StatelessWidget {
   const AnalysisContextCard({
     required this.strategy,
     required this.analysisContext,
+    required this.timeframePlan,
+    required this.availablePrimaryTimeframes,
+    required this.onPrimaryTimeframeSelected,
+    this.isReloading = false,
     super.key,
   });
 
   final StrategyType strategy;
   final RecommendationAnalysisContext analysisContext;
+  final StrategyTimeframePlan timeframePlan;
+  final List<String> availablePrimaryTimeframes;
+  final ValueChanged<String>? onPrimaryTimeframeSelected;
+  final bool isReloading;
 
   @override
   Widget build(BuildContext context) {
@@ -31,7 +40,7 @@ class AnalysisContextCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'How the selected strategy fits recent price action and the market environment.',
+                  'Choose the primary analysis interval, then see how it fits the broader trend and market environment.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -42,7 +51,23 @@ class AnalysisContextCard extends StatelessWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          _AnalysisTimeframeSelector(
+            strategy: strategy,
+            selectedTimeframe: timeframePlan.primaryTimeframe,
+            availableTimeframes: availablePrimaryTimeframes,
+            onSelected: onPrimaryTimeframeSelected,
+            isReloading: isReloading,
+          ),
           const SizedBox(height: 8),
+          Text(
+            '${timeframePlan.primaryCandleCount} × '
+            '${StrategyTimeframePlan.timeframeDescription(timeframePlan.primaryTimeframe)} '
+            'feed the primary ${strategy.title} evidence. Confirmation and broader context are selected automatically.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+          const SizedBox(height: 12),
+          const Divider(),
           _ContextRow(
             label: 'Timeframe Alignment',
             value: _alignmentLabel(multiTimeframe.alignment),
@@ -84,14 +109,25 @@ class AnalysisContextCard extends StatelessWidget {
   }
 
   Future<void> _showInfo(BuildContext context) {
+    final primary = StrategyTimeframePlan.timeframeDescription(
+      timeframePlan.primaryTimeframe,
+    );
+    final confirmation = StrategyTimeframePlan.timeframeDescription(
+      timeframePlan.confirmationTimeframe,
+    );
+    final regime = StrategyTimeframePlan.timeframeDescription(
+      timeframePlan.regimeTimeframe,
+    );
+
     return showDialog<void>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('What is Analysis Context?'),
-        content: const Text(
-          'TradePilot does not treat every timeframe as another independent vote. '
-          'For Trader mode, recent price action is evaluated with 5-minute candles as the active short-term signal, 1-hour candles for confirmation, and daily candles only as the broader trend backdrop. '
-          'These labels describe candle intervals, not the total holding period. '
+        content: Text(
+          'The Primary Analysis Interval controls the candles used by the main ${strategy.title} technical evidence. '
+          'For the current setup, $primary drive the primary signal, $confirmation provide confirmation, and $regime provide the broader trend backdrop. '
+          'These are candle intervals, not the expected holding period. '
+          'TradePilot does not count each timeframe as a separate independent vote. '
           'Market Environment evaluates the broad market and the relevant sector, while Relative Strength separately asks how the stock is performing versus those benchmarks. '
           'These inputs can strengthen or weaken confidence, but they do not override the complete evidence set by themselves.',
         ),
@@ -114,16 +150,16 @@ class AnalysisContextCard extends StatelessWidget {
     if (multiTimeframe.hasSufficientData) {
       switch (multiTimeframe.alignment) {
         case TimeframeAlignment.aligned:
-          parts.add('The short-term and broader trend views are aligned.');
+          parts.add('The primary and broader trend views are aligned.');
           break;
         case TimeframeAlignment.opposed:
           parts.add(
-            'Both broader trend views oppose the active short-term trend, which reduces confirmation.',
+            'Both broader trend views oppose the primary trend, which reduces confirmation.',
           );
           break;
         case TimeframeAlignment.mixed:
           parts.add(
-            'The short-term and broader trend views are mixed, so trend confirmation is limited.',
+            'The primary and broader trend views are mixed, so trend confirmation is limited.',
           );
           break;
         case TimeframeAlignment.unknown:
@@ -156,24 +192,29 @@ class AnalysisContextCard extends StatelessWidget {
   }
 
   String _timeframeAlignmentDetail(MultiTimeframeProfile profile) {
-    return '${_timeframeRoleLabel(profile.primary.timeframe)}: '
+    return '${_timeframeRoleLabel(profile.primary)}: '
         '${_directionLabel(profile.primary.direction)} • '
-        '${_timeframeRoleLabel(profile.confirmation.timeframe)}: '
+        '${_timeframeRoleLabel(profile.confirmation)}: '
         '${_directionLabel(profile.confirmation.direction)} • '
-        '${_timeframeRoleLabel(profile.regime.timeframe)}: '
+        '${_timeframeRoleLabel(profile.regime)}: '
         '${_directionLabel(profile.regime.direction)}';
   }
 
-  String _timeframeRoleLabel(String timeframe) {
-    switch (timeframe) {
-      case '5m':
-        return 'Short-term trend (5-minute candles)';
-      case '1h':
-        return 'Near-term trend (1-hour candles)';
-      case '1d':
-        return 'Daily backdrop (1-day candles)';
-      default:
-        return 'Trend ($timeframe candles)';
+  String _timeframeRoleLabel(TimeframeTrendSignal signal) {
+    final description = StrategyTimeframePlan.timeframeDescription(
+      signal.timeframe,
+    );
+
+    switch (signal.role) {
+      case TimeframeRole.primary:
+        return 'Primary trend ($description)';
+      case TimeframeRole.confirmation:
+        return 'Confirmation trend ($description)';
+      case TimeframeRole.regime:
+        if (signal.timeframe == '1d') {
+          return 'Daily backdrop ($description)';
+        }
+        return 'Broader backdrop ($description)';
     }
   }
 
@@ -253,6 +294,74 @@ class AnalysisContextCard extends StatelessWidget {
       case EvidenceDirection.unknown:
         return 'Unknown';
     }
+  }
+}
+
+class _AnalysisTimeframeSelector extends StatelessWidget {
+  const _AnalysisTimeframeSelector({
+    required this.strategy,
+    required this.selectedTimeframe,
+    required this.availableTimeframes,
+    required this.onSelected,
+    required this.isReloading,
+  });
+
+  final StrategyType strategy;
+  final String selectedTimeframe;
+  final List<String> availableTimeframes;
+  final ValueChanged<String>? onSelected;
+  final bool isReloading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Primary Analysis Interval',
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            if (isReloading) ...[
+              const SizedBox(width: 10),
+              const SizedBox(
+                width: 14,
+                height: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ],
+          ],
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Changes the ${strategy.title} evidence calculation. It does not change the Price History range.',
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+        const SizedBox(height: 10),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: availableTimeframes
+              .map((timeframe) {
+                return ChoiceChip(
+                  label: Text(timeframe),
+                  selected: timeframe == selectedTimeframe,
+                  onSelected: onSelected == null || isReloading
+                      ? null
+                      : (selected) {
+                          if (selected) {
+                            onSelected!(timeframe);
+                          }
+                        },
+                );
+              })
+              .toList(growable: false),
+        ),
+      ],
+    );
   }
 }
 

@@ -31,6 +31,7 @@ class ContextualEvidenceAdjuster {
 
     switch (evidence.definition.kind) {
       case EvidenceKind.candleTrend:
+      case EvidenceKind.emaStructure:
         if (profile.behaviorType == StockBehaviorType.volatile) {
           if (profile.trendEfficiency >= 0.65) {
             multiplier = 1.15;
@@ -100,7 +101,23 @@ class ContextualEvidenceAdjuster {
         }
         break;
 
+      case EvidenceKind.macdMomentum:
+        if (profile.behaviorType == StockBehaviorType.volatile &&
+            profile.trendEfficiency < 0.50) {
+          multiplier = 0.80;
+          reasons.add(
+            'MACD receives less weight because this volatile stock is currently moving noisily rather than directionally.',
+          );
+        } else if (profile.trendEfficiency >= 0.70) {
+          multiplier = 1.10;
+          reasons.add(
+            'MACD receives slightly more weight because momentum is being evaluated inside a clean directional move.',
+          );
+        }
+        break;
+
       case EvidenceKind.relativeVolume:
+      case EvidenceKind.volumeConfirmation:
         if (profile.relativeVolume >= 2) {
           multiplier = 1.30;
           reasons.add(
@@ -129,9 +146,48 @@ class ContextualEvidenceAdjuster {
               profile.relativeVolume < 2.0) {
             multiplier *= 0.85;
             reasons.add(
-              'This stock historically has highly variable volume, so a moderate volume spike is less exceptional than it would be for a stable-volume stock.',
+              'This stock historically has highly variable volume, so a moderate volume change is less exceptional than it would be for a stable-volume stock.',
             );
           }
+        }
+        break;
+
+      case EvidenceKind.vwapPosition:
+        if (profile.behaviorType == StockBehaviorType.volatile) {
+          multiplier = 0.90;
+          reasons.add(
+            'VWAP distance is slightly discounted because volatile stocks naturally travel farther around intraday reference prices.',
+          );
+        }
+        if (profile.relativeVolume >= 1.50) {
+          multiplier *= 1.10;
+          reasons.add(
+            'VWAP structure receives extra weight because elevated participation makes the current price location more informative.',
+          );
+        }
+        break;
+
+      case EvidenceKind.supportResistance:
+        if (profile.volatilityRegime == VolatilityRegime.elevated &&
+            profile.trendEfficiency < 0.50) {
+          multiplier = 0.85;
+          reasons.add(
+            'Local support and resistance receive less weight in elevated, noisy volatility where levels are more likely to be probed repeatedly.',
+          );
+        }
+        break;
+
+      case EvidenceKind.priceExtension:
+        if (profile.behaviorType == StockBehaviorType.steady) {
+          multiplier = 1.10;
+          reasons.add(
+            'ATR-normalized extension receives slightly more weight because large stretches are less typical for a steady stock.',
+          );
+        } else if (profile.trendEfficiency >= 0.75) {
+          multiplier = 0.85;
+          reasons.add(
+            'Extension receives slightly less weight because strongly directional trends can remain stretched for longer.',
+          );
         }
         break;
 

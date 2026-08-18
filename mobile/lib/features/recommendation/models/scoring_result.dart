@@ -1,3 +1,4 @@
+import 'evidence_contribution.dart';
 import 'evidence_family_summary.dart';
 
 class ScoringResult {
@@ -16,6 +17,10 @@ class ScoringResult {
     this.bearishSupportPercent = 0,
     this.independentFamilyCount = 0,
     this.familySummaries = const [],
+    this.baseEvidenceStrength = 0,
+    this.familyContributions = const [],
+    this.providerContributions = const [],
+    this.confidenceModifiers = const [],
   });
 
   const ScoringResult.empty()
@@ -32,7 +37,11 @@ class ScoringResult {
       bullishSupportPercent = 0,
       bearishSupportPercent = 0,
       independentFamilyCount = 0,
-      familySummaries = const [];
+      familySummaries = const [],
+      baseEvidenceStrength = 0,
+      familyContributions = const [],
+      providerContributions = const [],
+      confidenceModifiers = const [];
 
   /// Confidence score from 0 to 100.
   final double score;
@@ -67,6 +76,20 @@ class ScoringResult {
 
   final int independentFamilyCount;
   final List<EvidenceFamilySummary> familySummaries;
+
+  /// Weighted evidence-strength baseline before coverage, alignment, and
+  /// reliability adjustments reduce confidence.
+  final double baseEvidenceStrength;
+
+  /// Family-level attribution after correlated providers have been grouped.
+  final List<EvidenceFamilyContribution> familyContributions;
+
+  /// Provider-level attribution that reconciles exactly to the family and
+  /// overall scores without bypassing evidence-family caps.
+  final List<EvidenceContribution> providerContributions;
+
+  /// Exact steps that transform [baseEvidenceStrength] into final confidence.
+  final List<ConfidenceModifierImpact> confidenceModifiers;
 
   double get confidence => score;
 

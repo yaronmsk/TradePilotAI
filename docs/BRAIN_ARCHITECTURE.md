@@ -1,6 +1,6 @@
 # TradePilot AI Brain Architecture
 
-Version: 0.6 historical-context consensus
+Version: 0.8 advanced Trader evidence + selectable analysis intervals
 Status: Living design
 
 ## Core rule
@@ -46,21 +46,33 @@ Current families:
 - Trend
 - Momentum
 - Participation
-
-Reserved future families:
+- Price Structure
 - Volatility
 - Market Context
+
+Reserved future families:
 - Fundamentals
 - Sentiment
 - Other
 
 Current mappings:
 - Candle Trend → Trend
+- EMA Structure → Trend
+- Multi-Timeframe Trend → Trend
 - RSI → Momentum
+- MACD Momentum → Momentum
 - Relative Volume → Participation
+- Volume Confirmation → Participation
+- VWAP Position → Price Structure
+- Support & Resistance → Price Structure
+- Price Extension → Volatility
+- Market & Sector Context → Market Context
 
-Future example:
-- EMA, SMA, MACD trend component and Candle Trend may all contain overlapping trend information. Adding all of them must improve detail, not multiply trend voting power four times.
+De-duplication example:
+- Candle Trend, EMA Structure and Multi-Timeframe Trend refine one Trend conclusion rather than creating three independent votes.
+- RSI and MACD refine one Momentum conclusion.
+- Relative Volume and Volume Confirmation refine one Participation conclusion.
+- VWAP and Support/Resistance refine one Price Structure conclusion.
 
 ## Family de-duplication rule
 
@@ -173,17 +185,25 @@ Deferred intentionally:
 - Gap/earnings-gap behavior until event-aware data is available.
 
 ### v0.7 — Multi-Timeframe + Market Context Intelligence
-- Strategy-role hierarchy: 5m Primary, 1h Confirmation, 1D Regime.
+- Strategy-role hierarchy with a selectable Trader primary interval and automatically selected confirmation/backdrop intervals.
 - Higher-timeframe trend stays inside the Trend family.
 - Relative strength vs broad market and sector.
 - Market Context as an independent evidence family.
 
-### v0.8 — Richer Trader evidence
-- EMA/SMA structure.
-- MACD.
-- ADX / trend quality.
-- VWAP.
-- Support/resistance.
+### v0.8 — Advanced Trader evidence
+Implemented:
+- EMA Structure inside Trend.
+- MACD Momentum inside Momentum, with histogram strength normalized by price.
+- Volume Confirmation inside Participation.
+- Analysis-window VWAP Position inside Price Structure.
+- ATR-normalized local Support & Resistance inside Price Structure.
+- ATR-normalized Price Extension inside Volatility.
+- Evidence UI grouping by evidence family.
+
+Deferred intentionally:
+- ADX until historical validation shows it adds information beyond trend efficiency + EMA/Candle/Multi-Timeframe structure.
+- Bollinger Bands until evidence shows incremental value beyond Stock DNA, ATR and Price Extension.
+- True session VWAP until the live provider exposes reliable session boundaries.
 
 ### v0.9 — Event / environment context
 - Earnings calendar/risk.
@@ -221,17 +241,37 @@ Every recommendation should eventually answer:
 The brain now adds two context paths before consensus:
 
 ```text
-Primary 5m snapshot
+User-selected Trader primary snapshot
       +
-1h confirmation + 1D regime
+automatic confirmation + broader backdrop
       -> Multi-Timeframe Trend -> Trend family
 
-Stock 1h/1D
-+ SPY 1h/1D
-+ sector proxy 1h/1D
+Stock confirmation/backdrop
++ broad-market confirmation/backdrop
++ sector confirmation/backdrop
       -> Market Context -> Market Context family
 ```
 
 The first path is deliberately kept in the Trend family so higher-timeframe observations improve trend interpretation without becoming false independent votes. The second path is independent environmental evidence because relative stock/sector/market behavior measures a different question from the stock's own momentum or trend.
 
-Trader timeframe roles are explicit. Future Swing and Investor strategies must define their own timeframe hierarchy rather than reusing Trader weights.
+Trader primary choices are 1m, 5m, 15m, 30m and 1h. The default remains 5m. Supporting intervals are not independently user-selected because TradePilot must preserve a coherent hierarchy:
+- 1m -> 5m confirmation -> 1h backdrop
+- 5m -> 1h confirmation -> 1d backdrop
+- 15m -> 1h confirmation -> 1d backdrop
+- 30m / 1h -> 4h confirmation -> 1d backdrop
+
+Future Swing and Investor strategies use different policies rather than inheriting Trader settings. Swing defaults to 1d primary with 1w confirmation and 1mo regime. Investor defaults to 1w technical context with 1mo confirmation and 3mo regime, but long-term fundamentals/valuation remain more important than technical interval selection.
+
+The Price History selector remains presentation-only and is independent from these analysis intervals.
+
+
+## v0.8 direction-versus-entry-quality rule
+
+Technical direction and entry quality are not the same question. A stock may have bullish Trend, Momentum and Market Context while Price Extension is bearish because the move is already stretched. The Volatility family is allowed to reduce confidence or oppose a fresh entry without rewriting the underlying trend as bearish. This is a permanent brain rule.
+
+
+## Explainable attribution layer
+
+The Consensus Engine emits exact post-de-duplication attribution alongside its direction/confidence outputs. Each evidence family receives a signed direction-impact value and a confidence-contribution value. Provider-level values reconcile to the family total while preserving the family cap. Family direction impacts reconcile to the final -100..+100 direction score; family confidence points reconcile to final confidence. The UI may convert these exact values into percentage shares, but it must retain the signed point values for technical drill-down.
+
+Confidence attribution is not treated as a probability model. The engine first builds an evidence-strength baseline, then applies provider coverage, evidence-group coverage, signal alignment and reliability factors. These adjustments are emitted as explicit confidence-modifier impacts so the user can see what reduced confidence.

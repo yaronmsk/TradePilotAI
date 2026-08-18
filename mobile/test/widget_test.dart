@@ -31,6 +31,7 @@ void main() {
       scrollable: dashboardScroll,
     );
     expect(find.text('Trader Analysis Context'), findsOneWidget);
+    expect(find.text('Primary Analysis Interval'), findsOneWidget);
     expect(find.text('Market Environment'), findsOneWidget);
 
     final strategySummaryTop = tester

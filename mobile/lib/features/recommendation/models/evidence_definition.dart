@@ -5,6 +5,12 @@ enum EvidenceKind {
   candleTrend,
   rsi,
   relativeVolume,
+  emaStructure,
+  macdMomentum,
+  vwapPosition,
+  supportResistance,
+  volumeConfirmation,
+  priceExtension,
   multiTimeframeTrend,
   marketContext,
 }

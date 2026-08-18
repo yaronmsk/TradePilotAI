@@ -23,9 +23,16 @@ class RecommendationContextService {
   final MarketContextProfileService marketContextProfileService;
 
   Future<RecommendationAnalysisContext> loadTraderContext(
-    MarketSnapshot primarySnapshot,
-  ) async {
-    const plan = StrategyTimeframePlan.trader;
+    MarketSnapshot primarySnapshot, {
+    StrategyTimeframePlan plan = StrategyTimeframePlan.trader,
+  }) {
+    return loadContext(primarySnapshot, plan: plan);
+  }
+
+  Future<RecommendationAnalysisContext> loadContext(
+    MarketSnapshot primarySnapshot, {
+    required StrategyTimeframePlan plan,
+  }) async {
     final target = securityContextResolver.resolve(primarySnapshot.symbol);
 
     final futures = <Future<MarketSnapshot?>>[

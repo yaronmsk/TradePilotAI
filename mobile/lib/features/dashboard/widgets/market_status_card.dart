@@ -42,8 +42,6 @@ class MarketStatusCard extends StatelessWidget {
                   final summary = _MarketSummary(
                     symbol: snapshot.symbol,
                     currentPrice: snapshot.currentPrice,
-                    timeframe: snapshot.timeframe,
-                    candleCount: snapshot.candles.length,
                     currentVolume: snapshot.currentVolume,
                   );
 
@@ -80,15 +78,11 @@ class _MarketSummary extends StatelessWidget {
   const _MarketSummary({
     required this.symbol,
     required this.currentPrice,
-    required this.timeframe,
-    required this.candleCount,
     required this.currentVolume,
   });
 
   final String symbol;
   final double currentPrice;
-  final String timeframe;
-  final int candleCount;
   final double currentVolume;
 
   @override
@@ -117,8 +111,6 @@ class _MarketSummary extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 18),
-        Text('Analysis timeframe: $timeframe'),
-        Text('Candles analyzed: $candleCount'),
         Text(
           'Current volume: '
           '${currentVolume.toStringAsFixed(0)}',

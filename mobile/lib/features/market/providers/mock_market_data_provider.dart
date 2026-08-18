@@ -302,8 +302,12 @@ class MockMarketDataProvider implements MarketDataProvider {
   }) {
     switch (timeframe) {
       case '1h':
+      case '4h':
         return confirmation;
       case '1d':
+      case '1w':
+      case '1mo':
+      case '3mo':
         return regime;
       default:
         return shortTerm;
@@ -337,10 +341,20 @@ class MockMarketDataProvider implements MarketDataProvider {
         return 10;
       case '15m':
         return 15;
+      case '30m':
+        return 30;
       case '1h':
         return 60;
+      case '4h':
+        return 240;
       case '1d':
         return 1440;
+      case '1w':
+        return 10080;
+      case '1mo':
+        return 43200;
+      case '3mo':
+        return 129600;
       default:
         throw ArgumentError.value(
           timeframe,

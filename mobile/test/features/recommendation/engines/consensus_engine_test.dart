@@ -184,4 +184,153 @@ void main() {
     expect(result.bearishSupportPercent, 0);
     expect(result.neutralWeight, greaterThan(0));
   });
+
+  test(
+    'family attribution reconciles exactly to final direction and confidence',
+    () {
+      final result = engine.calculate(
+        report([
+          evidence(
+            name: 'Trend',
+            family: EvidenceFamily.trend,
+            direction: EvidenceDirection.bullish,
+            score: 80,
+          ),
+          evidence(
+            name: 'Momentum',
+            family: EvidenceFamily.momentum,
+            direction: EvidenceDirection.bearish,
+            score: 40,
+          ),
+        ]),
+      );
+
+      final directionTotal = result.familyContributions.fold<double>(
+        0,
+        (sum, contribution) => sum + contribution.directionImpactPoints,
+      );
+      final confidenceTotal = result.familyContributions.fold<double>(
+        0,
+        (sum, contribution) => sum + contribution.confidenceContributionPoints,
+      );
+      final directionShareTotal = result.familyContributions.fold<double>(
+        0,
+        (sum, contribution) => sum + contribution.directionShare,
+      );
+      final confidenceShareTotal = result.familyContributions.fold<double>(
+        0,
+        (sum, contribution) => sum + contribution.confidenceShare,
+      );
+
+      expect(directionTotal, closeTo(result.directionScore!, 0.001));
+      expect(confidenceTotal, closeTo(result.confidence, 0.001));
+      expect(directionShareTotal, closeTo(1, 0.001));
+      expect(confidenceShareTotal, closeTo(1, 0.001));
+
+      final trend = result.familyContributions.firstWhere(
+        (item) => item.family == EvidenceFamily.trend,
+      );
+      final momentum = result.familyContributions.firstWhere(
+        (item) => item.family == EvidenceFamily.momentum,
+      );
+
+      expect(trend.directionImpactPoints, closeTo(40, 0.001));
+      expect(momentum.directionImpactPoints, closeTo(-20, 0.001));
+      expect(trend.directionShare, closeTo(2 / 3, 0.001));
+      expect(momentum.directionShare, closeTo(1 / 3, 0.001));
+    },
+  );
+
+  test('provider attribution respects the evidence-family cap', () {
+    final single = engine.calculate(
+      report([
+        evidence(
+          name: 'Trend A',
+          family: EvidenceFamily.trend,
+          direction: EvidenceDirection.bullish,
+          score: 80,
+        ),
+      ]),
+    );
+
+    final duplicated = engine.calculate(
+      report([
+        evidence(
+          name: 'Trend A',
+          family: EvidenceFamily.trend,
+          direction: EvidenceDirection.bullish,
+          score: 80,
+        ),
+        evidence(
+          name: 'Trend B',
+          family: EvidenceFamily.trend,
+          direction: EvidenceDirection.bullish,
+          score: 80,
+        ),
+      ]),
+    );
+
+    expect(
+      single.familyContributions.single.directionImpactPoints,
+      closeTo(80, 0.001),
+    );
+    expect(
+      duplicated.familyContributions.single.directionImpactPoints,
+      closeTo(80, 0.001),
+    );
+    expect(duplicated.providerContributions, hasLength(2));
+    expect(
+      duplicated.providerContributions
+          .map((item) => item.directionImpactPoints)
+          .reduce((a, b) => a + b),
+      closeTo(80, 0.001),
+    );
+    expect(
+      duplicated.providerContributions.first.directionShareWithinFamily,
+      closeTo(0.5, 0.001),
+    );
+    expect(
+      duplicated.providerContributions.last.directionShareWithinFamily,
+      closeTo(0.5, 0.001),
+    );
+  });
+
+  test(
+    'confidence modifiers reconcile evidence strength to final confidence',
+    () {
+      final result = engine.calculate(
+        report([
+          evidence(
+            name: 'Trend',
+            family: EvidenceFamily.trend,
+            direction: EvidenceDirection.bullish,
+            score: 80,
+            reliability: 0.8,
+          ),
+          evidence(
+            name: 'Momentum',
+            family: EvidenceFamily.momentum,
+            direction: EvidenceDirection.bearish,
+            score: 40,
+            reliability: 0.8,
+          ),
+        ]),
+      );
+
+      final modifierImpact = result.confidenceModifiers.fold<double>(
+        0,
+        (sum, modifier) => sum + modifier.impactPoints,
+      );
+
+      expect(
+        result.baseEvidenceStrength + modifierImpact,
+        closeTo(result.confidence, 0.001),
+      );
+      expect(result.confidenceModifiers, hasLength(4));
+      expect(
+        result.confidenceModifiers.every((modifier) => modifier.factor <= 1),
+        isTrue,
+      );
+    },
+  );
 }

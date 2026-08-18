@@ -11,8 +11,14 @@ import '../features/market/services/market_history_service.dart';
 import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
+import '../features/recommendation/providers/ema_structure_evidence_provider.dart';
+import '../features/recommendation/providers/macd_momentum_evidence_provider.dart';
+import '../features/recommendation/providers/price_extension_evidence_provider.dart';
 import '../features/recommendation/providers/relative_volume_evidence_provider.dart';
 import '../features/recommendation/providers/rsi_evidence_provider.dart';
+import '../features/recommendation/providers/support_resistance_evidence_provider.dart';
+import '../features/recommendation/providers/volume_confirmation_evidence_provider.dart';
+import '../features/recommendation/providers/vwap_position_evidence_provider.dart';
 import '../features/recommendation/services/recommendation_context_service.dart';
 import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
@@ -80,8 +86,14 @@ class _TradePilotAppState extends State<TradePilotApp> {
       const RecommendationService(
         providers: [
           CandleTrendEvidenceProvider(),
+          EmaStructureEvidenceProvider(),
           RsiEvidenceProvider(),
+          MacdMomentumEvidenceProvider(),
           RelativeVolumeEvidenceProvider(),
+          VolumeConfirmationEvidenceProvider(),
+          VwapPositionEvidenceProvider(),
+          SupportResistanceEvidenceProvider(),
+          PriceExtensionEvidenceProvider(),
         ],
       ),
     );

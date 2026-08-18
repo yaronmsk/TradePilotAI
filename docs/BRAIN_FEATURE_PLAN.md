@@ -172,8 +172,10 @@ Long-term baselines, structural volatility, same-time volume foundation, current
 ### v0.7 — Multi-Timeframe + Market Context Intelligence
 Trader timeframe hierarchy, higher-timeframe alignment, stock-vs-market and stock-vs-sector relative strength, and Market Context evidence.
 
-### v0.8 — Multi-Factor Trader Brain
-MACD, EMA/SMA, ADX, VWAP and support/resistance with explicit family de-duplication.
+### v0.8 — Advanced Trader Evidence
+EMA Structure, MACD Momentum, Volume Confirmation, analysis-window VWAP, ATR-normalized support/resistance and Price Extension with explicit family de-duplication and grouped evidence presentation.
+
+ADX/Bollinger-style additions remain deferred until historical validation demonstrates incremental value beyond existing trend-efficiency and volatility context.
 
 ### v0.9 — Market / Sector / Event Context
 Market breadth/regime, volatility/risk context, earnings/events and news/sentiment.

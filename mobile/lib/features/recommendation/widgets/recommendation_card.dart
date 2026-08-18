@@ -61,8 +61,8 @@ class RecommendationCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
           const SizedBox(height: 8),
-          Text('Analysis timeframe: ${recommendation.timeframe}'),
-          Text('Candles analyzed: ${recommendation.candleCount}'),
+          Text('Primary analysis interval: ${recommendation.timeframe}'),
+          Text('Primary candles analyzed: ${recommendation.candleCount}'),
           Text(
             'Evidence coverage: '
             '${(recommendation.evidenceReport.coverage * 100).toStringAsFixed(0)}%',

@@ -64,23 +64,35 @@ void main() {
     ),
   );
 
-  testWidgets('presents clear strategy-aware timeframe and market context', (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: SingleChildScrollView(
-            child: AnalysisContextCard(
-              strategy: StrategyType.trader,
-              analysisContext: analysisContext,
-            ),
+  Widget buildCard({ValueChanged<String>? onSelected}) {
+    return MaterialApp(
+      home: Scaffold(
+        body: SingleChildScrollView(
+          child: AnalysisContextCard(
+            strategy: StrategyType.trader,
+            analysisContext: analysisContext,
+            timeframePlan: StrategyTimeframePlan.trader,
+            availablePrimaryTimeframes:
+                StrategyTimeframePlan.traderPrimaryTimeframes,
+            onPrimaryTimeframeSelected: onSelected,
           ),
         ),
       ),
     );
+  }
+
+  testWidgets('presents selectable strategy-aware analysis context', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildCard());
 
     expect(find.text('Trader Analysis Context'), findsOneWidget);
+    expect(find.text('Primary Analysis Interval'), findsOneWidget);
+    expect(find.text('1m'), findsOneWidget);
+    expect(find.text('5m'), findsOneWidget);
+    expect(find.text('15m'), findsOneWidget);
+    expect(find.text('30m'), findsOneWidget);
+    expect(find.text('1h'), findsOneWidget);
     expect(find.text('Timeframe Alignment'), findsOneWidget);
     expect(find.text('Aligned'), findsOneWidget);
     expect(find.text('Market Environment'), findsOneWidget);
@@ -89,11 +101,11 @@ void main() {
     expect(find.text('Relative Strength'), findsOneWidget);
     expect(find.text('Outperforming'), findsOneWidget);
     expect(
-      find.textContaining('Short-term trend (5-minute candles): Bullish'),
+      find.textContaining('Primary trend (5-minute candles): Bullish'),
       findsOneWidget,
     );
     expect(
-      find.textContaining('Near-term trend (1-hour candles): Bullish'),
+      find.textContaining('Confirmation trend (1-hour candles): Bullish'),
       findsOneWidget,
     );
     expect(
@@ -102,26 +114,40 @@ void main() {
     );
   });
 
-  testWidgets('explains candle intervals and market environment clearly', (
+  testWidgets('notifies when the user selects another Trader interval', (
     tester,
   ) async {
+    String? selected;
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: Scaffold(
-          body: AnalysisContextCard(
-            strategy: StrategyType.trader,
-            analysisContext: analysisContext,
-          ),
-        ),
+      buildCard(
+        onSelected: (timeframe) {
+          selected = timeframe;
+        },
       ),
     );
+
+    await tester.tap(find.text('15m'));
+    await tester.pump();
+
+    expect(selected, '15m');
+  });
+
+  testWidgets('explains selectable candle intervals and market environment', (
+    tester,
+  ) async {
+    await tester.pumpWidget(buildCard());
 
     await tester.tap(find.byTooltip('About Analysis Context'));
     await tester.pumpAndSettle();
 
     expect(find.text('What is Analysis Context?'), findsOneWidget);
     expect(
-      find.textContaining('candle intervals, not the total holding period'),
+      find.textContaining('The Primary Analysis Interval controls'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('candle intervals, not the expected holding period'),
       findsOneWidget,
     );
     expect(find.textContaining('Market Environment evaluates'), findsOneWidget);

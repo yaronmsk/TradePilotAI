@@ -36,7 +36,7 @@ void main() {
   test('stores an error when loading fails', () async {
     await controller.loadSnapshot(
       symbol: 'TSLA',
-      timeframe: '30m',
+      timeframe: '2m',
       candleCount: 48,
     );
 

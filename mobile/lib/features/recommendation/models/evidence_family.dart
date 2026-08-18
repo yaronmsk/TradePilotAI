@@ -3,6 +3,7 @@ enum EvidenceFamily {
   trend,
   momentum,
   participation,
+  priceStructure,
   volatility,
   marketContext,
   fundamentals,
@@ -20,6 +21,8 @@ extension EvidenceFamilyPresentation on EvidenceFamily {
         return 'Momentum';
       case EvidenceFamily.participation:
         return 'Participation';
+      case EvidenceFamily.priceStructure:
+        return 'Price Structure';
       case EvidenceFamily.volatility:
         return 'Volatility';
       case EvidenceFamily.marketContext:
