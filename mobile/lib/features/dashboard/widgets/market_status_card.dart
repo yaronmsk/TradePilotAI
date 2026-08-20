@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../shared/widgets/dashboard_card.dart';
+import '../../../shared/widgets/collapsible_dashboard_card.dart';
 import '../../market/controllers/market_controller.dart';
 import '../../market/controllers/market_history_controller.dart';
 import '../../market/widgets/market_history_chart.dart';
@@ -27,14 +27,19 @@ class MarketStatusCard extends StatelessWidget {
             final snapshot = marketController.state.snapshot;
 
             if (snapshot == null) {
-              return const DashboardCard(
+              return const CollapsibleDashboardCard(
                 title: 'Market Status',
+                collapsedSummary: Text('Waiting for market data'),
                 child: Text('Waiting for market data.'),
               );
             }
 
-            return DashboardCard(
+            return CollapsibleDashboardCard(
               title: 'Market Status',
+              collapsedSummary: _CollapsedMarketSummary(
+                symbol: snapshot.symbol,
+                currentPrice: snapshot.currentPrice,
+              ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth >= 760;
@@ -70,6 +75,28 @@ class MarketStatusCard extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _CollapsedMarketSummary extends StatelessWidget {
+  const _CollapsedMarketSummary({
+    required this.symbol,
+    required this.currentPrice,
+  });
+
+  final String symbol;
+  final double currentPrice;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      '$symbol  •  \$${currentPrice.toStringAsFixed(2)}',
+      overflow: TextOverflow.ellipsis,
+      style: TextStyle(
+        color: Theme.of(context).colorScheme.onSurfaceVariant,
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 }
@@ -111,10 +138,7 @@ class _MarketSummary extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
         const SizedBox(height: 18),
-        Text(
-          'Current volume: '
-          '${currentVolume.toStringAsFixed(0)}',
-        ),
+        Text('Current volume: ${currentVolume.toStringAsFixed(0)}'),
       ],
     );
   }
@@ -153,9 +177,7 @@ class _HistorySection extends StatelessWidget {
         const SizedBox(height: 12),
         MarketHistoryRangeSelector(
           selectedRange: state.range,
-          onSelected: (range) {
-            controller.selectRange(range);
-          },
+          onSelected: controller.selectRange,
         ),
         if (state.errorMessage != null) ...[
           const SizedBox(height: 8),

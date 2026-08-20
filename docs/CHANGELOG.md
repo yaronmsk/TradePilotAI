@@ -454,3 +454,8 @@ Changes require:
 2. Version update.
 
 3. Git commit.
+### v0.8 UX refinement — collapsible primary dashboard cards
+- Moved Watchlist to the top of the dashboard so symbol selection happens before analysis.
+- Made Watchlist collapsible; its collapsed header keeps the selected symbol visible.
+- Made Market Status collapsible; its collapsed header keeps the current symbol and price visible.
+- Added a reusable `CollapsibleDashboardCard` shared widget and widget coverage.

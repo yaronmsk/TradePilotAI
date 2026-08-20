@@ -76,6 +76,11 @@ class _DashboardPageState extends State<DashboardPage> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           children: [
+            WatchlistCard(
+              controller: watchlistController,
+              onSymbolSelected: dashboardController.selectSymbol,
+              onAddPressed: _openAddStockDialog,
+            ),
             MarketStatusCard(
               marketController: marketController,
               historyController: historyController,
@@ -168,11 +173,6 @@ class _DashboardPageState extends State<DashboardPage> {
                   ],
                 );
               },
-            ),
-            WatchlistCard(
-              controller: watchlistController,
-              onSymbolSelected: dashboardController.selectSymbol,
-              onAddPressed: _openAddStockDialog,
             ),
             const SizedBox(height: 20),
             const Center(

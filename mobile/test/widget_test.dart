@@ -13,10 +13,34 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('TradePilot AI'), findsOneWidget);
-    expect(find.text('AAPL connected'), findsOneWidget);
-    expect(find.text('Price History'), findsOneWidget);
+    expect(find.text('Watchlist'), findsOneWidget);
 
     final dashboardScroll = find.byType(Scrollable).first;
+
+    await tester.scrollUntilVisible(
+      find.text('Market Status'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Market Status'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('AAPL connected'),
+      200,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('AAPL connected'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Price History'),
+      200,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Price History'), findsOneWidget);
+
+    final watchlistTop = tester.getTopLeft(find.text('Watchlist')).dy;
+    final marketStatusTop = tester.getTopLeft(find.text('Market Status')).dy;
+    expect(watchlistTop, lessThan(marketStatusTop));
 
     await tester.scrollUntilVisible(
       find.text('Strategy Summary'),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/features/watchlist/controllers/watchlist_controller.dart';
 import 'package:mobile/features/watchlist/models/watchlist_item.dart';
+import 'package:mobile/shared/widgets/collapsible_dashboard_card.dart';
 
 class WatchlistCard extends StatelessWidget {
   const WatchlistCard({
@@ -16,74 +17,88 @@ class WatchlistCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: AnimatedBuilder(
-          animation: controller,
-          builder: (context, _) {
-            final state = controller.state;
+    return AnimatedBuilder(
+      animation: controller,
+      builder: (context, _) {
+        final state = controller.state;
+        final selectedSymbol = state.selectedSymbol;
 
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    const Expanded(
-                      child: Text(
-                        'Watchlist',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    IconButton(
-                      tooltip: 'Add stock',
-                      onPressed: onAddPressed,
-                      icon: const Icon(Icons.add),
-                    ),
-                  ],
+        return CollapsibleDashboardCard(
+          title: 'Watchlist',
+          collapsedSummary: selectedSymbol == null
+              ? const Text('No symbol selected')
+              : _SelectedSymbolSummary(symbol: selectedSymbol),
+          actions: [
+            IconButton(
+              tooltip: 'Add stock',
+              onPressed: onAddPressed,
+              icon: const Icon(Icons.add),
+            ),
+          ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (state.errorMessage != null) ...[
+                _WatchlistError(
+                  message: state.errorMessage!,
+                  onDismissed: controller.clearError,
                 ),
-                if (state.errorMessage != null) ...[
-                  const SizedBox(height: 8),
-                  _WatchlistError(
-                    message: state.errorMessage!,
-                    onDismissed: controller.clearError,
-                  ),
-                ],
                 const SizedBox(height: 8),
-                if (state.items.isEmpty)
-                  _EmptyWatchlist(onAddPressed: onAddPressed)
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: state.items.length,
-                    separatorBuilder: (_, _) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final item = state.items[index];
-                      final isSelected = state.selectedSymbol == item.symbol;
-
-                      return _WatchlistTile(
-                        item: item,
-                        isSelected: isSelected,
-                        onSelected: () {
-                          controller.selectSymbol(item.symbol);
-                          onSymbolSelected(item.symbol);
-                        },
-                        onNotificationsPressed: () {
-                          controller.toggleNotifications(item.symbol);
-                        },
-                        onRemovePressed: () {
-                          controller.removeItem(item.symbol);
-                        },
-                      );
-                    },
-                  ),
               ],
-            );
-          },
+              if (state.items.isEmpty)
+                _EmptyWatchlist(onAddPressed: onAddPressed)
+              else
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: state.items.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, index) {
+                    final item = state.items[index];
+                    final isSelected = state.selectedSymbol == item.symbol;
+
+                    return _WatchlistTile(
+                      item: item,
+                      isSelected: isSelected,
+                      onSelected: () {
+                        controller.selectSymbol(item.symbol);
+                        onSymbolSelected(item.symbol);
+                      },
+                      onNotificationsPressed: () {
+                        controller.toggleNotifications(item.symbol);
+                      },
+                      onRemovePressed: () {
+                        controller.removeItem(item.symbol);
+                      },
+                    );
+                  },
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _SelectedSymbolSummary extends StatelessWidget {
+  const _SelectedSymbolSummary({required this.symbol});
+
+  final String symbol;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        symbol,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+          fontWeight: FontWeight.w700,
         ),
       ),
     );
