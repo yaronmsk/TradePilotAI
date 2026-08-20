@@ -42,8 +42,9 @@ class RecommendationContributionPanel extends StatelessWidget {
         Text(
           'Direction influence shows what share of the final directional '
           'decision came from each independent evidence group. Confidence '
-          'share shows how much of the final confidence is attributable to '
-          'that group after the global confidence adjustments.',
+          'share shows how much of the evidence-derived confidence came from '
+          'that group after coverage, alignment, and reliability adjustments. '
+          'Historical validation is reconciled separately.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 10),
@@ -75,10 +76,12 @@ class RecommendationContributionPanel extends StatelessWidget {
           'Direction influence percentages are calculated after that '
           'de-duplication step. Supporting and opposing groups together '
           'account for 100% of the family-level directional influence.\n\n'
-          'Confidence share distributes the final confidence across the '
+          'Confidence share distributes evidence-derived confidence across the '
           'evidence groups that built its evidence-strength base. Coverage, '
-          'alignment, and reliability adjustments are shown separately. '
-          'Confidence is not a guaranteed probability of profit.',
+          'alignment, and reliability adjustments are applied before that '
+          'attribution. Historical setup validation is shown separately so it '
+          'cannot be mistaken for another indicator vote. Confidence is not a '
+          'guaranteed probability of profit.',
         ),
         actions: [
           TextButton(
@@ -132,7 +135,7 @@ class _FamilyContributionTile extends StatelessWidget {
                 '${(contribution.directionShare * 100).toStringAsFixed(0)}%',
               ),
               Text(
-                'Confidence share '
+                'Evidence confidence share '
                 '${(contribution.confidenceShare * 100).toStringAsFixed(0)}%',
               ),
             ],
@@ -145,7 +148,7 @@ class _FamilyContributionTile extends StatelessWidget {
             child: Text(
               'Exact group impact: '
               '${_signed(contribution.directionImpactPoints)} direction pts · '
-              '${contribution.confidenceContributionPoints.toStringAsFixed(1)} confidence pts',
+              '${contribution.confidenceContributionPoints.toStringAsFixed(1)} evidence-confidence pts',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ),
@@ -213,9 +216,9 @@ class _ProviderContributionRow extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            'Confidence: '
+            'Evidence confidence: '
             '${provider.confidenceContributionPoints.toStringAsFixed(1)} pts · '
-            '${(provider.confidenceShare * 100).toStringAsFixed(0)}% of final confidence',
+            '${(provider.confidenceShare * 100).toStringAsFixed(0)}% of evidence-derived confidence',
             style: Theme.of(context).textTheme.bodySmall,
           ),
         ],
@@ -236,24 +239,44 @@ class _ConfidenceCalculation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final evidenceModifiers = consensus.confidenceModifiers
+        .where((modifier) => modifier.label != 'Historical setup validation')
+        .toList(growable: false);
+    final externalModifiers = consensus.confidenceModifiers
+        .where((modifier) => modifier.label == 'Historical setup validation')
+        .toList(growable: false);
+
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: const EdgeInsets.only(bottom: 8),
       title: const Text('Confidence calculation'),
       subtitle: const Text(
-        'See how evidence strength becomes the final confidence score.',
+        'See how evidence strength becomes evidence confidence, then how external validation adjusts the final score.',
       ),
       children: [
         _CalculationRow(
           label: 'Evidence-strength baseline',
           value: '${consensus.baseEvidenceStrength.toStringAsFixed(1)}%',
         ),
-        ...consensus.confidenceModifiers.map(
+        ...evidenceModifiers.map(
           (modifier) => _CalculationRow(
             label: modifier.label,
             value: '${_signedImpact(modifier.impactPoints)} pts',
           ),
         ),
+        if (externalModifiers.isNotEmpty) ...[
+          const Divider(),
+          _CalculationRow(
+            label: 'Evidence-derived confidence',
+            value: '${consensus.evidenceConfidence.toStringAsFixed(1)}%',
+          ),
+          ...externalModifiers.map(
+            (modifier) => _CalculationRow(
+              label: modifier.label,
+              value: '${_signedImpact(modifier.impactPoints)} pts',
+            ),
+          ),
+        ],
         const Divider(),
         _CalculationRow(
           label: 'Final confidence',

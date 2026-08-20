@@ -31,13 +31,13 @@ class EvidenceContribution {
   /// providers are capped together before they influence the final result.
   final double directionShareWithinFamily;
 
-  /// Portion of final confidence attributable to this provider after global
-  /// coverage, alignment, and reliability adjustments are applied.
-  ///
-  /// All provider confidence-contribution points sum to final confidence.
+  /// Portion of evidence-derived confidence attributable to this provider
+  /// after coverage, alignment, and reliability adjustments are applied.
+  /// External validation layers (for example historical setup validation) are
+  /// reconciled separately and are not reassigned to indicator providers.
   final double confidenceContributionPoints;
 
-  /// Share of final confidence attributable to this provider, from 0 to 1.
+  /// Share of evidence-derived confidence attributable to this provider, from 0 to 1.
   final double confidenceShare;
 }
 
@@ -64,11 +64,11 @@ class EvidenceFamilyContribution {
   /// Shares across families sum to 1 when directional evidence exists.
   final double directionShare;
 
-  /// Portion of final confidence attributable to this family after global
-  /// confidence adjustments are applied.
+  /// Portion of evidence-derived confidence attributable to this family after
+  /// coverage, alignment, and reliability adjustments are applied.
   final double confidenceContributionPoints;
 
-  /// Share of final confidence attributable to this family, from 0 to 1.
+  /// Share of evidence-derived confidence attributable to this family, from 0 to 1.
   final double confidenceShare;
 
   final List<EvidenceContribution> providers;
@@ -86,7 +86,8 @@ class ConfidenceModifierImpact {
 
   final String label;
 
-  /// Multiplicative factor applied at this step. Current factors are <= 1.
+  /// Multiplicative factor applied at this step. Evidence-quality factors are
+  /// usually <= 1, while bounded external validation may be above 1.
   final double factor;
 
   final double before;

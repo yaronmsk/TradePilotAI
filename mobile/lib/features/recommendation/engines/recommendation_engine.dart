@@ -1,3 +1,4 @@
+import '../history/historical_setup_validation.dart';
 import '../models/evidence_report.dart';
 import '../models/recommendation.dart';
 import '../models/scoring_result.dart';
@@ -11,6 +12,8 @@ class RecommendationEngine {
     required String timeframe,
     required int candleCount,
     required DateTime analysisTime,
+    HistoricalSetupValidation historicalValidation =
+        const HistoricalSetupValidation.unavailable(),
   }) {
     if (!scoringResult.hasSufficientCoverage) {
       return _build(
@@ -20,6 +23,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation:
             'There is not enough reliable evidence coverage for a clear recommendation.',
       );
@@ -36,6 +40,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation:
             'Independent evidence families strongly align bullish with high confidence.',
       );
@@ -49,6 +54,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation:
             'Bullish evidence leads across the available independent evidence families.',
       );
@@ -62,6 +68,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation:
             'Independent evidence families strongly align bearish with high confidence.',
       );
@@ -75,6 +82,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation:
             'Bearish evidence leads across the available independent evidence families.',
       );
@@ -88,6 +96,7 @@ class RecommendationEngine {
         timeframe: timeframe,
         candleCount: candleCount,
         analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
         explanation: scoringResult.conflict >= 0.60
             ? 'Bullish and bearish evidence families are materially conflicted, leaving no clear directional edge.'
             : 'The current independent evidence families are broadly neutral.',
@@ -101,6 +110,7 @@ class RecommendationEngine {
       timeframe: timeframe,
       candleCount: candleCount,
       analysisTime: analysisTime,
+      historicalValidation: historicalValidation,
       explanation:
           'A directional bias exists, but confidence or cross-family agreement is not yet strong enough to act on it.',
     );
@@ -113,6 +123,7 @@ class RecommendationEngine {
     required String timeframe,
     required int candleCount,
     required DateTime analysisTime,
+    required HistoricalSetupValidation historicalValidation,
     required String explanation,
   }) {
     return Recommendation(
@@ -124,6 +135,7 @@ class RecommendationEngine {
       candleCount: candleCount,
       analysisTime: analysisTime,
       evidenceReport: evidenceReport,
+      historicalValidation: historicalValidation,
     );
   }
 

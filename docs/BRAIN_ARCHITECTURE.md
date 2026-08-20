@@ -205,7 +205,15 @@ Deferred intentionally:
 - Bollinger Bands until evidence shows incremental value beyond Stock DNA, ATR and Price Extension.
 - True session VWAP until the live provider exposes reliable session boundaries.
 
-### v0.9 — Event / environment context
+### v0.9 — Historical Setup Validation
+- Setup fingerprint from de-duplicated family state + Stock DNA + market context.
+- Similar historical case matching.
+- Follow-through vs a context-matched same-stock baseline that shares strategy, interval, Stock Profile, volatility regime and Market Environment but does not require today's specific evidence setup.
+- Effective sample size, similarity quality, median forward move and excursion analysis.
+- Bounded confidence-only adjustment; direction remains deterministic from current evidence.
+- Synthetic development provider behind a replaceable historical-data interface.
+
+### v0.10 — Event / broader-environment context
 - Earnings calendar/risk.
 - News and sentiment.
 - Market breadth/regime.
@@ -215,11 +223,12 @@ Deferred intentionally:
 - Swing-specific daily/weekly evidence.
 - Investor fundamentals, valuation, growth, quality and revisions.
 
-### v1.x — Historical conditional validation
-- Similar-setup outcomes.
+### v1.x — Historical calibration + AI Analyst
+- Replace development analogs with real historical setup/outcome storage.
 - Walk-forward / out-of-sample calibration.
 - Evidence effectiveness by stock and regime.
 - No live weight optimization from in-sample performance alone.
+- AI explanations grounded in deterministic current evidence + validated history.
 
 ## Explainability rule
 
@@ -275,3 +284,47 @@ Technical direction and entry quality are not the same question. A stock may hav
 The Consensus Engine emits exact post-de-duplication attribution alongside its direction/confidence outputs. Each evidence family receives a signed direction-impact value and a confidence-contribution value. Provider-level values reconcile to the family total while preserving the family cap. Family direction impacts reconcile to the final -100..+100 direction score; family confidence points reconcile to final confidence. The UI may convert these exact values into percentage shares, but it must retain the signed point values for technical drill-down.
 
 Confidence attribution is not treated as a probability model. The engine first builds an evidence-strength baseline, then applies provider coverage, evidence-group coverage, signal alignment and reliability factors. These adjustments are emitted as explicit confidence-modifier impacts so the user can see what reduced confidence.
+
+
+## v0.9 historical-validation overlay
+
+Historical setup validation runs **after** the Consensus Engine. It receives the current Recommendation, Stock DNA and Analysis Context, builds a setup-time fingerprint, finds similar historical cases, evaluates their later outcomes, and returns a bounded confidence modifier.
+
+```text
+Current evidence -> Consensus Engine -> direction + evidence confidence
+                                      |
+                                      v
+                              Setup fingerprint
+                                      |
+                                      v
+                           Historical analog match
+                                      |
+                         outcomes vs context-matched stock baseline
+                                      |
+                                      v
+                       bounded confidence modifier
+                                      |
+                                      v
+                              final confidence
+```
+
+Permanent constraints:
+- Historical validation is not an evidence family.
+- It cannot change direction in v0.9.
+- Maximum confidence impact is ±8 points.
+- Positive impact requires matched same-direction follow-through above 50% and above the context-matched same-stock baseline.
+- Similarity uses family-level state, not duplicated provider votes.
+- Kish effective sample size is reported because similarity-weighted observations do not have the same information content as an equal-weight raw count.
+- Historical features use setup-time information only; forward returns/excursions are evaluation-only.
+- Development synthetic data is always labeled and cannot be presented as historical performance.
+
+## v0.9 Historical Validation Weighting Rule
+
+Historical validation uses unequal outcome weights and a separate reliability gate:
+
+- Historical Difference vs context-matched stock baseline: 40%
+- Directional follow-through: 20%
+- Volatility/behavior-normalized outcome magnitude: 20%
+- Favorable vs adverse excursion quality: 20%
+
+Effective sample depth and match quality do not receive outcome weights. They are reliability gates applied after the weighted historical quality score; the weaker reliability dimension limits the historical confidence impact. Historical validation remains bounded to ±8 confidence points and cannot directly alter recommendation direction.

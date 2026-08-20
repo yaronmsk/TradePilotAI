@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/dashboard_card.dart';
+import '../history/historical_setup_validation.dart';
 import '../models/evidence_family.dart';
 import '../models/evidence_family_summary.dart';
 import '../models/evidence_result.dart';
 import '../models/scoring_result.dart';
 import '../models/strategy_recommendation.dart';
+import 'historical_setup_validation_panel.dart';
 import 'recommendation_contribution_panel.dart';
 
 class ConsensusSummaryCard extends StatelessWidget {
@@ -61,8 +63,11 @@ class ConsensusSummaryCard extends StatelessWidget {
                       infoText:
                           'Confidence reflects evidence strength, data '
                           'coverage, agreement between independent evidence '
-                          'groups, and reliability. It is not a guaranteed '
-                          'probability of profit.',
+                          'groups, reliability, and any bounded external '
+                          'validation such as the Historical Setup Check. '
+                          'Historical validation cannot change direction by '
+                          'itself. Confidence is not a guaranteed probability '
+                          'of profit.',
                     ),
                     _InsightMetric(
                       label: 'Signal Alignment',
@@ -80,6 +85,13 @@ class ConsensusSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _WhyConfidencePanel(consensus: consensus),
+                if (recommendation.historicalValidation.status !=
+                    HistoricalValidationStatus.unavailable) ...[
+                  const SizedBox(height: 16),
+                  HistoricalSetupValidationPanel(
+                    validation: recommendation.historicalValidation,
+                  ),
+                ],
                 const SizedBox(height: 16),
                 RecommendationContributionPanel(consensus: consensus),
                 const SizedBox(height: 8),

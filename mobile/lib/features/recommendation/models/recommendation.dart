@@ -1,3 +1,4 @@
+import '../history/historical_setup_validation.dart';
 import 'evidence_report.dart';
 import 'scoring_result.dart';
 
@@ -21,6 +22,7 @@ class Recommendation {
     required this.analysisTime,
     required this.evidenceReport,
     this.consensus = const ScoringResult.empty(),
+    this.historicalValidation = const HistoricalSetupValidation.unavailable(),
   });
 
   final RecommendationType type;
@@ -39,10 +41,35 @@ class Recommendation {
   final int candleCount;
   final DateTime? analysisTime;
   final EvidenceReport evidenceReport;
+  final HistoricalSetupValidation historicalValidation;
 
   double get confidenceScore => evidenceScore;
 
   double get directionScore => consensus.directionScore ?? 0;
+
+  Recommendation copyWith({
+    RecommendationType? type,
+    double? evidenceScore,
+    ScoringResult? consensus,
+    String? oneLineExplanation,
+    String? timeframe,
+    int? candleCount,
+    DateTime? analysisTime,
+    EvidenceReport? evidenceReport,
+    HistoricalSetupValidation? historicalValidation,
+  }) {
+    return Recommendation(
+      type: type ?? this.type,
+      evidenceScore: evidenceScore ?? this.evidenceScore,
+      consensus: consensus ?? this.consensus,
+      oneLineExplanation: oneLineExplanation ?? this.oneLineExplanation,
+      timeframe: timeframe ?? this.timeframe,
+      candleCount: candleCount ?? this.candleCount,
+      analysisTime: analysisTime ?? this.analysisTime,
+      evidenceReport: evidenceReport ?? this.evidenceReport,
+      historicalValidation: historicalValidation ?? this.historicalValidation,
+    );
+  }
 
   factory Recommendation.empty() {
     return Recommendation(

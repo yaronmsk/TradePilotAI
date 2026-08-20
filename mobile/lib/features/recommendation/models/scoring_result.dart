@@ -18,10 +18,11 @@ class ScoringResult {
     this.independentFamilyCount = 0,
     this.familySummaries = const [],
     this.baseEvidenceStrength = 0,
+    double? evidenceConfidence,
     this.familyContributions = const [],
     this.providerContributions = const [],
     this.confidenceModifiers = const [],
-  });
+  }) : evidenceConfidence = evidenceConfidence ?? score;
 
   const ScoringResult.empty()
     : score = 0,
@@ -39,6 +40,7 @@ class ScoringResult {
       independentFamilyCount = 0,
       familySummaries = const [],
       baseEvidenceStrength = 0,
+      evidenceConfidence = 0,
       familyContributions = const [],
       providerContributions = const [],
       confidenceModifiers = const [];
@@ -81,6 +83,11 @@ class ScoringResult {
   /// reliability adjustments reduce confidence.
   final double baseEvidenceStrength;
 
+  /// Confidence produced strictly by the current evidence engine after
+  /// coverage, alignment, and reliability adjustments, but before external
+  /// validation layers such as historical setup checks.
+  final double evidenceConfidence;
+
   /// Family-level attribution after correlated providers have been grouped.
   final List<EvidenceFamilyContribution> familyContributions;
 
@@ -92,6 +99,54 @@ class ScoringResult {
   final List<ConfidenceModifierImpact> confidenceModifiers;
 
   double get confidence => score;
+
+  ScoringResult copyWith({
+    double? score,
+    double? coverage,
+    double? bullishWeight,
+    double? bearishWeight,
+    double? neutralWeight,
+    List<String>? warnings,
+    double? directionScore,
+    double? familyCoverage,
+    double? agreement,
+    double? conflict,
+    double? bullishSupportPercent,
+    double? bearishSupportPercent,
+    int? independentFamilyCount,
+    List<EvidenceFamilySummary>? familySummaries,
+    double? baseEvidenceStrength,
+    double? evidenceConfidence,
+    List<EvidenceFamilyContribution>? familyContributions,
+    List<EvidenceContribution>? providerContributions,
+    List<ConfidenceModifierImpact>? confidenceModifiers,
+  }) {
+    return ScoringResult(
+      score: score ?? this.score,
+      coverage: coverage ?? this.coverage,
+      bullishWeight: bullishWeight ?? this.bullishWeight,
+      bearishWeight: bearishWeight ?? this.bearishWeight,
+      neutralWeight: neutralWeight ?? this.neutralWeight,
+      warnings: warnings ?? this.warnings,
+      directionScore: directionScore ?? this.directionScore,
+      familyCoverage: familyCoverage ?? this.familyCoverage,
+      agreement: agreement ?? this.agreement,
+      conflict: conflict ?? this.conflict,
+      bullishSupportPercent:
+          bullishSupportPercent ?? this.bullishSupportPercent,
+      bearishSupportPercent:
+          bearishSupportPercent ?? this.bearishSupportPercent,
+      independentFamilyCount:
+          independentFamilyCount ?? this.independentFamilyCount,
+      familySummaries: familySummaries ?? this.familySummaries,
+      baseEvidenceStrength: baseEvidenceStrength ?? this.baseEvidenceStrength,
+      evidenceConfidence: evidenceConfidence ?? this.evidenceConfidence,
+      familyContributions: familyContributions ?? this.familyContributions,
+      providerContributions:
+          providerContributions ?? this.providerContributions,
+      confidenceModifiers: confidenceModifiers ?? this.confidenceModifiers,
+    );
+  }
 
   bool get hasSufficientCoverage => coverage >= 0.60;
 }

@@ -218,7 +218,10 @@ void main() {
 
     expect(find.text('Candle Trend'), findsOneWidget);
     expect(find.textContaining('Direction: +38.0 pts'), findsOneWidget);
-    expect(find.textContaining('41% of final confidence'), findsOneWidget);
+    expect(
+      find.textContaining('41% of evidence-derived confidence'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('explains confidence calculation and attribution semantics', (

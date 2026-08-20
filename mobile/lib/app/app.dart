@@ -10,6 +10,8 @@ import '../features/market/providers/mock_market_history_provider.dart';
 import '../features/market/services/market_history_service.dart';
 import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
+import '../features/recommendation/history/historical_setup_validation_service.dart';
+import '../features/recommendation/history/mock_historical_setup_provider.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
 import '../features/recommendation/providers/ema_structure_evidence_provider.dart';
 import '../features/recommendation/providers/macd_momentum_evidence_provider.dart';
@@ -102,6 +104,10 @@ class _TradePilotAppState extends State<TradePilotApp> {
       marketService: marketService,
     );
 
+    const historicalSetupValidationService = HistoricalSetupValidationService(
+      provider: MockHistoricalSetupProvider(),
+    );
+
     final dashboardController = DashboardController(
       marketController: marketController,
       marketHistoryController: marketHistoryController,
@@ -109,6 +115,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
       recommendationContextService: recommendationContextService,
       watchlistController: watchlistController,
       recommendationController: recommendationController,
+      historicalSetupValidationService: historicalSetupValidationService,
     );
 
     final selectedSymbol = watchlistController.state.selectedSymbol;

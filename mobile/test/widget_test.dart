@@ -82,6 +82,14 @@ void main() {
     expect(find.text('Trader Recommendation'), findsOneWidget);
     expect(find.text('Trader Recommendation Insight'), findsOneWidget);
     expect(find.text('Confidence'), findsWidgets);
+
+    await tester.scrollUntilVisible(
+      find.text('Historical Setup Check'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Historical Setup Check'), findsOneWidget);
+    expect(find.textContaining('similar cases'), findsOneWidget);
     expect(find.text('Waiting for Analysis'), findsNothing);
   });
 }

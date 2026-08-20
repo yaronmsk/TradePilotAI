@@ -50,6 +50,56 @@ Each release shall contain:
 ---
 
 
+# Version 0.9.0
+
+Status
+
+Development / Validation
+
+Date
+
+2026-08-20
+
+Summary
+
+Historical Setup Validation adds a bounded, strategy-aware historical analog layer on top of the deterministic recommendation engine.
+
+### Added
+
+- Historical setup fingerprints built from de-duplicated evidence families, Stock DNA, volatility regime, Market Environment, Relative Strength and selected strategy interval.
+- Similarity matcher with cross-symbol analogs and a modest same-symbol statistical-weight preference.
+- Similar-case count, Kish effective sample size, match quality, follow-through rate, context-matched stock baseline rate, Historical Difference, median forward move, favorable excursion and adverse excursion.
+- Strategy/timeframe-specific forward outcome windows.
+- `Historical Setup Check` inside Recommendation Insight with expandable analog details and limitations.
+- Mock historical setup provider explicitly labeled as synthetic development data.
+- Historical validation unit, widget, integration and timeframe tests.
+
+### Refined — 2026-08-21
+
+- Stock Profile is now a hard eligibility gate for historical setup analogs.
+- Replaced the unconditional/control return list with structured same-stock comparison observations.
+- The comparison baseline now requires the same strategy, primary interval, Stock Profile, volatility regime and Market Environment while deliberately ignoring today's specific evidence pattern.
+- Historical validation requires at least 12 context-matched same-stock baseline observations before it may affect confidence.
+- Reworked Historical Setup Check wording around Similar historical setups, stock behavior under comparable conditions, Historical Difference (`+/-N% points`) and Confidence effect.
+- Removed `control` terminology from the normal user-facing historical UI.
+
+### Changed
+
+- Confidence now distinguishes evidence-derived confidence from final confidence after external validation.
+- Historical validation may adjust confidence by at most ±8 points and cannot change direction by itself.
+- Positive historical credit requires matched outcomes to beat both 50% directional follow-through and the context-matched stock baseline.
+- Evidence/provider confidence attribution reconciles to evidence-derived confidence; historical adjustment is shown separately.
+- Dashboard version marker advanced to 0.9.
+
+### Safety / statistical discipline
+
+- Historical setup fingerprints contain setup-time information only; future outcome data is evaluation-only.
+- Historical validation is not an independent evidence family and therefore cannot double-count the current indicators.
+- Current synthetic outcomes validate architecture/UI only and must not be interpreted as real strategy performance.
+
+---
+
+
 # Version 0.8.0
 
 Status
@@ -459,3 +509,11 @@ Changes require:
 - Made Watchlist collapsible; its collapsed header keeps the selected symbol visible.
 - Made Market Status collapsible; its collapsed header keeps the current symbol and price visible.
 - Added a reusable `CollapsibleDashboardCard` shared widget and widget coverage.
+
+### v0.9 weighted historical scoring refinement
+- Replaced the previous 40/40/20 historical outcome blend with an explicit four-dimension weighting policy: difference vs context-matched stock baseline 40%, directional follow-through 20%, normalized outcome magnitude 20%, and excursion quality 20%.
+- Added favorable-versus-adverse excursion quality so two setups with the same win rate can receive different historical quality scores when their risk paths differ.
+- Converted historical reliability into a separate weakest-link gate using effective sample depth and match quality rather than treating reliability as another outcome vote.
+- Preserved the anti-drift rule: historical validation cannot add confidence unless matched setups beat both the 50/50 directional baseline and the context-matched stock baseline.
+- Kept historical confidence impact capped at ±8 points and prohibited historical validation from changing recommendation direction by itself.
+- Added user-facing historical scoring-weight and reliability breakdowns inside Historical Setup Check details.

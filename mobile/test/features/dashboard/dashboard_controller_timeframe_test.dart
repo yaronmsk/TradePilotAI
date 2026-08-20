@@ -7,6 +7,8 @@ import 'package:mobile/features/market/providers/mock_market_history_provider.da
 import 'package:mobile/features/market/services/market_history_service.dart';
 import 'package:mobile/features/market/services/market_service.dart';
 import 'package:mobile/features/recommendation/controllers/recommendation_controller.dart';
+import 'package:mobile/features/recommendation/history/historical_setup_validation_service.dart';
+import 'package:mobile/features/recommendation/history/mock_historical_setup_provider.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
@@ -45,12 +47,24 @@ void main() {
         ),
         watchlistController: watchlistController,
         recommendationController: recommendationController,
+        historicalSetupValidationService:
+            const HistoricalSetupValidationService(
+              provider: MockHistoricalSetupProvider(),
+            ),
       );
 
       await controller.selectSymbol('AAPL');
 
       expect(marketController.state.snapshot!.timeframe, '5m');
       expect(recommendationController.state.recommendation!.timeframe, '5m');
+      expect(
+        recommendationController
+            .state
+            .recommendation!
+            .historicalValidation
+            .outcomeWindowLabel,
+        contains('5m'),
+      );
 
       await controller.selectAnalysisTimeframe(StrategyType.trader, '15m');
 
@@ -60,6 +74,14 @@ void main() {
       );
       expect(marketController.state.snapshot!.timeframe, '15m');
       expect(recommendationController.state.recommendation!.timeframe, '15m');
+      expect(
+        recommendationController
+            .state
+            .recommendation!
+            .historicalValidation
+            .outcomeWindowLabel,
+        contains('15m'),
+      );
       expect(
         recommendationController
             .state

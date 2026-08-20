@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.5
+Version: 1.6
 Status: Living reference
 
 ## Mission
@@ -38,6 +38,7 @@ Market data
 → Evidence-family aggregation
 → Consensus Engine
 → Strategy-specific recommendation
+→ Historical Setup Validation (bounded confidence overlay)
 → Presentation / explainability
 → Future AI Analyst / Mentor
 
@@ -141,10 +142,11 @@ When the brain begins learning from historical effectiveness:
 2. v0.5 — Strategy-aware Consensus Engine, evidence-family de-duplication and Recommendation Insight. Done.
 3. v0.6 — One-year Historical Context / Stock DNA foundation. Done.
 4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Done.
-5. v0.8 — Advanced Trader evidence + selectable Trader primary analysis interval with strategy-specific timeframe policy. Current.
-6. v0.9 — Market regime, earnings/events, news/sentiment.
-7. v1.0 — Swing and Investor brains.
-8. v1.x — Historical setup similarity, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
+5. v0.8 — Advanced Trader evidence + selectable Trader primary analysis interval with strategy-specific timeframe policy. Done.
+6. v0.9 — Historical Setup Validation / similar-case confidence overlay. Current.
+7. v0.10 — Broader market regime, earnings/events and news/sentiment.
+8. v1.0 — Swing and Investor brains.
+9. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
 ## UI roadmap
 
@@ -176,3 +178,20 @@ v0.8 expands provider-level detail without multiplying independent confidence. T
 ## Recommendation attribution rule
 
 Every strategy recommendation must be able to explain both **direction** and **confidence** quantitatively. Direction influence and confidence contribution are separate concepts. Family-level percentages are shown first; exact provider-level impact remains expandable. Attribution must reconcile to the same deterministic Consensus Engine math used to create the recommendation. Correlated providers remain capped inside their evidence family, so adding another EMA/trend-style signal cannot manufacture extra independent influence. Confidence attribution must also show the global coverage, alignment and reliability adjustments that transform evidence strength into final confidence.
+
+
+## Historical Setup Validation rule
+
+Historical validation is an **external validation overlay**, not another evidence family. It is derived from the same current evidence, so counting it as an independent signal would double-count the setup.
+
+The current setup fingerprint uses strategy/timeframe, de-duplicated evidence-family direction/strength, Stock DNA, volatility regime, Market Environment and Relative Strength. Historical outcomes are then evaluated only after the setup state is fixed. Future price data must never enter the fingerprint.
+
+The layer reports similar-case count, effective sample size, match quality, similar-setup follow-through, a context-matched same-stock follow-through baseline, Historical Difference, median forward/directional move and favorable/adverse excursion. Historical setup analogs must share the current Stock Profile as a hard eligibility rule. The same-stock baseline must share strategy, analysis interval, Stock Profile, volatility regime and Market Environment, while deliberately not requiring today's specific evidence setup. Positive historical credit is allowed only when matched follow-through exceeds both 50% and this context-matched stock baseline.
+
+Historical validation may adjust **confidence only**, currently capped at ±8 points. It cannot alter recommendation direction by itself. Evidence/provider attribution reconciles to evidence-derived confidence; the historical adjustment is displayed separately before final confidence.
+
+The v0.9 mock provider is explicitly synthetic development data. It validates architecture and UX, not real-world performance. Production use requires a real historical setup/outcome store plus out-of-sample/walk-forward validation before any learned calibration can influence live weights.
+
+## Historical Validation Scoring Principle
+
+TradePilot AI must not treat all historical measurements as equally informative. Historical setup validation prioritizes the difference versus the context-matched same-stock baseline, then uses directional follow-through, normalized outcome magnitude, and excursion quality as supporting dimensions. Statistical sample depth and match quality are reliability gates rather than additional votes. The UI must expose the configured historical weights and reliability factors so the confidence adjustment is auditable.

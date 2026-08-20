@@ -177,11 +177,14 @@ EMA Structure, MACD Momentum, Volume Confirmation, analysis-window VWAP, ATR-nor
 
 ADX/Bollinger-style additions remain deferred until historical validation demonstrates incremental value beyond existing trend-efficiency and volatility context.
 
-### v0.9 — Market / Sector / Event Context
+### v0.9 — Historical Setup Validation
+Current setup fingerprint, similarity-weighted historical analogs, matched outcomes versus a control baseline, effective sample size, excursion statistics and a bounded confidence-only overlay. Development starts with a synthetic provider behind a replaceable interface; real performance claims are forbidden until real historical data is connected and validated out of sample.
+
+### v0.10 — Market / Sector / Event Context
 Market breadth/regime, volatility/risk context, earnings/events and news/sentiment.
 
 ### v1.0 — Swing + Investor Engines
 Separate strategy-specific data and logic, all visible in the Strategy Summary.
 
-### v1.x — Historical Conditional Validation + AI Analyst
-Out-of-sample setup statistics, calibrated historical confidence, “what would change this recommendation?”, and AI explanations grounded only in deterministic evidence.
+### v1.x — Historical Calibration + AI Analyst
+Replace development historical analogs with real setup/outcome data, add walk-forward/out-of-sample calibration, “what would change this recommendation?”, and AI explanations grounded only in deterministic evidence plus validated history.

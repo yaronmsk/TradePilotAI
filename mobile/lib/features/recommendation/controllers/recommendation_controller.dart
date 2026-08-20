@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
 import '../context/recommendation_analysis_context.dart';
+import '../history/historical_setup_validation.dart';
 import '../models/recommendation_state.dart';
 import '../services/recommendation_service.dart';
 
@@ -52,6 +53,31 @@ class RecommendationController extends ChangeNotifier {
     }
 
     notifyListeners();
+  }
+
+  void applyHistoricalValidation(HistoricalSetupValidation validation) {
+    final recommendation = _state.recommendation;
+
+    if (recommendation == null) {
+      return;
+    }
+
+    try {
+      final adjusted = _service.applyHistoricalValidation(
+        recommendation: recommendation,
+        validation: validation,
+      );
+
+      _state = _state.copyWith(
+        status: RecommendationStatus.ready,
+        recommendation: adjusted,
+        clearError: true,
+      );
+      notifyListeners();
+    } catch (_) {
+      // Historical validation is optional. Preserve the already-ready current
+      // recommendation if the validation overlay cannot be applied.
+    }
   }
 
   void reset() {

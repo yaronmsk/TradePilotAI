@@ -9,6 +9,7 @@ import '../../market/services/market_history_service.dart';
 import '../../recommendation/context/recommendation_analysis_context.dart';
 import '../../recommendation/context/strategy_timeframe_plan.dart';
 import '../../recommendation/controllers/recommendation_controller.dart';
+import '../../recommendation/history/historical_setup_validation_service.dart';
 import '../../recommendation/models/strategy_summary.dart';
 import '../../recommendation/services/recommendation_context_service.dart';
 import '../../watchlist/controllers/watchlist_controller.dart';
@@ -21,6 +22,7 @@ class DashboardController extends ChangeNotifier {
     required this.recommendationContextService,
     required this.watchlistController,
     required this.recommendationController,
+    this.historicalSetupValidationService,
   }) : _selectedPrimaryTimeframes = <StrategyType, String>{
          StrategyType.trader: StrategyTimeframePlan.defaultPrimaryTimeframeFor(
            StrategyType.trader,
@@ -48,6 +50,7 @@ class DashboardController extends ChangeNotifier {
 
   final WatchlistController watchlistController;
   final RecommendationController recommendationController;
+  final HistoricalSetupValidationService? historicalSetupValidationService;
 
   final Map<StrategyType, String> _selectedPrimaryTimeframes;
 
@@ -180,10 +183,53 @@ class DashboardController extends ChangeNotifier {
       analysisContext: analysisContext,
     );
 
+    await _applyHistoricalSetupValidation(
+      requestId: requestId,
+      snapshot: snapshot,
+      analysisContext: analysisContext,
+    );
+
     await chartHistoryFuture;
 
     if (requestId == _analysisRequestId) {
       notifyListeners();
+    }
+  }
+
+  Future<void> _applyHistoricalSetupValidation({
+    required int requestId,
+    required MarketSnapshot snapshot,
+    required RecommendationAnalysisContext analysisContext,
+  }) async {
+    final service = historicalSetupValidationService;
+    final recommendation = recommendationController.state.recommendation;
+    final stockBehaviorProfile =
+        recommendationController.state.stockBehaviorProfile;
+
+    if (service == null ||
+        recommendation == null ||
+        stockBehaviorProfile == null ||
+        requestId != _analysisRequestId) {
+      return;
+    }
+
+    try {
+      final validation = await service.validate(
+        symbol: snapshot.symbol,
+        strategy: StrategyType.trader,
+        recommendation: recommendation,
+        stockBehaviorProfile: stockBehaviorProfile,
+        analysisContext: analysisContext,
+      );
+
+      if (requestId != _analysisRequestId) {
+        return;
+      }
+
+      recommendationController.applyHistoricalValidation(validation);
+    } catch (_) {
+      // Historical validation is an enhancement layer. Recommendation analysis
+      // must remain usable when historical analog data is unavailable.
     }
   }
 

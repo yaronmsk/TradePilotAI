@@ -1,0 +1,15 @@
+docs/BRAIN_ARCHITECTURE.md
+docs/CHANGELOG.md
+docs/PROJECT_BIBLE.md
+docs/RELEASE_0_9_HISTORICAL_SETUP_VALIDATION.md
+docs/RELEASE_0_9_WEIGHTED_HISTORICAL_SCORING_REFINEMENT.md
+docs/RELEASE_0_9_WEIGHTED_SCORING_FILE_MANIFEST.txt
+mobile/lib/features/recommendation/history/historical_setup_validation.dart
+mobile/lib/features/recommendation/history/historical_setup_validation_service.dart
+mobile/lib/features/recommendation/history/historical_validation_scoring_breakdown.dart
+mobile/lib/features/recommendation/history/historical_validation_scoring_policy.dart
+mobile/lib/features/recommendation/widgets/historical_setup_validation_panel.dart
+mobile/test/features/recommendation/history/historical_confidence_adjuster_test.dart
+mobile/test/features/recommendation/history/historical_setup_validation_service_test.dart
+mobile/test/features/recommendation/history/historical_validation_scoring_policy_test.dart
+mobile/test/features/recommendation/widgets/historical_setup_validation_panel_test.dart

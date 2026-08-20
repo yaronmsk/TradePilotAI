@@ -5,6 +5,8 @@ import '../context/recommendation_analysis_context.dart';
 import '../context/stock_behavior_profile.dart';
 import '../context/stock_behavior_profile_service.dart';
 import '../engines/consensus_engine.dart';
+import '../history/historical_confidence_adjuster.dart';
+import '../history/historical_setup_validation.dart';
 import '../engines/recommendation_engine.dart';
 import '../models/evidence_report.dart';
 import '../models/evidence_result.dart';
@@ -23,6 +25,7 @@ class RecommendationService {
     this.marketContextEvidenceProvider = const MarketContextEvidenceProvider(),
     this.consensusEngine = const ConsensusEngine(),
     this.recommendationEngine = const RecommendationEngine(),
+    this.historicalConfidenceAdjuster = const HistoricalConfidenceAdjuster(),
   }) : _providers = providers;
 
   final List<EvidenceProvider> _providers;
@@ -32,6 +35,7 @@ class RecommendationService {
   final MarketContextEvidenceProvider marketContextEvidenceProvider;
   final ConsensusEngine consensusEngine;
   final RecommendationEngine recommendationEngine;
+  final HistoricalConfidenceAdjuster historicalConfidenceAdjuster;
 
   List<EvidenceProvider> get providers =>
       List<EvidenceProvider>.unmodifiable(_providers);
@@ -71,6 +75,25 @@ class RecommendationService {
         analysisContext.marketContextProfile,
       ),
     ]);
+  }
+
+  Recommendation applyHistoricalValidation({
+    required Recommendation recommendation,
+    required HistoricalSetupValidation validation,
+  }) {
+    final adjustedScoring = historicalConfidenceAdjuster.apply(
+      scoringResult: recommendation.consensus,
+      validation: validation,
+    );
+
+    return recommendationEngine.create(
+      scoringResult: adjustedScoring,
+      evidenceReport: recommendation.evidenceReport,
+      timeframe: recommendation.timeframe,
+      candleCount: recommendation.candleCount,
+      analysisTime: recommendation.analysisTime ?? DateTime.now(),
+      historicalValidation: validation,
+    );
   }
 
   Recommendation analyze(
