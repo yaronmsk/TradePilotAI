@@ -203,4 +203,74 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'provides an individual explainability path for every context metric',
+    (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(800, 1000);
+
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      await tester.pumpWidget(buildCard());
+
+      const tooltips = [
+        'About Primary Analysis Interval',
+        'About Timeframe Alignment',
+        'About Market Environment',
+        'About Market Breadth',
+        'About Relative Strength',
+        'About Event Risk',
+        'About News Sentiment',
+      ];
+
+      for (final tooltip in tooltips) {
+        expect(
+          find.byTooltip(tooltip),
+          findsOneWidget,
+          reason: '$tooltip must be available.',
+        );
+      }
+
+      await tester.tap(find.byTooltip('About Event Risk'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Event Risk'), findsOneWidget);
+      expect(find.text('Confidence / risk only'), findsOneWidget);
+      expect(find.textContaining('at most 12 points'), findsOneWidget);
+      expect(
+        find.textContaining('cannot create Buy/Sell direction'),
+        findsOneWidget,
+      );
+      expect(find.text('Supportive interpretation'), findsNothing);
+      expect(find.text('Opposing interpretation'), findsNothing);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('About Primary Analysis Interval'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Primary Analysis Interval'), findsOneWidget);
+      expect(find.text('Context / configuration'), findsOneWidget);
+      expect(
+        find.textContaining('does not create bullish or bearish evidence'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('About Timeframe Alignment'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Timeframe Alignment'), findsOneWidget);
+      expect(find.text('Directional / evaluative'), findsOneWidget);
+      expect(find.text('Supportive interpretation'), findsOneWidget);
+      expect(find.text('Opposing interpretation'), findsOneWidget);
+    },
+  );
 }

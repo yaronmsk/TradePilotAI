@@ -1,0 +1,16 @@
+enum EvidenceKind {
+  generic,
+  candleTrend,
+  rsi,
+  relativeVolume,
+  emaStructure,
+  macdMomentum,
+  vwapPosition,
+  supportResistance,
+  volumeConfirmation,
+  priceExtension,
+  multiTimeframeTrend,
+  marketContext,
+  marketBreadth,
+  newsSentiment,
+}

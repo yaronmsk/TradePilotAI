@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/evidence_definition.dart';
 import '../models/evidence_family.dart';
+import 'metric_explainability_content.dart';
 
 class EvidenceInfoDialog extends StatelessWidget {
   const EvidenceInfoDialog({super.key, required this.definition});
@@ -20,6 +21,8 @@ class EvidenceInfoDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final explainability = definition.explainability;
+
     return AlertDialog(
       title: Text(definition.name),
       content: SingleChildScrollView(
@@ -32,26 +35,10 @@ class EvidenceInfoDialog extends StatelessWidget {
               style: Theme.of(context).textTheme.labelLarge,
             ),
             const SizedBox(height: 16),
-            const Text(
-              'What is it?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(definition.description),
-            const SizedBox(height: 16),
-            const Text(
-              'Why does it matter?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(definition.whyItMatters),
-            const SizedBox(height: 16),
-            const Text(
-              'How is it calculated?',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 6),
-            Text(definition.calculation),
+            if (explainability != null)
+              MetricExplainabilityContent(explainability: explainability)
+            else
+              _LegacyEvidenceExplanation(definition: definition),
           ],
         ),
       ),
@@ -60,6 +47,42 @@ class EvidenceInfoDialog extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
           child: const Text('Close'),
         ),
+      ],
+    );
+  }
+}
+
+class _LegacyEvidenceExplanation extends StatelessWidget {
+  const _LegacyEvidenceExplanation({required this.definition});
+
+  final EvidenceDefinition definition;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          'What is it?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(definition.description),
+        const SizedBox(height: 16),
+        const Text(
+          'Why does it matter?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(definition.whyItMatters),
+        const SizedBox(height: 16),
+        const Text(
+          'How is it calculated?',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 6),
+        Text(definition.calculation),
       ],
     );
   }

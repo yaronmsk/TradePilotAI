@@ -6,8 +6,11 @@ import '../context/market_context_profile.dart';
 import '../context/multi_timeframe_profile.dart';
 import '../context/recommendation_analysis_context.dart';
 import '../context/strategy_timeframe_plan.dart';
+import '../models/analysis_context_explainability_catalog.dart';
+import '../models/analysis_context_metric.dart';
 import '../models/evidence_result.dart';
 import '../models/strategy_summary.dart';
+import 'metric_explainability_dialog.dart';
 
 class AnalysisContextCard extends StatelessWidget {
   const AnalysisContextCard({
@@ -71,7 +74,8 @@ class AnalysisContextCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
           _ContextRow(
-            label: 'Timeframe Alignment',
+            metric: AnalysisContextMetric.timeframeAlignment,
+            label: AnalysisContextMetric.timeframeAlignment.label,
             value: _alignmentLabel(multiTimeframe.alignment),
             detail: multiTimeframe.hasSufficientData
                 ? _timeframeAlignmentDetail(multiTimeframe)
@@ -79,7 +83,8 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
-            label: 'Market Environment',
+            metric: AnalysisContextMetric.marketEnvironment,
+            label: AnalysisContextMetric.marketEnvironment.label,
             value: _marketEnvironmentLabel(market.backdrop),
             detail: market.hasSufficientData
                 ? _marketEnvironmentDetail(market)
@@ -87,7 +92,8 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
-            label: 'Market Breadth',
+            metric: AnalysisContextMetric.marketBreadth,
+            label: AnalysisContextMetric.marketBreadth.label,
             value: _breadthLabel(external.marketBreadth.state),
             detail: external.marketBreadth.isAvailable
                 ? '${external.marketBreadth.advancingPercent.toStringAsFixed(0)}% advancing • '
@@ -96,7 +102,8 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
-            label: 'Relative Strength',
+            metric: AnalysisContextMetric.relativeStrength,
+            label: AnalysisContextMetric.relativeStrength.label,
             value: _relativeStrengthLabel(market.relativeStrength),
             detail: market.hasSufficientData
                 ? _relativeStrengthDetail(market)
@@ -104,7 +111,8 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
-            label: 'Event Risk',
+            metric: AnalysisContextMetric.eventRisk,
+            label: AnalysisContextMetric.eventRisk.label,
             value: _eventRiskLabel(external.eventRisk.level),
             detail: external.eventRisk.isAvailable
                 ? _eventRiskDetail(external.eventRisk)
@@ -112,7 +120,8 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
-            label: 'News Sentiment',
+            metric: AnalysisContextMetric.newsSentiment,
+            label: AnalysisContextMetric.newsSentiment.label,
             value: _newsLabel(external.newsSentiment.state),
             detail: external.newsSentiment.isAvailable
                 ? '${external.newsSentiment.articleCount} recent items • '
@@ -424,10 +433,13 @@ class _AnalysisTimeframeSelector extends StatelessWidget {
         Row(
           children: [
             Text(
-              'Primary Analysis Interval',
+              AnalysisContextMetric.primaryAnalysisInterval.label,
               style: Theme.of(
                 context,
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
+            ),
+            _MetricInfoButton(
+              metric: AnalysisContextMetric.primaryAnalysisInterval,
             ),
             if (isReloading) ...[
               const SizedBox(width: 10),
@@ -469,13 +481,41 @@ class _AnalysisTimeframeSelector extends StatelessWidget {
   }
 }
 
+class _MetricInfoButton extends StatelessWidget {
+  const _MetricInfoButton({required this.metric});
+
+  final AnalysisContextMetric metric;
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      tooltip: 'About ${metric.label}',
+      visualDensity: VisualDensity.compact,
+      padding: EdgeInsets.zero,
+      constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+      icon: const Icon(Icons.info_outline, size: 18),
+      onPressed: () {
+        MetricExplainabilityDialog.show(
+          context,
+          title: metric.label,
+          explainability: AnalysisContextExplainabilityCatalog.forMetric(
+            metric,
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _ContextRow extends StatelessWidget {
   const _ContextRow({
+    required this.metric,
     required this.label,
     required this.value,
     required this.detail,
   });
 
+  final AnalysisContextMetric metric;
   final String label;
   final String value;
   final String detail;
@@ -488,12 +528,20 @@ class _ContextRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 145,
-            child: Text(
-              label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+            width: 170,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                _MetricInfoButton(metric: metric),
+              ],
             ),
           ),
           const SizedBox(width: 12),
