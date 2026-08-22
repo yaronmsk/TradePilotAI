@@ -57,11 +57,7 @@ Do not initiate a major visual redesign unless the project documentation explici
 
 ## Current Release Checkpoint
 
-## v0.10.0 — Market, Event & News Context
-
-**Status:** Completed  
-**Date:** 2026-08-22  
-**Validation:** 241 tests passed; Flutter analyze clean; documented visual acceptance checks passed.
+**v0.10.0 — Market, Event & News Context**
 
 Previous release:
 
@@ -74,7 +70,7 @@ v0.10.0 validation completed successfully on 2026-08-22:
 * `flutter test`: 241 tests passed.
 * All six documented visual acceptance checks passed.
 
-The release should be committed, pushed and tagged before new feature development begins.
+The release has been committed and pushed. Confirm the `v0.10.0` release tag before beginning the next patch.
 
 ---
 
@@ -421,7 +417,28 @@ First ensure the validated v0.10.0 work has been:
 * tagged `v0.10.0`,
 * and the tag pushed.
 
-After that, begin the next documented brain-development phase.
+After that, do **not** jump directly to broader v0.11 feature development.
+
+The immediate next patch is:
+
+**v0.10.1 — Explainability & Bidirectional Audit**
+
+Required scope:
+
+1. Individual explainability for every Trader Analysis Context metric: Primary Analysis Interval, Timeframe Alignment, Market Environment, Market Breadth, Relative Strength, Event Risk and News Sentiment.
+2. A reusable explainability contract for evidence, context and historical metrics instead of hardcoded widget-only explanations.
+3. Explainability fields should cover, where applicable: What it is, Calculation, Why it matters, Supportive interpretation, Opposing interpretation, Recommendation impact and Limitations.
+4. Metrics must be classified by semantic role:
+
+   * Directional/evaluative metrics must support supportive, opposing and neutral/unknown outcomes where mathematically meaningful.
+   * Confidence/risk-only metrics must define their bounded impact, cannot create directional Buy/Sell evidence and must not manufacture artificial positive bonuses.
+   * Context/configuration metrics describe analysis state without artificial directional interpretation.
+5. Historical Setup Validation explanations must explicitly describe supportive and opposing outcomes and how they map into the bounded confidence adjustment.
+6. Automated architecture tests must enforce explainability completeness.
+7. Automated behavioral tests must enforce bidirectional behavior for directional metrics and the non-directional constraints of confidence/risk-only metrics.
+8. Existing evidence-family de-duplication, direction/confidence separation, historical ±8 confidence cap and Event Risk confidence-only behavior must remain intact.
+
+This patch exists to turn the permanent explainability rule from documentation into an enforceable architecture invariant before Swing, Investor, fundamentals or other major brain expansion increases the number of user-facing metrics.
 
 Before choosing or implementing that phase, review:
 
@@ -430,7 +447,7 @@ Before choosing or implementing that phase, review:
 * `BRAIN_ARCHITECTURE.md`
 * `PROJECT_STATE.md`
 
-The next feature should be selected from the documented roadmap rather than invented from conversation context.
+After v0.10.1 is completed and released, the next significant feature should be selected from the documented roadmap rather than invented from conversation context.
 
 ---
 

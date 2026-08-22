@@ -10,7 +10,7 @@
 
 ## 1. Current Release Baseline
 
-Current release being finalized:
+Current completed release baseline:
 
 **v0.10.0 — Market, Event & News Context**
 
@@ -25,7 +25,13 @@ v0.10.0 validation completed successfully on 2026-08-22:
 * Flutter test: 241 tests passed.
 * All documented v0.10 visual acceptance checks passed.
 
-The v0.10.0 release may be considered complete after its release commit, GitHub synchronization and `v0.10.0` Git tag are created.
+The v0.10.0 release has been committed and synchronized with GitHub. Its release tag is the final release-checkpoint action.
+
+The immediate next patch is:
+
+**v0.10.1 — Explainability & Bidirectional Audit**
+
+This patch must be completed before beginning broader v0.11 feature development.
 
 ---
 
@@ -436,16 +442,23 @@ Validated 2026-08-22 with:
 
 ## 14. Immediate Project Action
 
-Complete the formal v0.10.0 release checkpoint:
+After the formal v0.10.0 tag is confirmed, the next development patch is:
 
-1. Update project-state documentation.
-2. Create `PROJECT_HANDOFF.md`.
-3. Update/finalize changelog status.
-4. Stage v0.10 production, test and documentation files.
-5. Commit v0.10.0.
-6. Push `develop`.
-7. Create annotated `v0.10.0` tag.
-8. Push the tag.
-9. Begin the next development phase in a fresh ChatGPT conversation using repository documentation as the source of truth.
+**v0.10.1 — Explainability & Bidirectional Audit**
 
-No new feature should be introduced between validation and the v0.10.0 release checkpoint.
+Scope:
+
+1. Give every Trader Analysis Context metric its own explainability path, including Primary Analysis Interval, Timeframe Alignment, Market Environment, Market Breadth, Relative Strength, Event Risk and News Sentiment.
+2. Introduce a reusable explainability contract for evidence, context and historical metrics rather than relying on widget-specific explanatory text.
+3. Where applicable, explanations must cover: What it is, Calculation, Why it matters, Supportive interpretation, Opposing interpretation, Recommendation impact and Limitations.
+4. Classify metrics by semantic role so the architecture does not manufacture artificial symmetry:
+
+   * Directional/evaluative metrics support supportive, opposing and neutral/unknown outcomes where mathematically meaningful.
+   * Confidence/risk-only metrics explicitly define their bounded impact and cannot create directional Buy/Sell evidence or artificial positive bonuses.
+   * Context/configuration metrics describe analysis state and do not manufacture directional influence.
+5. Expand Historical Setup Validation explainability so supportive and opposing historical results and their bounded confidence effects are explicit.
+6. Add automated architecture tests enforcing explainability completeness for registered providers/metrics.
+7. Add behavioral invariant tests for bidirectional directional metrics and confidence/risk-only metrics.
+8. Preserve evidence-family de-duplication, direction/confidence separation and existing confidence caps.
+
+Do not begin broader v0.11 feature development until this architectural patch is completed and released as `v0.10.1`.
