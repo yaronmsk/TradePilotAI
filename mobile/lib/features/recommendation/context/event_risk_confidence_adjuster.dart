@@ -3,7 +3,12 @@ import '../models/scoring_result.dart';
 import 'external_context_profile.dart';
 
 class EventRiskConfidenceAdjuster {
-  const EventRiskConfidenceAdjuster({this.maximumPenaltyPoints = 12});
+  static const double maximumAllowedPenaltyPoints = 12;
+
+  const EventRiskConfidenceAdjuster({
+    this.maximumPenaltyPoints = maximumAllowedPenaltyPoints,
+  }) : assert(maximumPenaltyPoints >= 0),
+       assert(maximumPenaltyPoints <= maximumAllowedPenaltyPoints);
 
   final double maximumPenaltyPoints;
 
@@ -18,6 +23,7 @@ class EventRiskConfidenceAdjuster {
     final penalty = eventRisk.confidencePenaltyPoints
         .clamp(0.0, maximumPenaltyPoints)
         .toDouble();
+
     final before = scoringResult.confidence;
     final after = (before - penalty).clamp(0.0, 100.0).toDouble();
     final factor = before <= 0 ? 1.0 : after / before;
