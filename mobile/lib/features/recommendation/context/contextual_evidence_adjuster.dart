@@ -193,6 +193,8 @@ class ContextualEvidenceAdjuster {
 
       case EvidenceKind.multiTimeframeTrend:
       case EvidenceKind.marketContext:
+      case EvidenceKind.marketBreadth:
+      case EvidenceKind.newsSentiment:
       case EvidenceKind.generic:
         break;
     }

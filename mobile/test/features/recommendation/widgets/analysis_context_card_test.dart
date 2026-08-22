@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/features/recommendation/context/external_context_profile.dart';
 import 'package:mobile/features/recommendation/context/market_context_profile.dart';
 import 'package:mobile/features/recommendation/context/market_context_target.dart';
 import 'package:mobile/features/recommendation/context/multi_timeframe_profile.dart';
@@ -62,6 +63,38 @@ void main() {
       marketCompositeReturnPercent: 3,
       sectorCompositeReturnPercent: 5,
     ),
+    externalContextProfile: const ExternalContextProfile(
+      marketBreadth: MarketBreadthProfile(
+        state: MarketBreadthState.healthy,
+        advancingPercent: 61,
+        above50DayPercent: 64,
+        sectorParticipationPercent: 58,
+        volatilityPercentile: 42,
+        directionScore: 32,
+        reliability: 0.9,
+        summary: 'Broad participation is healthy.',
+      ),
+      eventRisk: EventRiskProfile(
+        level: EventRiskLevel.high,
+        earningsHoursAway: 28,
+        macroEventHoursAway: 36,
+        macroEventLabel: 'High-impact macro event',
+        confidencePenaltyPoints: 6,
+        summary: 'Event risk is elevated.',
+      ),
+      newsSentiment: NewsSentimentProfile(
+        state: NewsSentimentState.positive,
+        sentimentScore: 45,
+        articleCount: 9,
+        sourceCount: 5,
+        freshnessHours: 2.5,
+        materiality: 0.8,
+        reliability: 0.88,
+        summary: 'Recent news is positive.',
+      ),
+      isSynthetic: true,
+      sourceLabel: 'Development simulation',
+    ),
   );
 
   Widget buildCard({ValueChanged<String>? onSelected}) {
@@ -98,8 +131,14 @@ void main() {
     expect(find.text('Market Environment'), findsOneWidget);
     expect(find.text('Market Backdrop'), findsNothing);
     expect(find.text('Supportive'), findsOneWidget);
+    expect(find.text('Market Breadth'), findsOneWidget);
+    expect(find.text('Healthy'), findsOneWidget);
     expect(find.text('Relative Strength'), findsOneWidget);
     expect(find.text('Outperforming'), findsOneWidget);
+    expect(find.text('Event Risk'), findsOneWidget);
+    expect(find.text('High'), findsOneWidget);
+    expect(find.text('News Sentiment'), findsOneWidget);
+    expect(find.text('Positive'), findsOneWidget);
     expect(
       find.textContaining('Primary trend (5-minute candles): Bullish'),
       findsOneWidget,
@@ -152,7 +191,15 @@ void main() {
     );
     expect(find.textContaining('Market Environment evaluates'), findsOneWidget);
     expect(
-      find.textContaining('do not override the complete evidence set'),
+      find.textContaining('Market Breadth asks whether many stocks'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('Event Risk covers scheduled catalysts'),
+      findsOneWidget,
+    );
+    expect(
+      find.textContaining('News Sentiment is directional evidence'),
       findsOneWidget,
     );
   });

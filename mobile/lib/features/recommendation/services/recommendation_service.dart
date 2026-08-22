@@ -1,6 +1,7 @@
 import '../../market/models/market_candle.dart';
 import '../../market/models/market_snapshot.dart';
 import '../context/contextual_evidence_adjuster.dart';
+import '../context/event_risk_confidence_adjuster.dart';
 import '../context/recommendation_analysis_context.dart';
 import '../context/stock_behavior_profile.dart';
 import '../context/stock_behavior_profile_service.dart';
@@ -12,8 +13,10 @@ import '../models/evidence_report.dart';
 import '../models/evidence_result.dart';
 import '../models/recommendation.dart';
 import '../providers/evidence_provider.dart';
+import '../providers/market_breadth_evidence_provider.dart';
 import '../providers/market_context_evidence_provider.dart';
 import '../providers/multi_timeframe_trend_evidence_provider.dart';
+import '../providers/news_sentiment_evidence_provider.dart';
 
 class RecommendationService {
   const RecommendationService({
@@ -23,6 +26,9 @@ class RecommendationService {
     this.multiTimeframeTrendEvidenceProvider =
         const MultiTimeframeTrendEvidenceProvider(),
     this.marketContextEvidenceProvider = const MarketContextEvidenceProvider(),
+    this.marketBreadthEvidenceProvider = const MarketBreadthEvidenceProvider(),
+    this.newsSentimentEvidenceProvider = const NewsSentimentEvidenceProvider(),
+    this.eventRiskConfidenceAdjuster = const EventRiskConfidenceAdjuster(),
     this.consensusEngine = const ConsensusEngine(),
     this.recommendationEngine = const RecommendationEngine(),
     this.historicalConfidenceAdjuster = const HistoricalConfidenceAdjuster(),
@@ -33,6 +39,9 @@ class RecommendationService {
   final ContextualEvidenceAdjuster contextualEvidenceAdjuster;
   final MultiTimeframeTrendEvidenceProvider multiTimeframeTrendEvidenceProvider;
   final MarketContextEvidenceProvider marketContextEvidenceProvider;
+  final MarketBreadthEvidenceProvider marketBreadthEvidenceProvider;
+  final NewsSentimentEvidenceProvider newsSentimentEvidenceProvider;
+  final EventRiskConfidenceAdjuster eventRiskConfidenceAdjuster;
   final ConsensusEngine consensusEngine;
   final RecommendationEngine recommendationEngine;
   final HistoricalConfidenceAdjuster historicalConfidenceAdjuster;
@@ -73,6 +82,12 @@ class RecommendationService {
       ),
       marketContextEvidenceProvider.evaluate(
         analysisContext.marketContextProfile,
+      ),
+      marketBreadthEvidenceProvider.evaluate(
+        analysisContext.externalContextProfile.marketBreadth,
+      ),
+      newsSentimentEvidenceProvider.evaluate(
+        analysisContext.externalContextProfile.newsSentiment,
       ),
     ]);
   }
@@ -124,6 +139,12 @@ class RecommendationService {
             marketContextEvidenceProvider.evaluate(
               analysisContext.marketContextProfile,
             ),
+            marketBreadthEvidenceProvider.evaluate(
+              analysisContext.externalContextProfile.marketBreadth,
+            ),
+            newsSentimentEvidenceProvider.evaluate(
+              analysisContext.externalContextProfile.newsSentiment,
+            ),
           ];
 
     final evidenceResults = <EvidenceResult>[
@@ -137,9 +158,15 @@ class RecommendationService {
     );
 
     final consensusResult = consensusEngine.calculate(evidenceReport);
+    final contextAdjustedResult = analysisContext == null
+        ? consensusResult
+        : eventRiskConfidenceAdjuster.apply(
+            scoringResult: consensusResult,
+            eventRisk: analysisContext.externalContextProfile.eventRisk,
+          );
 
     return recommendationEngine.create(
-      scoringResult: consensusResult,
+      scoringResult: contextAdjustedResult,
       evidenceReport: evidenceReport,
       timeframe: snapshot.timeframe,
       candleCount: snapshot.candleCount,

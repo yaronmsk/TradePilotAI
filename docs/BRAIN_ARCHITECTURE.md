@@ -328,3 +328,14 @@ Historical validation uses unequal outcome weights and a separate reliability ga
 - Favorable vs adverse excursion quality: 20%
 
 Effective sample depth and match quality do not receive outcome weights. They are reliability gates applied after the weighted historical quality score; the weaker reliability dimension limits the historical confidence impact. Historical validation remains bounded to ±8 confidence points and cannot directly alter recommendation direction.
+
+
+## v0.10 external-context architecture
+
+`RecommendationContextService` now loads a replaceable `ExternalContextProvider` alongside multi-timeframe stock/benchmark data. The current mock provider returns Market Breadth, Event Risk and News Sentiment profiles.
+
+- Market Breadth -> `MarketBreadthEvidenceProvider` -> `EvidenceFamily.marketContext`.
+- News Sentiment -> `NewsSentimentEvidenceProvider` -> `EvidenceFamily.sentiment`.
+- Event Risk -> `EventRiskConfidenceAdjuster` -> confidence modifier only, capped at 12 points.
+
+This role separation is intentional: breadth is related to existing market context, news can carry independent direction when data quality is sufficient, and scheduled-event proximity represents uncertainty/risk rather than direction.

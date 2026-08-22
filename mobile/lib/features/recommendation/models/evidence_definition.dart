@@ -13,6 +13,8 @@ enum EvidenceKind {
   priceExtension,
   multiTimeframeTrend,
   marketContext,
+  marketBreadth,
+  newsSentiment,
 }
 
 class EvidenceDefinition {

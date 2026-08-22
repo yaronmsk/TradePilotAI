@@ -22,7 +22,7 @@ void main() {
   );
 
   test(
-    'adds timeframe and market context without double-counting trend family',
+    'adds breadth and news while keeping market context family capped',
     () async {
       final snapshot = await marketService.loadSnapshot(
         symbol: 'NVDA',
@@ -36,39 +36,63 @@ void main() {
         analysisContext: context,
       );
 
-      expect(recommendation.evidenceReport.results.length, 7);
-      expect(recommendation.evidenceReport.expectedProviderCount, 7);
-
-      final trendEvidence = recommendation.evidenceReport.results
-          .where((result) => result.definition.family == EvidenceFamily.trend)
+      final marketResults = recommendation.evidenceReport.results
+          .where(
+            (result) =>
+                result.definition.family == EvidenceFamily.marketContext,
+          )
+          .toList();
+      final sentimentResults = recommendation.evidenceReport.results
+          .where(
+            (result) => result.definition.family == EvidenceFamily.sentiment,
+          )
           .toList();
 
-      expect(trendEvidence.length, 2);
+      expect(marketResults, hasLength(2));
+      expect(sentimentResults, hasLength(1));
       expect(
-        recommendation.consensus.familySummaries
-            .where((summary) => summary.family == EvidenceFamily.trend)
-            .length,
-        1,
-      );
-      expect(
-        recommendation.consensus.familySummaries.any(
+        recommendation.consensus.familySummaries.where(
           (summary) => summary.family == EvidenceFamily.marketContext,
         ),
-        isTrue,
-      );
-
-      expect(
-        recommendation.consensus.familySummaries
-            .where((summary) => summary.family == EvidenceFamily.marketContext)
-            .length,
-        1,
+        hasLength(1),
       );
       expect(
-        recommendation.consensus.familySummaries.any(
+        recommendation.consensus.familySummaries.where(
           (summary) => summary.family == EvidenceFamily.sentiment,
         ),
-        isTrue,
+        hasLength(1),
       );
     },
   );
+
+  test('event risk changes confidence but not direction', () async {
+    final snapshot = await marketService.loadSnapshot(
+      symbol: 'NVDA',
+      timeframe: '5m',
+      candleCount: 48,
+    );
+    final context = await contextService.loadTraderContext(snapshot);
+
+    final withContext = recommendationService.analyze(
+      snapshot,
+      analysisContext: context,
+    );
+
+    final evidenceOnly = recommendationService.analyze(snapshot);
+
+    expect(
+      withContext.consensus.confidenceModifiers.any(
+        (item) => item.label == 'Upcoming event risk',
+      ),
+      isTrue,
+    );
+    expect(
+      withContext.confidenceScore,
+      lessThan(withContext.consensus.evidenceConfidence),
+    );
+    expect(
+      evidenceOnly.consensus.confidenceModifiers.last.label,
+      'Data reliability',
+    );
+  });
 }

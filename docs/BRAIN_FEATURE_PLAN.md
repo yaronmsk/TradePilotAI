@@ -181,7 +181,7 @@ ADX/Bollinger-style additions remain deferred until historical validation demons
 Current setup fingerprint, similarity-weighted historical analogs, matched outcomes versus a control baseline, effective sample size, excursion statistics and a bounded confidence-only overlay. Development starts with a synthetic provider behind a replaceable interface; real performance claims are forbidden until real historical data is connected and validated out of sample.
 
 ### v0.10 — Market / Sector / Event Context
-Market breadth/regime, volatility/risk context, earnings/events and news/sentiment.
+Market breadth participation, scheduled earnings/macro event risk and reliability-weighted news sentiment. Market Breadth remains inside the Market Context family; Event Risk is a confidence-only overlay; News Sentiment is a capped Sentiment family. Development uses a synthetic provider until licensed live data is connected.
 
 ### v1.0 — Swing + Investor Engines
 Separate strategy-specific data and logic, all visible in the Strategy Summary.

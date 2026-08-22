@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../shared/widgets/dashboard_card.dart';
+import '../context/external_context_profile.dart';
 import '../context/market_context_profile.dart';
 import '../context/multi_timeframe_profile.dart';
 import '../context/recommendation_analysis_context.dart';
@@ -30,6 +31,7 @@ class AnalysisContextCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final multiTimeframe = analysisContext.multiTimeframeProfile;
     final market = analysisContext.marketContextProfile;
+    final external = analysisContext.externalContextProfile;
 
     return DashboardCard(
       title: '${strategy.title} Analysis Context',
@@ -40,7 +42,7 @@ class AnalysisContextCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Text(
-                  'Choose the primary analysis interval, then see how it fits the broader trend and market environment.',
+                  'Choose the primary analysis interval, then see the broader trend, market participation, event risk and information context around the setup.',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ),
@@ -85,11 +87,38 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
+            label: 'Market Breadth',
+            value: _breadthLabel(external.marketBreadth.state),
+            detail: external.marketBreadth.isAvailable
+                ? '${external.marketBreadth.advancingPercent.toStringAsFixed(0)}% advancing • '
+                      '${external.marketBreadth.above50DayPercent.toStringAsFixed(0)}% above 50-day reference'
+                : 'Broad market participation unavailable',
+          ),
+          const Divider(),
+          _ContextRow(
             label: 'Relative Strength',
             value: _relativeStrengthLabel(market.relativeStrength),
             detail: market.hasSufficientData
                 ? _relativeStrengthDetail(market)
                 : 'Relative performance unavailable',
+          ),
+          const Divider(),
+          _ContextRow(
+            label: 'Event Risk',
+            value: _eventRiskLabel(external.eventRisk.level),
+            detail: external.eventRisk.isAvailable
+                ? _eventRiskDetail(external.eventRisk)
+                : 'Upcoming earnings/event context unavailable',
+          ),
+          const Divider(),
+          _ContextRow(
+            label: 'News Sentiment',
+            value: _newsLabel(external.newsSentiment.state),
+            detail: external.newsSentiment.isAvailable
+                ? '${external.newsSentiment.articleCount} recent items • '
+                      '${external.newsSentiment.sourceCount} sources • '
+                      'freshest ~${external.newsSentiment.freshnessHours.toStringAsFixed(1)}h'
+                : 'Recent news context unavailable',
           ),
           if (analysisContext.hasAnyContext) ...[
             const SizedBox(height: 12),
@@ -100,7 +129,14 @@ class AnalysisContextCard extends StatelessWidget {
                 color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(10),
               ),
-              child: Text(_summary(multiTimeframe, market)),
+              child: Text(_summary(multiTimeframe, market, external)),
+            ),
+          ],
+          if (external.isSynthetic) ...[
+            const SizedBox(height: 8),
+            Text(
+              '${external.sourceLabel}: breadth, events and news are synthetic development context. They validate the architecture and UI, not real-world market conditions.',
+              style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
         ],
@@ -123,13 +159,16 @@ class AnalysisContextCard extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const Text('What is Analysis Context?'),
-        content: Text(
-          'The Primary Analysis Interval controls the candles used by the main ${strategy.title} technical evidence. '
-          'For the current setup, $primary drive the primary signal, $confirmation provide confirmation, and $regime provide the broader trend backdrop. '
-          'These are candle intervals, not the expected holding period. '
-          'TradePilot does not count each timeframe as a separate independent vote. '
-          'Market Environment evaluates the broad market and the relevant sector, while Relative Strength separately asks how the stock is performing versus those benchmarks. '
-          'These inputs can strengthen or weaken confidence, but they do not override the complete evidence set by themselves.',
+        content: SingleChildScrollView(
+          child: Text(
+            'The Primary Analysis Interval controls the candles used by the main ${strategy.title} technical evidence. '
+            'For the current setup, $primary drive the primary signal, $confirmation provide confirmation, and $regime provide the broader trend backdrop. '
+            'These are candle intervals, not the expected holding period.\n\n'
+            'Market Environment evaluates the broad market and relevant sector. Market Breadth asks whether many stocks are participating in that move instead of trusting a headline index alone. Relative Strength asks how this stock is performing versus those benchmarks.\n\n'
+            'Event Risk covers scheduled catalysts such as earnings and high-impact macro events. It is a confidence/risk modifier only: event proximity can reduce confidence, but it never creates a Buy or Sell direction by itself.\n\n'
+            'News Sentiment is directional evidence, but TradePilot scales it using source diversity, freshness and materiality so repeated or low-quality headlines cannot dominate the recommendation.\n\n'
+            'Market Breadth remains inside the Market Context evidence group, while News Sentiment has its own capped Sentiment group. This prevents related context signals from being counted as unlimited independent votes.',
+          ),
         ),
         actions: [
           TextButton(
@@ -144,6 +183,7 @@ class AnalysisContextCard extends StatelessWidget {
   String _summary(
     MultiTimeframeProfile multiTimeframe,
     MarketContextProfile market,
+    ExternalContextProfile external,
   ) {
     final parts = <String>[];
 
@@ -178,13 +218,36 @@ class AnalysisContextCard extends StatelessWidget {
       }
 
       if (market.backdrop == MarketBackdrop.challenging) {
-        parts.add(
-          'The current market environment is a headwind rather than a tailwind.',
-        );
+        parts.add('The current market environment is a headwind.');
       } else if (market.backdrop == MarketBackdrop.supportive) {
+        parts.add('The current market environment provides a tailwind.');
+      }
+    }
+
+    if (external.marketBreadth.isAvailable) {
+      if (external.marketBreadth.state == MarketBreadthState.weak ||
+          external.marketBreadth.state == MarketBreadthState.stressed) {
+        parts.add('Market participation is weak, which reduces confirmation.');
+      } else if (external.marketBreadth.state == MarketBreadthState.strong ||
+          external.marketBreadth.state == MarketBreadthState.healthy) {
         parts.add(
-          'The current market environment provides a supportive tailwind.',
+          'Market participation is broad enough to support the backdrop.',
         );
+      }
+    }
+
+    if (external.eventRisk.isAvailable &&
+        external.eventRisk.confidencePenaltyPoints >= 3) {
+      parts.add(
+        'Upcoming scheduled events reduce confidence because gap/volatility risk is elevated.',
+      );
+    }
+
+    if (external.newsSentiment.isAvailable) {
+      if (external.newsSentiment.state == NewsSentimentState.positive) {
+        parts.add('Recent company news is directionally positive.');
+      } else if (external.newsSentiment.state == NewsSentimentState.negative) {
+        parts.add('Recent company news is directionally negative.');
       }
     }
 
@@ -239,61 +302,102 @@ class AnalysisContextCard extends StatelessWidget {
         '${_signed(market.stockVsSectorPercent)} pp';
   }
 
+  String _eventRiskDetail(EventRiskProfile profile) {
+    final parts = <String>[];
+    if (profile.earningsHoursAway != null) {
+      parts.add('earnings in ~${_humanDuration(profile.earningsHoursAway!)}');
+    }
+    if (profile.macroEventHoursAway != null) {
+      parts.add(
+        '${profile.macroEventLabel.toLowerCase()} in ~${_humanDuration(profile.macroEventHoursAway!)}',
+      );
+    }
+    parts.add(
+      '-${profile.confidencePenaltyPoints.toStringAsFixed(1)} confidence pts',
+    );
+    return parts.join(' • ');
+  }
+
+  String _humanDuration(int hours) {
+    if (hours < 24) {
+      return '${hours}h';
+    }
+    final days = hours / 24;
+    return days == days.roundToDouble()
+        ? '${days.toStringAsFixed(0)}d'
+        : '${days.toStringAsFixed(1)}d';
+  }
+
   String _signed(double value) {
     final prefix = value > 0 ? '+' : '';
     return '$prefix${value.toStringAsFixed(1)}';
   }
 
   String _alignmentLabel(TimeframeAlignment alignment) {
-    switch (alignment) {
-      case TimeframeAlignment.aligned:
-        return 'Aligned';
-      case TimeframeAlignment.mixed:
-        return 'Mixed';
-      case TimeframeAlignment.opposed:
-        return 'Opposed';
-      case TimeframeAlignment.unknown:
-        return 'Unavailable';
-    }
+    return switch (alignment) {
+      TimeframeAlignment.aligned => 'Aligned',
+      TimeframeAlignment.mixed => 'Mixed',
+      TimeframeAlignment.opposed => 'Opposed',
+      TimeframeAlignment.unknown => 'Unavailable',
+    };
   }
 
   String _marketEnvironmentLabel(MarketBackdrop backdrop) {
-    switch (backdrop) {
-      case MarketBackdrop.supportive:
-        return 'Supportive';
-      case MarketBackdrop.neutral:
-        return 'Neutral';
-      case MarketBackdrop.challenging:
-        return 'Challenging';
-      case MarketBackdrop.unknown:
-        return 'Unavailable';
-    }
+    return switch (backdrop) {
+      MarketBackdrop.supportive => 'Supportive',
+      MarketBackdrop.neutral => 'Neutral',
+      MarketBackdrop.challenging => 'Challenging',
+      MarketBackdrop.unknown => 'Unavailable',
+    };
+  }
+
+  String _breadthLabel(MarketBreadthState state) {
+    return switch (state) {
+      MarketBreadthState.strong => 'Strong',
+      MarketBreadthState.healthy => 'Healthy',
+      MarketBreadthState.mixed => 'Mixed',
+      MarketBreadthState.weak => 'Weak',
+      MarketBreadthState.stressed => 'Stressed',
+      MarketBreadthState.unavailable => 'Unavailable',
+    };
+  }
+
+  String _eventRiskLabel(EventRiskLevel level) {
+    return switch (level) {
+      EventRiskLevel.low => 'Low',
+      EventRiskLevel.moderate => 'Moderate',
+      EventRiskLevel.high => 'High',
+      EventRiskLevel.critical => 'Critical',
+      EventRiskLevel.unavailable => 'Unavailable',
+    };
+  }
+
+  String _newsLabel(NewsSentimentState state) {
+    return switch (state) {
+      NewsSentimentState.positive => 'Positive',
+      NewsSentimentState.neutral => 'Neutral',
+      NewsSentimentState.negative => 'Negative',
+      NewsSentimentState.mixed => 'Mixed',
+      NewsSentimentState.unavailable => 'Unavailable',
+    };
   }
 
   String _relativeStrengthLabel(RelativeStrengthState state) {
-    switch (state) {
-      case RelativeStrengthState.outperforming:
-        return 'Outperforming';
-      case RelativeStrengthState.inLine:
-        return 'In Line';
-      case RelativeStrengthState.underperforming:
-        return 'Underperforming';
-      case RelativeStrengthState.unknown:
-        return 'Unavailable';
-    }
+    return switch (state) {
+      RelativeStrengthState.outperforming => 'Outperforming',
+      RelativeStrengthState.inLine => 'In Line',
+      RelativeStrengthState.underperforming => 'Underperforming',
+      RelativeStrengthState.unknown => 'Unavailable',
+    };
   }
 
   String _directionLabel(EvidenceDirection direction) {
-    switch (direction) {
-      case EvidenceDirection.bullish:
-        return 'Bullish';
-      case EvidenceDirection.bearish:
-        return 'Bearish';
-      case EvidenceDirection.neutral:
-        return 'Neutral';
-      case EvidenceDirection.unknown:
-        return 'Unknown';
-    }
+    return switch (direction) {
+      EvidenceDirection.bullish => 'Bullish',
+      EvidenceDirection.bearish => 'Bearish',
+      EvidenceDirection.neutral => 'Neutral',
+      EvidenceDirection.unknown => 'Unknown',
+    };
   }
 }
 

@@ -1,0 +1,39 @@
+TradePilot AI v0.10.0 patch manifest
+
+Documentation
+- docs/BRAIN_ARCHITECTURE.md
+- docs/BRAIN_FEATURE_PLAN.md
+- docs/CHANGELOG.md
+- docs/COMPETITOR_RESEARCH_V0_10.md
+- docs/PROJECT_BIBLE.md
+- docs/RELEASE_0_10_APPLY.md
+- docs/RELEASE_0_10_FILE_MANIFEST.txt
+- docs/RELEASE_0_10_MARKET_EVENT_NEWS_CONTEXT.md
+
+Validation
+- tools/validate-release-0.10.sh
+
+Production
+- mobile/lib/features/dashboard/dashboard_page.dart
+- mobile/lib/features/recommendation/context/contextual_evidence_adjuster.dart
+- mobile/lib/features/recommendation/context/event_risk_confidence_adjuster.dart
+- mobile/lib/features/recommendation/context/external_context_profile.dart
+- mobile/lib/features/recommendation/context/external_context_provider.dart
+- mobile/lib/features/recommendation/context/mock_external_context_provider.dart
+- mobile/lib/features/recommendation/context/recommendation_analysis_context.dart
+- mobile/lib/features/recommendation/models/evidence_definition.dart
+- mobile/lib/features/recommendation/providers/market_breadth_evidence_provider.dart
+- mobile/lib/features/recommendation/providers/news_sentiment_evidence_provider.dart
+- mobile/lib/features/recommendation/services/recommendation_context_service.dart
+- mobile/lib/features/recommendation/services/recommendation_service.dart
+- mobile/lib/features/recommendation/widgets/analysis_context_card.dart
+
+Tests
+- mobile/test/features/recommendation/context/event_risk_confidence_adjuster_test.dart
+- mobile/test/features/recommendation/context/mock_external_context_provider_test.dart
+- mobile/test/features/recommendation/providers/market_breadth_evidence_provider_test.dart
+- mobile/test/features/recommendation/providers/news_sentiment_evidence_provider_test.dart
+- mobile/test/features/recommendation/services/external_context_recommendation_integration_test.dart
+- mobile/test/features/recommendation/services/recommendation_context_service_test.dart
+- mobile/test/features/recommendation/services/recommendation_service_context_test.dart
+- mobile/test/features/recommendation/widgets/analysis_context_card_test.dart

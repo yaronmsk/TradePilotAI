@@ -143,8 +143,8 @@ When the brain begins learning from historical effectiveness:
 3. v0.6 — One-year Historical Context / Stock DNA foundation. Done.
 4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Done.
 5. v0.8 — Advanced Trader evidence + selectable Trader primary analysis interval with strategy-specific timeframe policy. Done.
-6. v0.9 — Historical Setup Validation / similar-case confidence overlay. Current.
-7. v0.10 — Broader market regime, earnings/events and news/sentiment.
+6. v0.9 — Context-matched Historical Setup Validation / similar-case confidence overlay. Done.
+7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Current.
 8. v1.0 — Swing and Investor brains.
 9. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -195,3 +195,8 @@ The v0.9 mock provider is explicitly synthetic development data. It validates ar
 ## Historical Validation Scoring Principle
 
 TradePilot AI must not treat all historical measurements as equally informative. Historical setup validation prioritizes the difference versus the context-matched same-stock baseline, then uses directional follow-through, normalized outcome magnitude, and excursion quality as supporting dimensions. Statistical sample depth and match quality are reliability gates rather than additional votes. The UI must expose the configured historical weights and reliability factors so the confidence adjustment is auditable.
+
+
+## Market, Event & News Context rule
+
+Market Breadth belongs to the existing Market Context evidence family so index/sector trend and breadth cannot manufacture multiple independent market votes. News Sentiment is a separate Sentiment family but is reliability-gated by source diversity, freshness and materiality. Scheduled Event Risk is not directional evidence: earnings or high-impact macro proximity may reduce confidence within a bounded penalty but cannot create Buy/Sell direction by itself. Synthetic development context must be labeled and must never be presented as real current market/news/calendar data.

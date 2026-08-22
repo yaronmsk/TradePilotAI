@@ -1,13 +1,18 @@
 import '../../market/models/market_snapshot.dart';
 import '../../market/services/market_service.dart';
+import '../context/external_context_profile.dart';
+import '../context/external_context_provider.dart';
 import '../context/market_context_profile.dart';
+import '../context/market_context_target.dart';
 import '../context/market_context_profile_service.dart';
+import '../context/mock_external_context_provider.dart';
 import '../context/mock_security_context_resolver.dart';
 import '../context/multi_timeframe_profile.dart';
 import '../context/multi_timeframe_profile_service.dart';
 import '../context/recommendation_analysis_context.dart';
 import '../context/security_context_resolver.dart';
 import '../context/strategy_timeframe_plan.dart';
+import '../models/strategy_summary.dart';
 
 class RecommendationContextService {
   const RecommendationContextService({
@@ -15,25 +20,39 @@ class RecommendationContextService {
     this.securityContextResolver = const MockSecurityContextResolver(),
     this.multiTimeframeProfileService = const MultiTimeframeProfileService(),
     this.marketContextProfileService = const MarketContextProfileService(),
+    this.externalContextProvider = const MockExternalContextProvider(),
   });
 
   final MarketService marketService;
   final SecurityContextResolver securityContextResolver;
   final MultiTimeframeProfileService multiTimeframeProfileService;
   final MarketContextProfileService marketContextProfileService;
+  final ExternalContextProvider externalContextProvider;
 
   Future<RecommendationAnalysisContext> loadTraderContext(
     MarketSnapshot primarySnapshot, {
     StrategyTimeframePlan plan = StrategyTimeframePlan.trader,
   }) {
-    return loadContext(primarySnapshot, plan: plan);
+    return loadContext(
+      primarySnapshot,
+      plan: plan,
+      strategy: StrategyType.trader,
+    );
   }
 
   Future<RecommendationAnalysisContext> loadContext(
     MarketSnapshot primarySnapshot, {
     required StrategyTimeframePlan plan,
+    required StrategyType strategy,
   }) async {
     final target = securityContextResolver.resolve(primarySnapshot.symbol);
+
+    final externalContextFuture = _safeLoadExternalContext(
+      symbol: primarySnapshot.symbol,
+      strategy: strategy,
+      primaryTimeframe: plan.primaryTimeframe,
+      target: target,
+    );
 
     final futures = <Future<MarketSnapshot?>>[
       _safeLoad(
@@ -69,6 +88,7 @@ class RecommendationContextService {
     ];
 
     final loaded = await Future.wait(futures);
+    final externalContext = await externalContextFuture;
     final stockConfirmation = loaded[0];
     final stockRegime = loaded[1];
     final marketConfirmation = loaded[2];
@@ -107,6 +127,7 @@ class RecommendationContextService {
     return RecommendationAnalysisContext(
       multiTimeframeProfile: multiTimeframeProfile,
       marketContextProfile: marketContextProfile,
+      externalContextProfile: externalContext,
     );
   }
 
@@ -123,6 +144,24 @@ class RecommendationContextService {
       );
     } catch (_) {
       return null;
+    }
+  }
+
+  Future<ExternalContextProfile> _safeLoadExternalContext({
+    required String symbol,
+    required StrategyType strategy,
+    required String primaryTimeframe,
+    required MarketContextTarget target,
+  }) async {
+    try {
+      return await externalContextProvider.load(
+        symbol: symbol,
+        strategy: strategy,
+        primaryTimeframe: primaryTimeframe,
+        target: target,
+      );
+    } catch (_) {
+      return const ExternalContextProfile.unavailable();
     }
   }
 }

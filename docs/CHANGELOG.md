@@ -24,6 +24,14 @@ Related Documents:
 
 ---
 
+## v0.10.0 — Market, Event & News Context
+
+- Added Market Breadth as a de-duplicated Market Context provider.
+- Added reliability-weighted News Sentiment as a separate Sentiment family.
+- Added scheduled earnings/macro Event Risk as a confidence-only modifier capped at 12 points.
+- Expanded Trader Analysis Context with breadth, event and news rows plus explainability.
+- Added replaceable external-context provider architecture with explicit synthetic-development labeling.
+
 # Purpose
 
 This document records all significant changes made throughout the lifecycle of the TradePilot AI project.

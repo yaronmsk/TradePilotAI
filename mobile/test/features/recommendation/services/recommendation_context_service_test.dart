@@ -26,6 +26,9 @@ void main() {
       context.marketContextProfile.relativeStrength,
       RelativeStrengthState.outperforming,
     );
+    expect(context.externalContextProfile.marketBreadth.isAvailable, isTrue);
+    expect(context.externalContextProfile.eventRisk.isAvailable, isTrue);
+    expect(context.externalContextProfile.newsSentiment.isAvailable, isTrue);
   });
 
   test('captures mixed Trader timeframe context for PLTR', () async {
