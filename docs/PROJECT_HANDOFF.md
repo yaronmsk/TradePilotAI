@@ -1,9 +1,9 @@
 # TradePilot AI — Project Handoff
 
 **Document:** Project Continuation / Chat Handoff
-**Version:** 1.0
-**Checkpoint:** v0.10.0
-**Date:** 2026-08-22
+**Version:** 1.1
+**Checkpoint:** v0.10.1
+**Date:** 2026-08-23
 **Primary Branch:** `develop`
 
 ---
@@ -57,20 +57,53 @@ Do not initiate a major visual redesign unless the project documentation explici
 
 ## Current Release Checkpoint
 
-**v0.10.0 — Market, Event & News Context**
+**v0.10.1 — Explainability & Bidirectional Audit**
 
 Previous release:
 
-**v0.9.0 — Historical Setup Validation**
+**v0.10.0 — Market, Event & News Context**
 
-v0.10.0 validation completed successfully on 2026-08-22:
+v0.10.1 implementation validation completed successfully on 2026-08-23:
 
-* `dart format`: 185 files, 0 changes.
 * `flutter analyze`: no issues.
-* `flutter test`: 241 tests passed.
-* All six documented visual acceptance checks passed.
+* `flutter test`: 263 tests passed.
+* Provider regression audit: 47 tests passed.
+* All six documented v0.10.1 visual acceptance checks passed.
+* Final implementation checkpoint before release documentation: `15c352c`.
 
-The release has been committed and pushed. Confirm the `v0.10.0` release tag before beginning the next patch.
+Implementation checkpoints:
+
+* `0b5f064` — reusable explainability contracts.
+* `00199af` — Historical Setup Validation explainability and confidence-bound enforcement.
+* `15c352c` — explainability invariant enforcement.
+
+The implementation is complete and pushed to `origin/develop`.
+
+The final documentation commit and `v0.10.1` release tag are the remaining release-checkpoint actions.
+
+---
+
+## v0.10.1 Scope
+
+v0.10.1 converts TradePilot AI's permanent explainability requirements into reusable and automatically tested architecture.
+
+Implemented:
+
+* Reusable `MetricExplainability` contract.
+* Explicit semantic roles:
+  * Directional/evaluative.
+  * Confidence/risk-only.
+  * Context/configuration.
+* Central explainability catalog for every production `EvidenceKind`.
+* Individual explainability paths for all seven Trader Analysis Context metrics.
+* Shared explainability rendering rather than widget-specific explanation architecture.
+* Historical Setup Validation supportive/opposing explainability.
+* Historical Setup Validation hard-bounded to ±8 final-confidence points.
+* Event Risk hard-bounded to a maximum 12-point confidence penalty.
+* Event Risk prohibited from producing positive confidence bonuses or directional evidence.
+* Automated explainability-completeness and semantic-role tests.
+* Provider BUY/SELL and bidirectional regression audit.
+* Existing evidence-family de-duplication and direction/confidence attribution preserved.
 
 ---
 
@@ -234,11 +267,42 @@ Every user-facing metric, evidence item, context value, historical statistic and
 * Risk impact.
 * Important limitations.
 
-Every directional/evaluative input should represent both supportive and opposing outcomes wherever logically meaningful.
+Every directional/evaluative input must represent both supportive and opposing outcomes wherever logically meaningful.
 
 Direction influence must not be confused with confidence contribution.
 
 Provider attribution must reconcile with evidence-family aggregation.
+
+v0.10.1 makes explainability a domain-level contract rather than a collection of widget-specific strings.
+
+Semantic roles are permanent architecture:
+
+### Directional / evaluative
+
+May influence directional interpretation.
+
+Supportive and opposing interpretations are required where mathematically meaningful.
+
+### Confidence / risk only
+
+May alter confidence or risk within an explicit bound but cannot create Buy/Sell direction.
+
+Current permanent bounds:
+
+* Event Risk — maximum 12-point confidence penalty and no positive confidence bonus.
+* Historical Setup Validation — maximum ±8-point final-confidence adjustment.
+
+Neither may modify evidence-derived direction.
+
+Historical Setup Validation also preserves evidence-derived confidence separately from its final-confidence modifier.
+
+### Context / configuration
+
+Describes analysis state or configuration without manufacturing bullish/bearish meaning.
+
+Primary Analysis Interval is the current example.
+
+Automated tests enforce explainability completeness and semantic-role behavior.
 
 ---
 
@@ -410,44 +474,36 @@ When starting a new conversation:
 
 ## Immediate Continuation Point
 
-First ensure the validated v0.10.0 work has been:
+Complete the formal **v0.10.1 — Explainability & Bidirectional Audit** release checkpoint:
 
-* committed,
-* pushed to `origin/develop`,
-* tagged `v0.10.0`,
-* and the tag pushed.
+1. Complete canonical documentation updates.
+2. Run final release validation.
+3. Commit and push the release documentation.
+4. Confirm the working tree is clean.
+5. Create the annotated `v0.10.1` tag.
+6. Push the tag to GitHub.
+7. Verify `origin/develop` and the release tag.
 
-After that, do **not** jump directly to broader v0.11 feature development.
+After v0.10.1 is formally released, do not invent the next major capability from conversation context.
 
-The immediate next patch is:
+Before beginning the next development phase:
 
-**v0.10.1 — Explainability & Bidirectional Audit**
+1. Read the six canonical continuation documents.
+2. Reconstruct the current architecture and permanent constraints.
+3. Select the next significant capability from the documented roadmap.
+4. Present the proposed implementation approach before coding.
 
-Required scope:
+Permanent regression constraints include:
 
-1. Individual explainability for every Trader Analysis Context metric: Primary Analysis Interval, Timeframe Alignment, Market Environment, Market Breadth, Relative Strength, Event Risk and News Sentiment.
-2. A reusable explainability contract for evidence, context and historical metrics instead of hardcoded widget-only explanations.
-3. Explainability fields should cover, where applicable: What it is, Calculation, Why it matters, Supportive interpretation, Opposing interpretation, Recommendation impact and Limitations.
-4. Metrics must be classified by semantic role:
-
-   * Directional/evaluative metrics must support supportive, opposing and neutral/unknown outcomes where mathematically meaningful.
-   * Confidence/risk-only metrics must define their bounded impact, cannot create directional Buy/Sell evidence and must not manufacture artificial positive bonuses.
-   * Context/configuration metrics describe analysis state without artificial directional interpretation.
-5. Historical Setup Validation explanations must explicitly describe supportive and opposing outcomes and how they map into the bounded confidence adjustment.
-6. Automated architecture tests must enforce explainability completeness.
-7. Automated behavioral tests must enforce bidirectional behavior for directional metrics and the non-directional constraints of confidence/risk-only metrics.
-8. Existing evidence-family de-duplication, direction/confidence separation, historical ±8 confidence cap and Event Risk confidence-only behavior must remain intact.
-
-This patch exists to turn the permanent explainability rule from documentation into an enforceable architecture invariant before Swing, Investor, fundamentals or other major brain expansion increases the number of user-facing metrics.
-
-Before choosing or implementing that phase, review:
-
-* `PROJECT_BIBLE.md`
-* `BRAIN_FEATURE_PLAN.md`
-* `BRAIN_ARCHITECTURE.md`
-* `PROJECT_STATE.md`
-
-After v0.10.1 is completed and released, the next significant feature should be selected from the documented roadmap rather than invented from conversation context.
+* Reusable explainability contracts.
+* Semantic-role classification.
+* Bidirectional interpretation where mathematically meaningful.
+* Evidence-family de-duplication.
+* Direction/confidence separation.
+* Event Risk confidence-only behavior and 12-point maximum penalty.
+* Historical Setup Validation confidence-only behavior and ±8-point maximum adjustment.
+* BUY/SELL analytical parity.
+* Synthetic-data honesty.
 
 ---
 

@@ -1,6 +1,6 @@
 # TradePilot AI Brain Architecture
 
-Version: 0.8 advanced Trader evidence + selectable analysis intervals
+Version: 0.10.1 explainability architecture + external context
 Status: Living design
 
 ## Core rule
@@ -49,10 +49,10 @@ Current families:
 - Price Structure
 - Volatility
 - Market Context
+- Sentiment
 
 Reserved future families:
 - Fundamentals
-- Sentiment
 - Other
 
 Current mappings:
@@ -67,12 +67,19 @@ Current mappings:
 - Support & Resistance → Price Structure
 - Price Extension → Volatility
 - Market & Sector Context → Market Context
+- Market Breadth → Market Context
+- News Sentiment → Sentiment
+
+Event Risk is not an evidence family. It is a confidence-only external modifier.
+
+Historical Setup Validation is not an evidence family. It is a bounded post-consensus confidence overlay.
 
 De-duplication example:
 - Candle Trend, EMA Structure and Multi-Timeframe Trend refine one Trend conclusion rather than creating three independent votes.
 - RSI and MACD refine one Momentum conclusion.
 - Relative Volume and Volume Confirmation refine one Participation conclusion.
 - VWAP and Support/Resistance refine one Price Structure conclusion.
+- Market & Sector Context and Market Breadth refine one Market Context conclusion.
 
 ## Family de-duplication rule
 
@@ -208,9 +215,9 @@ Deferred intentionally:
 ### v0.9 — Historical Setup Validation
 - Setup fingerprint from de-duplicated family state + Stock DNA + market context.
 - Similar historical case matching.
-- Follow-through vs a context-matched same-stock baseline that shares strategy, interval, Stock Profile, volatility regime and Market Environment but does not require today's specific evidence setup.
+- Follow-through vs a context-matched same-stock baseline.
 - Effective sample size, similarity quality, median forward move and excursion analysis.
-- Bounded confidence-only adjustment; direction remains deterministic from current evidence.
+- Bounded confidence-only adjustment.
 - Synthetic development provider behind a replaceable historical-data interface.
 
 ### v0.10 — Event / broader-environment context
@@ -218,6 +225,15 @@ Deferred intentionally:
 - News and sentiment.
 - Market breadth/regime.
 - Volatility/risk regime.
+
+### v0.10.1 — Explainability & Bidirectional Audit
+- Reusable `MetricExplainability` contract.
+- Explicit semantic-role classification.
+- Complete production-evidence explainability catalog.
+- Individual explainability paths for all seven Trader Analysis Context metrics.
+- Historical Setup Validation supportive/opposing explanation with ±8 hard bound.
+- Event Risk confidence-only behavior with 12-point maximum penalty.
+- Automated explainability-completeness and behavioral regression tests.
 
 ### v1.0 — Swing and Investor brains
 - Swing-specific daily/weekly evidence.
@@ -244,6 +260,34 @@ Every recommendation should eventually answer:
 - What would change the recommendation?
 - How did similar historical conditions perform out of sample?
 
+v0.10.1 makes explainability a domain-level architectural contract.
+
+`MetricExplainability` classifies each user-facing analytical metric as:
+
+- **Directional/evaluative** — may affect directional interpretation and must describe supportive and opposing outcomes where mathematically meaningful.
+- **Confidence/risk-only** — may alter confidence or risk within an explicit bound but cannot create Buy/Sell direction.
+- **Context/configuration** — describes analysis state/configuration and must not manufacture directional meaning.
+
+Reusable explanation content can expose:
+- What the metric means.
+- How it is calculated.
+- Why it matters.
+- Supportive interpretation.
+- Opposing interpretation.
+- Neutral interpretation.
+- Recommendation impact.
+- Explicit bounded impact.
+- Limitations.
+
+Production `EvidenceKind` values are covered by a central explainability catalog.
+
+Trader Analysis Context has a separate complete catalog covering all seven displayed metrics.
+
+Architecture tests enforce completeness and semantic-role invariants.
+
+Permanent confidence-only boundaries:
+- Event Risk cannot increase confidence, cannot create Buy/Sell direction and is hard-capped at a 12-point confidence penalty.
+- Historical Setup Validation cannot alter evidence-derived direction or evidence confidence and is hard-capped at ±8 final-confidence points.
 
 ## v0.7 environment/context layer
 
@@ -332,10 +376,28 @@ Effective sample depth and match quality do not receive outcome weights. They ar
 
 ## v0.10 external-context architecture
 
-`RecommendationContextService` now loads a replaceable `ExternalContextProvider` alongside multi-timeframe stock/benchmark data. The current mock provider returns Market Breadth, Event Risk and News Sentiment profiles.
+`RecommendationContextService` loads a replaceable `ExternalContextProvider` alongside multi-timeframe stock/benchmark data. The current mock provider returns Market Breadth, Event Risk and News Sentiment profiles.
 
-- Market Breadth -> `MarketBreadthEvidenceProvider` -> `EvidenceFamily.marketContext`.
-- News Sentiment -> `NewsSentimentEvidenceProvider` -> `EvidenceFamily.sentiment`.
-- Event Risk -> `EventRiskConfidenceAdjuster` -> confidence modifier only, capped at 12 points.
+- Market Breadth → `MarketBreadthEvidenceProvider` → `EvidenceFamily.marketContext`.
+- News Sentiment → `NewsSentimentEvidenceProvider` → `EvidenceFamily.sentiment`.
+- Event Risk → `EventRiskConfidenceAdjuster` → confidence modifier only, capped at 12 points.
 
 This role separation is intentional: breadth is related to existing market context, news can carry independent direction when data quality is sufficient, and scheduled-event proximity represents uncertainty/risk rather than direction.
+
+## v0.10.1 explainability architecture
+
+The explainability layer is shared across production evidence, Analysis Context and Historical Setup Validation.
+
+The UI renders this contract through reusable explainability content/dialog components rather than embedding metric semantics directly into individual widgets.
+
+Production safeguards are enforced in both metadata and behavior:
+
+- Missing production evidence explainability fails architecture tests.
+- Missing Analysis Context explainability fails architecture tests.
+- Directional/evaluative metrics require both supportive and opposing interpretations where meaningful.
+- Context/configuration metrics are not forced into artificial directionality.
+- Event Risk remains confidence/risk-only and cannot be configured beyond its 12-point maximum penalty.
+- Event Risk cannot create a positive confidence bonus.
+- Historical Setup Validation remains confidence/risk-only and is defense-in-depth capped to ±8 at the final adjustment layer.
+- Evidence-family de-duplication remains unchanged.
+- Direction influence and confidence contribution remain separate concepts.

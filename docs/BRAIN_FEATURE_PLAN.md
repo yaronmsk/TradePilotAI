@@ -183,6 +183,18 @@ Current setup fingerprint, similarity-weighted historical analogs, matched outco
 ### v0.10 — Market / Sector / Event Context
 Market breadth participation, scheduled earnings/macro event risk and reliability-weighted news sentiment. Market Breadth remains inside the Market Context family; Event Risk is a confidence-only overlay; News Sentiment is a capped Sentiment family. Development uses a synthetic provider until licensed live data is connected.
 
+### v0.10.1 — Explainability & Bidirectional Audit
+Reusable explainability contracts, explicit semantic roles, individual Analysis Context explainability, supportive/opposing interpretation rules, confidence-only modifier boundaries and automated architecture invariants.
+
+Completed safeguards include:
+- Complete explainability metadata for every production evidence kind.
+- Individual explainability for all seven Trader Analysis Context metrics.
+- Directional/evaluative, confidence/risk-only and context/configuration semantic roles.
+- Event Risk confidence-only behavior with a hard maximum 12-point penalty and no positive bonus.
+- Historical Setup Validation confidence-only behavior with a hard ±8-point adjustment boundary.
+- Evidence-family de-duplication and direction/confidence separation preserved.
+- BUY/SELL provider regression coverage preserved.
+
 ### v1.0 — Swing + Investor Engines
 Separate strategy-specific data and logic, all visible in the Strategy Summary.
 

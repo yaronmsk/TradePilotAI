@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.6
+Version: 1.7
 Status: Living reference
 
 ## Mission
@@ -8,7 +8,6 @@ Status: Living reference
 Build an explainable, statistically grounded investment analysis platform that helps users understand evidence, probability and risk rather than pretending to predict the future.
 
 ## Permanent principles
-
 - Never claim to predict the market.
 - Every recommendation must be traceable to measurable evidence.
 - Supporting and opposing evidence are both displayed.
@@ -23,6 +22,12 @@ Build an explainable, statistically grounded investment analysis platform that h
 - Business logic is independent from the visual UI.
 - Current UI is provisional and can be completely redesigned later.
 - Buy and Sell capabilities receive equal treatment.
+- Explainability is a reusable domain contract rather than widget-specific copy.
+- Every explainable metric must explicitly declare whether it is directional/evaluative, confidence/risk-only or context/configuration.
+- Directional/evaluative inputs must represent supportive and opposing interpretations wherever mathematically meaningful.
+- Confidence/risk-only inputs cannot manufacture Buy/Sell direction and must declare their bounded effect.
+- Direction influence and confidence contribution must remain separate.
+- Evidence attribution must respect evidence-family aggregation and family caps.
 - When evidence is inadequate or conflicted, WAIT/HOLD is preferable to false certainty.
 
 ## Current architecture
@@ -43,7 +48,6 @@ Market data
 → Future AI Analyst / Mentor
 
 ## Current implemented evidence
-
 - Candle Trend — Trend family
 - EMA Structure — Trend family
 - Multi-Timeframe Trend — Trend family (same family by design; higher timeframes cannot create duplicate independent votes)
@@ -55,6 +59,14 @@ Market data
 - Support & Resistance — Price Structure family
 - Price Extension — Volatility family
 - Market & Sector Context — Market Context family
+- Market Breadth — Market Context family
+- News Sentiment — Sentiment family
+
+Correlated providers remain de-duplicated inside their evidence family.
+
+Event Risk is intentionally not an evidence family. It is a confidence/risk-only modifier that cannot create Buy/Sell direction, cannot produce a positive confidence bonus and is hard-capped at a 12-point confidence penalty.
+
+Historical Setup Validation is also not an evidence family. It is a post-consensus confidence-only overlay hard-bounded to ±8 final-confidence points.
 
 ## Current brain outputs
 
@@ -137,16 +149,16 @@ When the brain begins learning from historical effectiveness:
 - Update this Bible for major architectural decisions.
 
 ## Immediate brain roadmap
-
 1. v0.4 — Relative Volume + short-window Stock Behavior context. Done.
 2. v0.5 — Strategy-aware Consensus Engine, evidence-family de-duplication and Recommendation Insight. Done.
 3. v0.6 — One-year Historical Context / Stock DNA foundation. Done.
 4. v0.7 — Multi-timeframe Trader intelligence + market/sector relative strength. Done.
 5. v0.8 — Advanced Trader evidence + selectable Trader primary analysis interval with strategy-specific timeframe policy. Done.
 6. v0.9 — Context-matched Historical Setup Validation / similar-case confidence overlay. Done.
-7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Current.
-8. v1.0 — Swing and Investor brains.
-9. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
+7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
+8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
+9. v1.0 — Swing and Investor brains.
+10. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
 ## UI roadmap
 
@@ -177,8 +189,80 @@ v0.8 expands provider-level detail without multiplying independent confidence. T
 
 ## Recommendation attribution rule
 
-Every strategy recommendation must be able to explain both **direction** and **confidence** quantitatively. Direction influence and confidence contribution are separate concepts. Family-level percentages are shown first; exact provider-level impact remains expandable. Attribution must reconcile to the same deterministic Consensus Engine math used to create the recommendation. Correlated providers remain capped inside their evidence family, so adding another EMA/trend-style signal cannot manufacture extra independent influence. Confidence attribution must also show the global coverage, alignment and reliability adjustments that transform evidence strength into final confidence.
+Every strategy recommendation must be able to explain both **direction** and **confidence** quantitatively.
 
+Direction influence and confidence contribution are separate concepts.
+
+Family-level percentages are shown first; exact provider-level impact remains expandable.
+
+Attribution must reconcile to the same deterministic Consensus Engine math used to create the recommendation.
+
+Correlated providers remain capped inside their evidence family, so adding another EMA/trend-style signal cannot manufacture extra independent influence.
+
+Confidence attribution must also show the global coverage, alignment and reliability adjustments that transform evidence strength into final confidence.
+
+## v0.10.1 Explainability architecture rule
+
+`MetricExplainability` is the reusable domain contract for user-facing analytical explanation.
+
+Every explainable metric belongs to one explicit semantic role:
+
+### Directional / evaluative
+
+May influence directional interpretation.
+
+Supportive and opposing interpretations are required wherever mathematically meaningful.
+
+Neutral/unknown interpretation should be represented where useful rather than forcing a false directional conclusion.
+
+### Confidence / risk only
+
+May modify confidence or risk only within an explicit boundary.
+
+These metrics cannot create or flip Buy/Sell direction.
+
+Current permanent bounds:
+
+- Event Risk — maximum 12-point confidence penalty and no positive confidence bonus.
+- Historical Setup Validation — maximum ±8-point final-confidence adjustment.
+
+### Context / configuration
+
+Explains analysis state or configuration without manufacturing bullish/bearish meaning.
+
+Primary Analysis Interval is the current example.
+
+### Current explainability coverage
+
+Production evidence is covered by a central explainability catalog keyed by `EvidenceKind`.
+
+Trader Analysis Context has individual explainability for:
+
+- Primary Analysis Interval.
+- Timeframe Alignment.
+- Market Environment.
+- Market Breadth.
+- Relative Strength.
+- Event Risk.
+- News Sentiment.
+
+Historical Setup Validation uses the same reusable explainability architecture.
+
+Reusable explanation content exposes, where applicable:
+
+- What the metric means.
+- How it is calculated.
+- Why it matters.
+- Supportive interpretation.
+- Opposing interpretation.
+- Neutral interpretation.
+- Recommendation impact.
+- Explicit impact boundary.
+- Limitations.
+
+Architecture tests must fail when registered production metrics lack complete explainability metadata.
+
+Behavioral tests must preserve semantic-role boundaries, evidence-family de-duplication, direction/confidence separation and BUY/SELL analytical parity.
 
 ## Historical Setup Validation rule
 

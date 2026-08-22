@@ -7,13 +7,13 @@ Document:
 Project Changelog
 
 Version:
-1.0
+1.1
 
 Status:
 Approved
 
 Last Updated:
-2026-07-06
+2026-08-23
 
 Owner:
 TradePilot AI
@@ -21,6 +21,57 @@ TradePilot AI
 Related Documents:
 - TP-001 Master Specification
 - TP-009 Project Roadmap
+
+---
+
+## v0.10.1 — Explainability & Bidirectional Audit
+
+Status
+
+Completed
+
+Date
+
+2026-08-23
+
+Summary
+
+Converted TradePilot AI's permanent explainability rules from documentation and UI conventions into reusable, typed and automatically tested architecture.
+
+### Added
+- Reusable `MetricExplainability` domain contract.
+- Explicit semantic roles for directional/evaluative, confidence/risk-only and context/configuration metrics.
+- Central explainability catalog covering every production `EvidenceKind`.
+- Individual explainability paths for all seven Trader Analysis Context metrics.
+- Shared explainability content and dialog rendering.
+- Historical Setup Validation explainability covering supportive, opposing and neutral outcomes.
+- Automated explainability-completeness and semantic-role tests.
+
+### Changed
+- Production evidence explanations now expose recommendation impact and limitations in addition to existing description and calculation information.
+- Historical Setup Validation now uses the reusable explainability contract.
+- Historical Setup Validation explicitly explains its same-stock comparable-condition baseline.
+- Event Risk is explicitly classified as confidence/risk-only.
+- Sentiment is now documented as an implemented evidence family.
+
+### Invariants / Safeguards
+- Directional/evaluative metrics require supportive and opposing interpretations where mathematically meaningful.
+- Context/configuration metrics cannot manufacture artificial directional meaning.
+- Event Risk cannot create Buy/Sell direction.
+- Event Risk cannot create a positive confidence bonus.
+- Event Risk is hard-capped at a 12-point confidence penalty.
+- Historical Setup Validation cannot alter recommendation direction.
+- Historical Setup Validation preserves evidence-derived confidence.
+- Historical Setup Validation is hard-capped to ±8 final-confidence points.
+- Evidence-family de-duplication remains intact.
+- Direction influence and confidence contribution remain separate concepts.
+- BUY/SELL analytical parity remains protected.
+
+### Validation
+- `flutter analyze`: no issues.
+- Full Flutter test suite: 263 tests passed.
+- Provider regression suite: 47 tests passed.
+- All six documented v0.10.1 visual acceptance checks passed.
 
 ---
 
