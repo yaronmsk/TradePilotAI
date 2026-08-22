@@ -84,4 +84,36 @@ void main() {
     expect(result.evidenceConfidence, 70);
     expect(result.directionScore, 70);
   });
+
+  test('supportive impact is hard-capped at positive eight points', () {
+    final result = adjuster.apply(
+      scoringResult: scoring(70),
+      validation: validation(20),
+    );
+
+    expect(result.confidence, 78);
+    expect(result.evidenceConfidence, 70);
+    expect(result.directionScore, 70);
+
+    expect(
+      result.confidenceModifiers.last.impactPoints,
+      closeTo(HistoricalSetupValidation.maximumConfidenceImpactPoints, 0.001),
+    );
+  });
+
+  test('opposing impact is hard-capped at negative eight points', () {
+    final result = adjuster.apply(
+      scoringResult: scoring(70),
+      validation: validation(-20),
+    );
+
+    expect(result.confidence, 62);
+    expect(result.evidenceConfidence, 70);
+    expect(result.directionScore, 70);
+
+    expect(
+      result.confidenceModifiers.last.impactPoints,
+      closeTo(-HistoricalSetupValidation.maximumConfidenceImpactPoints, 0.001),
+    );
+  });
 }

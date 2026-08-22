@@ -13,6 +13,8 @@ enum HistoricalValidationReliability { unavailable, low, moderate, high }
 enum HistoricalValidationVerdict { unavailable, supports, mixed, opposes }
 
 class HistoricalSetupValidation {
+  static const double maximumConfidenceImpactPoints = 8;
+
   const HistoricalSetupValidation({
     required this.status,
     required this.reliability,

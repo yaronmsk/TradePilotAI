@@ -18,8 +18,13 @@ class HistoricalSetupValidationService {
     this.matcher = const HistoricalSetupMatcher(),
     this.comparisonSelector = const HistoricalComparisonSelector(),
     this.scoringPolicy = const HistoricalValidationScoringPolicy(),
-    this.maximumConfidenceImpact = 8,
-  });
+    this.maximumConfidenceImpact =
+        HistoricalSetupValidation.maximumConfidenceImpactPoints,
+  }) : assert(maximumConfidenceImpact >= 0),
+       assert(
+         maximumConfidenceImpact <=
+             HistoricalSetupValidation.maximumConfidenceImpactPoints,
+       );
 
   final HistoricalSetupProvider provider;
   final SetupFingerprintBuilder fingerprintBuilder;

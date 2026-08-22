@@ -155,7 +155,12 @@ void main() {
       expect(result.alignedOutcomeRate, greaterThan(0.70));
       expect(result.edgeVsControlPercentagePoints, greaterThan(15));
       expect(result.confidenceImpactPoints, greaterThan(0));
-      expect(result.confidenceImpactPoints, lessThanOrEqualTo(8));
+      expect(
+        result.confidenceImpactPoints,
+        lessThanOrEqualTo(
+          HistoricalSetupValidation.maximumConfidenceImpactPoints,
+        ),
+      );
       expect(result.comparisonCases, 16);
       expect(result.scoringBreakdown.edgeVsControlWeight, 0.40);
       expect(result.scoringBreakdown.followThroughWeight, 0.20);

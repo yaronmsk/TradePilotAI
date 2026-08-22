@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../history/historical_setup_match.dart';
 import '../history/historical_setup_validation.dart';
+import '../history/historical_setup_validation_explainability.dart';
+import 'metric_explainability_dialog.dart';
 
 class HistoricalSetupValidationPanel extends StatelessWidget {
   const HistoricalSetupValidationPanel({required this.validation, super.key});
@@ -267,24 +269,10 @@ class HistoricalSetupValidationPanel extends StatelessWidget {
   }
 
   Future<void> _showInfo(BuildContext context) {
-    return showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Historical Setup Check'),
-        content: const Text(
-          'TradePilot uses two different historical groups.\n\n'
-          '1. Similar historical setups: cases from the current stock and other stocks that share the same Stock Profile. The setup matcher then compares the independent evidence groups, volatility regime, market environment, relative strength, strategy and analysis interval. Stock Profile is a hard eligibility rule, not merely a small weighting bonus.\n\n'
-          '2. The current stock under comparable conditions: observations from this stock only, with the same strategy, analysis interval, Stock Profile, volatility regime and market environment. These observations are deliberately NOT required to match today\'s evidence pattern. They estimate what the stock usually did under similar surrounding conditions.\n\n'
-          'TradePilot compares the two follow-through rates so ordinary stock or market behavior is less likely to be mistaken for setup-specific historical evidence. Outcome measurements have unequal weights, while sample depth and match quality are applied afterward as reliability gates. Historical validation can adjust confidence within a strict cap, but it does not change recommendation direction by itself.\n\n'
-          'Historical results do not guarantee future performance.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Close'),
-          ),
-        ],
-      ),
+    return MetricExplainabilityDialog.show(
+      context,
+      title: 'Historical Setup Check',
+      explainability: HistoricalSetupValidationExplainability.definition,
     );
   }
 

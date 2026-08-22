@@ -9,16 +9,19 @@ class HistoricalConfidenceAdjuster {
     required ScoringResult scoringResult,
     required HistoricalSetupValidation validation,
   }) {
-    if (!validation.canInfluenceConfidence ||
-        validation.confidenceImpactPoints.abs() < 0.001) {
+    final boundedImpact = validation.confidenceImpactPoints
+        .clamp(
+          -HistoricalSetupValidation.maximumConfidenceImpactPoints,
+          HistoricalSetupValidation.maximumConfidenceImpactPoints,
+        )
+        .toDouble();
+
+    if (!validation.canInfluenceConfidence || boundedImpact.abs() < 0.001) {
       return scoringResult;
     }
 
     final before = scoringResult.confidence;
-    final after = (before + validation.confidenceImpactPoints).clamp(
-      0.0,
-      100.0,
-    );
+    final after = (before + boundedImpact).clamp(0.0, 100.0);
     final factor = before == 0 ? 1.0 : after / before;
 
     return scoringResult.copyWith(

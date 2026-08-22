@@ -156,22 +156,23 @@ void main() {
       await tester.tap(find.byTooltip('About Historical Setup Check'));
       await tester.pumpAndSettle();
 
+      expect(find.text('About Historical Setup Check'), findsOneWidget);
+      expect(find.text('Confidence / risk only'), findsOneWidget);
+      expect(find.text('Supportive interpretation'), findsOneWidget);
+      expect(find.text('Opposing interpretation'), findsOneWidget);
       expect(
-        find.textContaining('two different historical groups'),
+        find.textContaining('above both 50% and the same-stock baseline'),
         findsOneWidget,
       );
+      expect(find.textContaining('±8 points'), findsOneWidget);
       expect(
-        find.textContaining('Stock Profile is a hard eligibility rule'),
+        find.textContaining('does not alter evidence confidence'),
         findsOneWidget,
       );
       expect(
         find.textContaining(
-          "deliberately NOT required to match today's evidence pattern",
+          'Historical similarity does not guarantee future performance',
         ),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('do not guarantee future performance'),
         findsOneWidget,
       );
     },
