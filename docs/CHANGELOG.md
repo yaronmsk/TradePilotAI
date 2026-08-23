@@ -7,7 +7,7 @@ Document:
 Project Changelog
 
 Version:
-1.1
+1.2
 
 Status:
 Approved
@@ -21,6 +21,218 @@ TradePilot AI
 Related Documents:
 - TP-001 Master Specification
 - TP-009 Project Roadmap
+
+---
+
+## v0.11.0 — Swing Strategy Brain
+
+Status
+
+Development — Scope Approved
+
+Date
+
+2026-08-23
+
+Summary
+
+Opened v0.11.0 as the dedicated Swing Strategy Brain release.
+
+This checkpoint defines architecture, evidence applicability, explainability, attribution and acceptance requirements before production implementation begins.
+
+No production recommendation behavior has changed in this checkpoint.
+
+### Release Boundary
+
+- v0.11.0 — Swing Strategy Brain.
+- v0.12.0 — Investor Strategy Brain.
+- v1.0.0 — validated Trader + Swing + Investor multi-strategy milestone.
+
+Swing is explicitly separated from Investor rather than implementing both engines inside one v1.0 release.
+
+### Core Architecture Decision
+
+Swing is not Trader logic running on slower candles.
+
+Before Swing becomes active, every existing:
+
+- Evidence provider.
+- Evidence family.
+- Context input.
+- Confidence modifier.
+- Historical capability.
+- Recommendation helper.
+- Decision helper.
+
+must receive an explicit Swing applicability and calibration decision.
+
+v0.11.0 will introduce a strategy-aware policy layer supporting:
+
+- Provider applicability.
+- Strategy-specific parameters.
+- Lookbacks.
+- Thresholds.
+- Reliability and weight.
+- Semantic role.
+- Direction behavior.
+- Confidence behavior.
+- Risk / entry-quality behavior.
+- Evidence-family constraints.
+
+### Swing Timeframe Policy
+
+Approved default hierarchy:
+
+- 1D primary.
+- 1W confirmation.
+- 1M regime.
+
+Approved alternate hierarchy:
+
+- 4H primary.
+- 1D confirmation.
+- 1W regime.
+
+### Approved Evidence Audit Decisions
+
+#### Trend
+- Candle Trend — reuse with Swing calibration.
+- EMA Structure — reuse with Swing calibration.
+- Multi-Timeframe Trend — core Swing evidence.
+
+#### Momentum
+- RSI — retain with trend/regime-aware Swing interpretation.
+- RSI overbought/oversold thresholds must not automatically create SELL/BUY direction.
+- MACD Momentum — retain with Swing calibration.
+
+#### Participation
+- Relative Volume — conditional reuse.
+- 1D Swing may use daily relative-volume history.
+- 4H Swing must not fabricate same-time-of-day normalization.
+- Volume Confirmation — retain with Swing calibration and volatility-aware move significance.
+
+#### Price Structure
+- Current analysis-window VWAP Position — excluded from initial Swing scoring.
+- Support & Resistance — core Swing evidence with confirmation-aware semantics.
+- Proximity to support/resistance alone is not confirmed direction.
+
+#### Volatility / Entry Quality
+- Price Extension — primarily entry-quality/confidence/risk context.
+- Extension must not automatically claim that the opposite trend has begun.
+
+#### Market Context
+- Market & Sector Context / Relative Strength — core Swing evidence.
+- Market Breadth — retained inside the Market Context family.
+
+#### Sentiment
+- News Sentiment — retained with Swing-specific freshness and materiality policy.
+
+### Confidence / Context Decisions
+
+#### Event Risk
+- Confidence/risk-only.
+- Cannot create Buy/Sell direction.
+- Cannot create a positive confidence bonus.
+- Maximum 12-point confidence penalty.
+- Swing requires a strategy-specific event relevance horizon.
+
+#### Stock DNA
+- Core contextual capability.
+- Must become strategy-aware.
+- Must not create standalone Buy/Sell direction.
+
+#### Historical Setup Validation
+- Confidence-only.
+- Strategy/timeframe-specific.
+- Swing outcomes must use a Swing-appropriate forward horizon.
+- Trader and Swing outcomes must not be pooled as equivalent observations.
+- Maximum ±8 final-confidence points.
+
+### Human-Readable UI Rule
+
+Every Swing:
+
+- Card.
+- Evidence item.
+- Metric.
+- Context value.
+- Decision helper.
+- Historical statistic.
+- Risk/confidence value.
+- Recommendation component.
+
+must be understandable in plain human language.
+
+Main UI should present human meaning first and technical detail second.
+
+Every individual analytical input/value must have its own visible info/explainability path.
+
+A card-level general explanation does not replace individual metric explainability.
+
+### Explainability Rule
+
+Every individual Swing input must explain, where applicable:
+
+1. What it means.
+2. How it is calculated.
+3. Why it matters for Swing.
+4. Supportive interpretation.
+5. Opposing interpretation.
+6. Neutral interpretation.
+7. Direction impact.
+8. Confidence impact.
+9. Risk / entry-quality impact.
+10. Evidence-family and de-duplication implications.
+11. Limitations.
+
+### Recommendation Attribution Rule
+
+Direction influence and confidence contribution remain separate.
+
+User-facing directional percentages must represent actual current-case effective influence after:
+
+- Strategy-specific weighting.
+- Reliability.
+- Contextual adjustment.
+- Signal magnitude.
+- Evidence-family aggregation.
+- Family caps.
+- Correlation de-duplication.
+
+The active directional basis must reconcile to 100%.
+
+Provider-level attribution must reconcile to the capped family contribution.
+
+Configured static weights must not be presented as though they were actual current-case percentages.
+
+Supportive and opposing contributions must remain identifiable.
+
+Confidence-only modifiers are not normalized into the directional 100%.
+
+Examples:
+
+- Event Risk: explicit negative confidence-point adjustment.
+- Historical Setup Validation: explicit bounded ± confidence-point adjustment.
+
+### Data-Honesty Rule
+
+Synthetic/mock data remains explicitly identified.
+
+Swing thresholds and weights must not be described as statistically optimized from synthetic historical outcomes.
+
+Unavailable or neutral evidence is preferable to fabricated information.
+
+### Detailed Contract
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+### Next Implementation Step
+
+After the documentation checkpoint is committed, begin:
+
+**Batch 1 — Strategy-aware analysis/evidence policy foundation**
+
+Swing must not be activated in the UI before the strategy-policy architecture and recommendation orchestration are validated.
 
 ---
 

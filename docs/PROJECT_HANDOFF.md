@@ -1,8 +1,8 @@
 # TradePilot AI — Project Handoff
 
 **Document:** Project Continuation / Chat Handoff
-**Version:** 1.1
-**Checkpoint:** v0.10.1
+**Version:** 1.2
+**Checkpoint:** v0.11.0 — Scope Approved
 **Date:** 2026-08-23
 **Primary Branch:** `develop`
 
@@ -57,29 +57,39 @@ Do not initiate a major visual redesign unless the project documentation explici
 
 ## Current Release Checkpoint
 
+Current tagged release:
+
 **v0.10.1 — Explainability & Bidirectional Audit**
 
-Previous release:
+Release commit:
 
-**v0.10.0 — Market, Event & News Context**
+`c53ad00 — docs: finalize v0.10.1 explainability release`
 
-v0.10.1 implementation validation completed successfully on 2026-08-23:
+v0.10.1 is complete, tagged and synchronized with GitHub.
 
-* `flutter analyze`: no issues.
-* `flutter test`: 263 tests passed.
-* Provider regression audit: 47 tests passed.
-* All six documented v0.10.1 visual acceptance checks passed.
-* Final implementation checkpoint before release documentation: `15c352c`.
+Current active development release:
 
-Implementation checkpoints:
+**v0.11.0 — Swing Strategy Brain**
 
-* `0b5f064` — reusable explainability contracts.
-* `00199af` — Historical Setup Validation explainability and confidence-bound enforcement.
-* `15c352c` — explainability invariant enforcement.
+Status:
 
-The implementation is complete and pushed to `origin/develop`.
+**Scope approved / production implementation not yet started.**
 
-The final documentation commit and `v0.10.1` release tag are the remaining release-checkpoint actions.
+Detailed evidence, capability and acceptance contract:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+Swing remains **Coming Soon** in the UI until TradePilot AI produces and validates a real strategy-specific Swing recommendation.
+
+Swing must not be implemented as Trader logic running on slower candles.
+
+Before Swing activation, every existing evidence provider, context input, confidence modifier, historical capability and decision helper requires an explicit Swing applicability/calibration decision.
+
+Approved roadmap:
+
+* v0.11.0 — Swing Strategy Brain.
+* v0.12.0 — Investor Strategy Brain.
+* v1.0.0 — validated Trader + Swing + Investor multi-strategy milestone.
 
 ---
 
@@ -225,7 +235,25 @@ Confirmation/backdrop intervals adapt automatically.
 
 ### Swing
 
-Planned / Coming Soon.
+v0.11.0 active development.
+
+Still displayed as Coming Soon until a real strategy-specific Swing recommendation is implemented and validated.
+
+Approved default timeframe plan:
+
+* 1D primary.
+* 1W confirmation.
+* 1M regime.
+
+Approved alternate timeframe plan:
+
+* 4H primary.
+* 1D confirmation.
+* 1W regime.
+
+Detailed evidence applicability and calibration are defined in:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
 ### Investor
 
@@ -336,17 +364,48 @@ External validation cannot silently overwrite evidence-derived confidence.
 
 The UI remains modular and replaceable.
 
-Important current rules:
+Permanent presentation rules:
 
 * Strategy Summary establishes strategy context.
 * Analysis Context appears directly beneath Strategy Summary.
-* Recommendation details belong to the selected strategy.
-* Technical complexity should be hidden behind explainability/expandable details where possible.
-* Primary user-facing concepts should remain understandable.
-* Exceptional values may be visually emphasized.
-* Historical comparisons should favor useful numerical/graphical context.
-* Buy and sell analysis receive equivalent analytical treatment.
-* Price History range is independent of recommendation-analysis interval.
+* Recommendation details belong explicitly to the selected strategy.
+* Primary user-facing concepts must remain understandable in plain human language.
+* Technical complexity belongs behind explainability or expandable details.
+* Every individual analytical input/value requires its own visible info/explainability path.
+* A card-level general information dialog does not replace individual metric explanations.
+* Evidence items must explain both supportive and opposing meaning where mathematically appropriate.
+* BUY and SELL analysis receive equivalent analytical treatment.
+* Decision helpers must summarize real underlying evidence and cannot become unexplained proprietary scores.
+* A value such as Momentum, Trend Quality, Entry Quality or Alignment must not appear as an unexplained number.
+
+### Attribution UI
+
+Direction attribution and confidence attribution are separate.
+
+User-facing direction percentages must represent actual current-case influence after:
+
+* Strategy-specific weighting.
+* Reliability.
+* Contextual adjustment.
+* Signal magnitude.
+* Evidence-family aggregation.
+* Family caps.
+* Correlation de-duplication.
+
+The active direction basis must reconcile to 100%.
+
+Provider-level shares must reconcile to their capped family contribution.
+
+Configured base weights must not be displayed as though they were actual current-case contribution.
+
+Confidence-only modifiers remain explicit point adjustments.
+
+Examples:
+
+* Event Risk: negative confidence points only, maximum -12.
+* Historical Setup Validation: bounded ±8 confidence points.
+
+They are not normalized into the direction-attribution 100%.
 
 ---
 
@@ -474,36 +533,56 @@ When starting a new conversation:
 
 ## Immediate Continuation Point
 
-Complete the formal **v0.10.1 — Explainability & Bidirectional Audit** release checkpoint:
+Active development release:
 
-1. Complete canonical documentation updates.
-2. Run final release validation.
-3. Commit and push the release documentation.
-4. Confirm the working tree is clean.
-5. Create the annotated `v0.10.1` tag.
-6. Push the tag to GitHub.
-7. Verify `origin/develop` and the release tag.
+**v0.11.0 — Swing Strategy Brain**
 
-After v0.10.1 is formally released, do not invent the next major capability from conversation context.
+Detailed implementation contract:
 
-Before beginning the next development phase:
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
-1. Read the six canonical continuation documents.
-2. Reconstruct the current architecture and permanent constraints.
-3. Select the next significant capability from the documented roadmap.
-4. Present the proposed implementation approach before coding.
+The approved evidence-by-evidence audit is authoritative during implementation.
 
-Permanent regression constraints include:
+Immediate sequence:
 
-* Reusable explainability contracts.
-* Semantic-role classification.
-* Bidirectional interpretation where mathematically meaningful.
-* Evidence-family de-duplication.
-* Direction/confidence separation.
-* Event Risk confidence-only behavior and 12-point maximum penalty.
-* Historical Setup Validation confidence-only behavior and ±8-point maximum adjustment.
-* BUY/SELL analytical parity.
-* Synthetic-data honesty.
+1. Complete and commit the v0.11.0 documentation/scope checkpoint.
+2. Confirm the repository is clean on `develop`.
+3. Begin Batch 1 — strategy-aware analysis/evidence policy foundation.
+4. Do not activate Swing in the UI before policy, context and recommendation orchestration are validated.
+
+For every existing evidence/capability, determine:
+
+* Whether Swing uses it.
+* Why it matters to Swing.
+* Correct timeframe and lookback.
+* Calculation/threshold changes.
+* Direction effect.
+* Confidence effect.
+* Risk or entry-quality effect.
+* Evidence-family relationship.
+* BUY/SELL interpretation.
+* User-facing wording.
+* Individual info/explainability behavior.
+* Attribution behavior.
+* Limitations.
+
+Permanent v0.11.0 constraints:
+
+* Swing is not Trader on slower candles.
+* Main UI remains human-readable.
+* Every analytical input/value has an individual info path.
+* Direction attribution reconciles to 100% of active effective directional influence.
+* Provider attribution reconciles to capped family attribution.
+* Confidence attribution remains separate.
+* Evidence-family de-duplication remains mandatory.
+* Event Risk remains confidence-only and capped at a maximum 12-point penalty.
+* Historical Setup Validation remains confidence-only and capped at ±8 points.
+* Current analysis-window VWAP is not automatically valid Swing evidence.
+* RSI must not use simplistic overbought-equals-SELL / oversold-equals-BUY Swing semantics.
+* Price Extension must not automatically claim trend reversal.
+* Support/resistance proximity alone is not confirmed directional evidence.
+* 4H Relative Volume must not fabricate same-time-of-day normalization.
+* Synthetic/mock data honesty remains mandatory.
 
 ---
 

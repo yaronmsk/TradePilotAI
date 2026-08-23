@@ -10,36 +10,39 @@
 
 ## 1. Current Release Baseline
 
-Current completed implementation baseline:
+Current tagged release:
 
 **v0.10.1 — Explainability & Bidirectional Audit**
 
-Previous tagged release:
+Release commit:
 
-**v0.10.0 — Market, Event & News Context**
+`c53ad00 — docs: finalize v0.10.1 explainability release`
 
-v0.10.1 implementation validation completed successfully on 2026-08-23:
+v0.10.1 is complete, tagged and synchronized with `origin/develop`.
 
-* Flutter analyze: no issues.
-* Flutter test: 263 tests passed.
-* Provider regression audit: 47 tests passed.
-* All six documented v0.10.1 visual acceptance checks passed.
-* Final implementation checkpoint before release documentation: `15c352c`.
+Current active development release:
 
-Implemented v0.10.1 checkpoints:
+**v0.11.0 — Swing Strategy Brain**
 
-* `0b5f064` — reusable explainability contracts.
-* `00199af` — Historical Setup Validation explainability and confidence-bound enforcement.
-* `15c352c` — explainability invariant enforcement.
+Status:
 
-The implementation is complete and synchronized with `origin/develop`.
+**Scope approved / production implementation not yet started.**
 
-The remaining v0.10.1 release actions are:
+Detailed v0.11.0 evidence, capability and acceptance contract:
 
-1. Complete canonical documentation updates.
-2. Run final release validation.
-3. Commit and push the release documentation.
-4. Create and push the `v0.10.1` tag.
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+v0.11.0 activates Swing as TradePilot AI's second real strategy.
+
+Swing must not be implemented as Trader logic running on slower candles.
+
+Before Swing is activated in the UI, every existing evidence provider, context input, confidence modifier, historical capability, recommendation helper and decision helper must receive an explicit Swing applicability and calibration decision.
+
+Approved release sequence:
+
+* v0.11.0 — Swing Strategy Brain.
+* v0.12.0 — Investor Strategy Brain.
+* v1.0.0 — validated multi-strategy milestone with Trader, Swing and Investor implemented.
 
 ---
 
@@ -47,11 +50,32 @@ The remaining v0.10.1 release actions are:
 
 **Brain-first feature development.**
 
-The priority remains recommendation quality, stock-specific context, statistical discipline, explainability and risk awareness.
+The current focus is:
 
-The current UI is functional and intentionally provisional.
+**v0.11.0 — Swing Strategy Brain**
 
-A dedicated commercial UI/design phase remains deferred until the analysis capability is sufficiently mature.
+The current UI remains functional and intentionally provisional.
+
+The first v0.11.0 production objective is not Swing UI activation.
+
+The first production architecture must introduce a strategy-aware analysis/evidence policy capable of expressing genuine differences between Trader and Swing.
+
+Approved implementation sequence begins with:
+
+1. Strategy-aware evidence/applicability policy.
+2. Swing timeframe/context orchestration.
+3. Evidence-family-by-family Swing calibration.
+4. Swing historical-validation horizon.
+5. Swing recommendation orchestration and recommendation policy.
+6. Attribution and explainability.
+7. Human-readable Swing UI and decision helpers.
+8. Full regression, visual acceptance, documentation and release.
+
+Detailed evidence-by-evidence decisions are maintained in:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+No existing Trader evidence provider is automatically valid for Swing merely because it can consume slower candles.
 
 ---
 
@@ -71,9 +95,9 @@ A dedicated commercial UI/design phase remains deferred until the analysis capab
 
 ### Strategy Model
 
-* Trader — active.
-* Swing — planned / Coming Soon.
-* Investor — planned / Coming Soon.
+* Trader — implemented and active.
+* Swing — v0.11.0 active development; remains Coming Soon in the UI until a real strategy-specific Swing recommendation is implemented and validated.
+* Investor — planned for v0.12.0.
 * Strategy Summary is the master context selector for detailed analysis.
 * Recommendation, Evidence, Context and Risk belong explicitly to the selected strategy.
 * Trader Primary Analysis Interval is selectable:
@@ -341,64 +365,112 @@ Metric-specific explanations provide, where applicable:
 
 Explainability is a permanent product requirement.
 
-Every user-facing metric, evidence item, context value, historical statistic and future analysis data point must provide an explanation path covering, where applicable:
+Every user-facing metric, evidence item, context value, historical statistic, decision helper, recommendation component and future analysis data point must provide an individual explanation path.
+
+The normal UI must remain human-readable and simple.
+
+A user should be able to understand the primary meaning of a card or value without understanding the internal scoring engine.
+
+Preferred presentation pattern:
+
+1. Human conclusion first.
+2. Important quantitative value second.
+3. Technical/statistical detail behind the info path.
+
+A card-level general information dialog does not replace the requirement for individual metric/input explainability.
+
+Every individual user-facing analytical input/value must have its own visible info affordance.
+
+The explanation should cover, where applicable:
 
 1. What the value means.
 2. How it is calculated.
 3. Why it matters.
-4. How it affects direction.
-5. How it affects confidence.
-6. How it affects risk.
-7. Important limitations.
+4. Supportive interpretation.
+5. Opposing interpretation.
+6. Neutral interpretation.
+7. How it affects recommendation direction.
+8. How it affects confidence.
+9. How it affects risk or entry quality.
+10. Evidence-family/de-duplication implications.
+11. Important limitations.
 
-Directional and evaluative inputs must represent both supportive and opposing outcomes wherever logically meaningful.
+### Semantic roles
 
-One-sided evidence logic should be avoided.
+Every explainable analytical metric belongs to one explicit semantic role.
 
-Direction influence and confidence contribution must remain explicitly separated.
+#### Directional / evaluative
 
-Provider attribution must respect evidence-family aggregation and family caps.
+May affect directional interpretation.
 
-v0.10.1 makes these rules enforceable through the reusable `MetricExplainability` architecture.
+Supportive and opposing interpretations are required wherever mathematically meaningful.
 
-Every explainable metric is classified into one of three semantic roles:
+#### Confidence / risk only
 
-### Directional / evaluative
+May alter confidence or risk but cannot create Buy/Sell direction.
 
-These metrics may affect directional interpretation.
+Its permitted effect must be explicitly bounded.
 
-Where mathematically meaningful they must define supportive, opposing and neutral/unknown interpretations.
+Current permanent examples:
 
-### Confidence / risk only
-
-These metrics may modify confidence or risk but cannot create Buy/Sell direction.
-
-Their permitted effect must be explicitly bounded.
-
-Current examples:
-
-* Event Risk — maximum 12-point confidence penalty and cannot produce a confidence bonus.
+* Event Risk — maximum 12-point confidence penalty and cannot create a positive confidence bonus.
 * Historical Setup Validation — maximum ±8-point final-confidence adjustment.
 
-Neither may modify evidence-derived direction.
+#### Context / configuration
 
-Historical Setup Validation also preserves evidence-derived confidence separately from its final-confidence modifier.
+Explains analysis state without manufacturing artificial bullish/bearish meaning.
 
-### Context / configuration
+### Direction attribution
 
-These values explain analysis configuration or state without manufacturing bullish/bearish meaning.
+Direction influence and confidence contribution remain separate.
 
-Primary Analysis Interval is the current example.
+User-facing direction attribution percentages must represent actual current-case effective contribution.
 
-### Explainability catalogs
+The active directional basis must reconcile to 100% after:
 
-Production evidence definitions are covered by a central explainability catalog keyed by `EvidenceKind`.
+* Strategy-specific weighting.
+* Reliability.
+* Contextual adjustment.
+* Signal magnitude.
+* Evidence-family aggregation.
+* Family caps.
+* Correlation de-duplication.
 
-Trader Analysis Context has a separate complete explainability catalog covering all seven displayed metrics.
+Configured base weights are not the same thing as actual current-case attribution.
 
-Historical Setup Validation uses the same reusable explainability contract.
+A family with no active directional contribution is excluded from the 100% denominator.
 
-Automated tests enforce explainability completeness and semantic-role invariants.
+Provider shares shown inside a family must reconcile to that family's capped contribution.
+
+Supportive and opposing influence must remain identifiable.
+
+### Confidence attribution
+
+Confidence attribution remains separate from directional attribution.
+
+Evidence-derived confidence should explain, where relevant:
+
+* Coverage.
+* Reliability.
+* Agreement.
+* Conflict.
+* Independent family coverage.
+* Family confidence contribution.
+
+Confidence-only modifiers remain explicit bounded point adjustments rather than being falsely normalized into the directional 100% basis.
+
+Examples:
+
+* Event Risk: `-6 confidence points`.
+* Historical Setup Validation: `+4 confidence points`.
+
+Final confidence conceptually reconciles as:
+
+Evidence-derived confidence
++/- bounded confidence modifiers
+= Final confidence
+
+Automated tests must protect explainability completeness, semantic-role behavior, evidence-family de-duplication and attribution reconciliation.
 
 ---
 
@@ -517,42 +589,72 @@ v0.10.1 was validated on 2026-08-23 with:
 20. Every incremental patch/hotfix/refinement receives its own semantic version.
 21. Significant functionality must be documented during the same development cycle in which it is introduced.
 22. Project documentation, not conversation history, is the authoritative persistent record of project decisions.
+23. Every user-facing card, evidence item, decision helper, metric and input must be understandable in plain human language.
+24. Every individual user-facing analytical input/value must have its own info/explainability path.
+25. Direction attribution percentages must reconcile to 100% of the active post-de-duplication directional basis.
+26. Confidence attribution must remain separate from directional attribution; confidence-only modifiers are shown as bounded point adjustments rather than fake evidence percentages.
 
 ---
 
 ## 14. Immediate Project Action
 
-Complete the formal **v0.10.1 — Explainability & Bidirectional Audit** release checkpoint:
+Active development release:
 
-1. Complete and validate the canonical documentation updates.
-2. Commit and push the release documentation.
-3. Confirm the working tree is clean.
-4. Create the annotated `v0.10.1` release tag.
-5. Push the tag to GitHub.
-6. Verify `origin/develop` and the release tag.
+**v0.11.0 — Swing Strategy Brain**
 
-After v0.10.1 is formally released, do not invent the next major capability from conversation context.
+Approved detailed scope:
 
-Before beginning the next development phase:
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
-1. Reconstruct the project from the six canonical continuation documents:
-   * `PROJECT_HANDOFF.md`
-   * `PROJECT_STATE.md`
-   * `PROJECT_BIBLE.md`
-   * `BRAIN_ARCHITECTURE.md`
-   * `BRAIN_FEATURE_PLAN.md`
-   * `CHANGELOG.md`
-2. Confirm the next roadmap release/capability.
-3. Present the proposed implementation approach before coding.
-4. Preserve all permanent architecture and explainability invariants.
+Current checkpoint:
 
-The following v0.10.1 rules are permanent regression constraints:
+**Documentation / architecture scope before production implementation.**
 
-* Reusable explainability contracts.
-* Semantic-role classification.
-* Bidirectional interpretation where mathematically meaningful.
-* Evidence-family de-duplication.
-* Direction/confidence separation.
-* Event Risk confidence-only behavior and 12-point maximum penalty.
-* Historical Setup Validation confidence-only behavior and ±8-point maximum adjustment.
-* BUY/SELL analytical parity.
+Before production code:
+
+1. Commit the approved Swing evidence/capability audit.
+2. Ensure all six canonical continuation documents identify v0.11.0 as the active release.
+3. Preserve `v0.10.1` as the clean tagged baseline.
+
+The first production-code batch must implement the strategy-aware analysis/evidence policy foundation.
+
+Do not activate Swing in the UI first.
+
+The strategy policy must be able to express, per strategy:
+
+* Provider applicability.
+* Strategy-specific parameters.
+* Lookbacks.
+* Threshold model.
+* Base reliability/weight.
+* Semantic role.
+* Direction behavior.
+* Confidence behavior.
+* Risk / entry-quality behavior.
+* Family/de-duplication constraints.
+
+v0.11.0 must audit every existing evidence and capability individually.
+
+Permanent Swing acceptance constraints:
+
+* Swing is not Trader on slower candles.
+* Human-readable cards and decision helpers.
+* Individual info paths for every user-facing analytical input/value.
+* BUY/SELL parity wherever mathematically meaningful.
+* Direction attribution reconciles to 100% of active post-family-cap directional influence.
+* Provider attribution reconciles to capped family attribution.
+* Confidence attribution remains separate from direction attribution.
+* Event Risk remains confidence-only with a maximum 12-point penalty.
+* Historical Setup Validation remains confidence-only with a maximum ±8-point adjustment.
+* Current analysis-window VWAP is not automatically valid Swing evidence.
+* RSI must not use a simplistic overbought-equals-SELL / oversold-equals-BUY Swing rule.
+* Price Extension must not automatically claim trend reversal.
+* Support/resistance proximity alone must not create confirmed direction.
+* 4H Relative Volume must not fabricate time-of-day normalization.
+* Synthetic/mock data remains explicitly identified.
+
+Approved roadmap:
+
+* v0.11.0 — Swing Strategy Brain.
+* v0.12.0 — Investor Strategy Brain.
+* v1.0.0 — validated multi-strategy milestone.

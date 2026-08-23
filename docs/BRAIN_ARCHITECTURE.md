@@ -1,6 +1,6 @@
 # TradePilot AI Brain Architecture
 
-Version: 0.10.1 explainability architecture + external context
+Version: 0.11.0 Swing strategy policy scope
 Status: Living design
 
 ## Core rule
@@ -175,6 +175,51 @@ Implemented through v0.6:
 
 Stock DNA never emits Buy/Sell by itself. It only changes the interpretation and weight of evidence.
 
+## v0.11 strategy-aware analysis policy
+
+v0.11.0 introduces a strategy-aware policy layer before existing evidence providers are reused for Swing.
+
+Conceptual flow:
+
+Strategy Type
+→ Strategy Analysis Policy
+→ Provider applicability
+→ Strategy-specific parameters / lookbacks / thresholds
+→ Evidence provider
+→ Strategy-aware contextual adjustment
+→ Evidence-family aggregation
+→ Consensus Engine
+→ Strategy recommendation policy
+→ Confidence-only modifiers
+→ Strategy-specific presentation and explainability
+
+The purpose is to share provider implementations only when the underlying calculation is genuinely reusable while allowing Trader and Swing to use different:
+
+- Applicability.
+- Parameters.
+- Lookbacks.
+- Thresholds.
+- Reliability.
+- Weight.
+- Semantic role.
+- Direction behavior.
+- Confidence behavior.
+- Risk / entry-quality behavior.
+
+An existing provider may therefore be:
+
+- Enabled unchanged.
+- Enabled with Swing calibration.
+- Used as context/confidence/entry-quality only.
+- Excluded from Swing.
+- Deferred until the required data quality exists.
+
+Swing must not be implemented as Trader logic running on slower candles.
+
+Detailed Swing evidence and capability decisions are defined in:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
 ## Brain roadmap
 
 ### v0.6 — Historical Context / Stock DNA foundation
@@ -192,15 +237,15 @@ Deferred intentionally:
 - Gap/earnings-gap behavior until event-aware data is available.
 
 ### v0.7 — Multi-Timeframe + Market Context Intelligence
-- Strategy-role hierarchy with a selectable Trader primary interval and automatically selected confirmation/backdrop intervals.
-- Higher-timeframe trend stays inside the Trend family.
+- Strategy-role hierarchy with selectable strategy primary intervals and automatically selected confirmation/backdrop intervals.
+- Higher-timeframe trend remains inside the Trend family.
 - Relative strength vs broad market and sector.
 - Market Context as an independent evidence family.
 
 ### v0.8 — Advanced Trader evidence
 Implemented:
 - EMA Structure inside Trend.
-- MACD Momentum inside Momentum, with histogram strength normalized by price.
+- MACD Momentum inside Momentum.
 - Volume Confirmation inside Participation.
 - Analysis-window VWAP Position inside Price Structure.
 - ATR-normalized local Support & Resistance inside Price Structure.
@@ -208,17 +253,15 @@ Implemented:
 - Evidence UI grouping by evidence family.
 
 Deferred intentionally:
-- ADX until historical validation shows it adds information beyond trend efficiency + EMA/Candle/Multi-Timeframe structure.
-- Bollinger Bands until evidence shows incremental value beyond Stock DNA, ATR and Price Extension.
-- True session VWAP until the live provider exposes reliable session boundaries.
+- ADX until historical validation shows incremental value.
+- Bollinger Bands until evidence shows incremental value.
+- True session VWAP until reliable session boundaries exist.
 
 ### v0.9 — Historical Setup Validation
 - Setup fingerprint from de-duplicated family state + Stock DNA + market context.
 - Similar historical case matching.
-- Follow-through vs a context-matched same-stock baseline.
-- Effective sample size, similarity quality, median forward move and excursion analysis.
+- Follow-through vs context-matched same-stock baseline.
 - Bounded confidence-only adjustment.
-- Synthetic development provider behind a replaceable historical-data interface.
 
 ### v0.10 — Event / broader-environment context
 - Earnings calendar/risk.
@@ -227,24 +270,44 @@ Deferred intentionally:
 - Volatility/risk regime.
 
 ### v0.10.1 — Explainability & Bidirectional Audit
-- Reusable `MetricExplainability` contract.
-- Explicit semantic-role classification.
-- Complete production-evidence explainability catalog.
-- Individual explainability paths for all seven Trader Analysis Context metrics.
-- Historical Setup Validation supportive/opposing explanation with ±8 hard bound.
-- Event Risk confidence-only behavior with 12-point maximum penalty.
-- Automated explainability-completeness and behavioral regression tests.
+- Reusable `MetricExplainability`.
+- Explicit semantic roles.
+- Complete production-evidence explainability.
+- Individual Analysis Context explainability.
+- Historical Validation ±8 confidence boundary.
+- Event Risk 12-point maximum penalty.
+- Automated explainability and behavioral invariants.
 
-### v1.0 — Swing and Investor brains
-- Swing-specific daily/weekly evidence.
-- Investor fundamentals, valuation, growth, quality and revisions.
+### v0.11.0 — Swing Strategy Brain
+- Strategy-aware evidence/applicability policy.
+- Evidence-by-evidence Swing calibration.
+- Swing timeframe/context orchestration.
+- Swing-specific Historical Setup Validation horizon.
+- Swing recommendation policy.
+- Human-readable Swing cards and decision helpers.
+- Individual info paths for every Swing analytical input.
+- Direction attribution reconciled to 100% of active post-family-cap influence.
+- Confidence attribution kept separate from directional attribution.
+
+### v0.12.0 — Investor Strategy Brain
+- Growth.
+- Profitability / Quality.
+- Financial Strength.
+- Valuation.
+- Revisions.
+- Long-term fundamental context.
+
+### v1.0.0 — Validated Multi-Strategy Milestone
+- Trader implemented and validated.
+- Swing implemented and validated.
+- Investor implemented and validated.
+- Strategy-specific recommendations coexist cleanly.
 
 ### v1.x — Historical calibration + AI Analyst
-- Replace development analogs with real historical setup/outcome storage.
+- Real historical setup/outcome storage.
 - Walk-forward / out-of-sample calibration.
 - Evidence effectiveness by stock and regime.
-- No live weight optimization from in-sample performance alone.
-- AI explanations grounded in deterministic current evidence + validated history.
+- AI explanations grounded in deterministic evidence and validated history.
 
 ## Explainability rule
 
@@ -325,10 +388,60 @@ Technical direction and entry quality are not the same question. A stock may hav
 
 ## Explainable attribution layer
 
-The Consensus Engine emits exact post-de-duplication attribution alongside its direction/confidence outputs. Each evidence family receives a signed direction-impact value and a confidence-contribution value. Provider-level values reconcile to the family total while preserving the family cap. Family direction impacts reconcile to the final -100..+100 direction score; family confidence points reconcile to final confidence. The UI may convert these exact values into percentage shares, but it must retain the signed point values for technical drill-down.
+The Consensus Engine emits exact post-de-duplication attribution alongside direction and confidence outputs.
 
-Confidence attribution is not treated as a probability model. The engine first builds an evidence-strength baseline, then applies provider coverage, evidence-group coverage, signal alignment and reliability factors. These adjustments are emitted as explicit confidence-modifier impacts so the user can see what reduced confidence.
+Each evidence family receives:
 
+- Signed direction-impact value.
+- Confidence-contribution value.
+
+Provider-level values must reconcile to the family total while preserving the family cap.
+
+### User-facing direction attribution
+
+For user-facing direction percentages, active absolute directional influence is normalized into a 100% basis only after:
+
+- Strategy-specific weighting.
+- Provider reliability.
+- Contextual adjustment.
+- Signal magnitude.
+- Evidence-family aggregation.
+- Family caps.
+- Correlation de-duplication.
+
+Therefore the displayed percentage represents actual current-case influence rather than configured base weight.
+
+The active family direction basis must reconcile to 100%.
+
+A family with no active directional contribution is excluded from the denominator.
+
+Provider percentages shown inside a family must reconcile to that family's capped contribution.
+
+Supportive and opposing contributions remain explicitly identified.
+
+### Confidence attribution
+
+Confidence attribution remains separate from directional attribution.
+
+Evidence-derived confidence should explain:
+
+- Provider coverage.
+- Independent family coverage.
+- Signal alignment.
+- Conflict.
+- Reliability.
+- Family confidence contribution.
+
+Confidence-only modifiers remain explicit point adjustments.
+
+Examples:
+
+- Event Risk: negative confidence points only, maximum -12.
+- Historical Setup Validation: bounded ±8 confidence points.
+
+These modifiers are never normalized into the directional 100% basis.
+
+Confidence remains model confidence, not probability of profit.
 
 ## v0.9 historical-validation overlay
 

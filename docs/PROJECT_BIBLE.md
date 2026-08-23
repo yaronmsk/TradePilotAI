@@ -1,6 +1,6 @@
 # TradePilot AI Project Bible
 
-Version: 1.7
+Version: 1.8
 Status: Living reference
 
 ## Mission
@@ -28,6 +28,16 @@ Build an explainable, statistically grounded investment analysis platform that h
 - Confidence/risk-only inputs cannot manufacture Buy/Sell direction and must declare their bounded effect.
 - Direction influence and confidence contribution must remain separate.
 - Evidence attribution must respect evidence-family aggregation and family caps.
+- Every user-facing card, evidence item, decision helper, metric, score, percentage, context value and recommendation input must be understandable in plain human language.
+- Every individual user-facing analytical input/value must have its own visible info/explainability path.
+- A card-level explanation does not replace individual input/value explainability.
+- Main UI should present the human conclusion first and place deeper technical/statistical detail behind the info path.
+- Direction attribution percentages must represent actual current-case effective influence rather than configured base weights.
+- The active post-de-duplication directional basis must reconcile to 100%.
+- Provider attribution shown inside an evidence family must reconcile to that family's capped contribution.
+- Supportive and opposing directional influence must remain identifiable.
+- Confidence attribution must remain separate from directional attribution.
+- Confidence-only modifiers must be displayed as explicit bounded point adjustments rather than fake evidence percentages.
 - When evidence is inadequate or conflicted, WAIT/HOLD is preferable to false certainty.
 
 ## Current architecture
@@ -111,12 +121,31 @@ Same-time-of-day historical RVOL is intentionally deferred until the data provid
 Minutes to days. Technical, volume, volatility, market regime and event-aware. Active.
 
 ### Swing
-Days to weeks. Multi-timeframe trend, support/resistance, volume confirmation, market/sector regime and event-aware. Planned.
+Days to weeks.
+
+**v0.11.0 active development.**
+
+Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation is implemented and validated.
+
+Swing must not be implemented as Trader logic running on slower candles.
+
+Approved initial timeframe hierarchy:
+
+- Default: 1D primary → 1W confirmation → 1M regime.
+- Alternate: 4H primary → 1D confirmation → 1W regime.
+
+Every existing evidence provider and capability requires an explicit Swing applicability/calibration decision.
+
+Detailed Swing evidence and capability rules are defined in:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
 ### Investor
-Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context. Planned.
+Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-The same stock may legitimately have different conclusions for all three strategies.
+Planned for v0.12.0.
+
+The same stock may legitimately have different conclusions for all three strategies because strategy horizons, evidence applicability, parameters, context and historical-validation windows differ.
 
 ## Feature research rule
 
@@ -157,8 +186,10 @@ When the brain begins learning from historical effectiveness:
 6. v0.9 — Context-matched Historical Setup Validation / similar-case confidence overlay. Done.
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
-9. v1.0 — Swing and Investor brains.
-10. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
+9. v0.11.0 — Swing Strategy Brain. Active development.
+10. v0.12.0 — Investor Strategy Brain.
+11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
+12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
 ## UI roadmap
 
@@ -189,17 +220,68 @@ v0.8 expands provider-level detail without multiplying independent confidence. T
 
 ## Recommendation attribution rule
 
-Every strategy recommendation must be able to explain both **direction** and **confidence** quantitatively.
+Every strategy recommendation must explain both **direction** and **confidence** quantitatively.
 
 Direction influence and confidence contribution are separate concepts.
 
-Family-level percentages are shown first; exact provider-level impact remains expandable.
+### Direction attribution
 
-Attribution must reconcile to the same deterministic Consensus Engine math used to create the recommendation.
+Family-level direction attribution is shown first; provider-level detail remains expandable.
 
-Correlated providers remain capped inside their evidence family, so adding another EMA/trend-style signal cannot manufacture extra independent influence.
+Displayed direction percentages must be calculated from the same effective deterministic math used to produce the recommendation after:
 
-Confidence attribution must also show the global coverage, alignment and reliability adjustments that transform evidence strength into final confidence.
+- Strategy-specific weighting.
+- Provider reliability.
+- Contextual adjustment.
+- Signal magnitude.
+- Evidence-family aggregation.
+- Family caps.
+- Correlation de-duplication.
+
+Configured base weight is not the same thing as actual current-case influence and must not be presented as though it were.
+
+The active directional basis must reconcile to **100%**.
+
+A family with no active directional contribution is excluded from the 100% denominator rather than being assigned a decorative percentage.
+
+Each active family contribution must identify whether it:
+
+- Supports the final direction.
+- Opposes the final direction.
+
+Provider-level attribution shown inside a family must reconcile exactly to that family's capped contribution.
+
+Correlated providers cannot gain artificial independent influence.
+
+### Confidence attribution
+
+Confidence attribution remains separate from directional attribution.
+
+Evidence-derived confidence should explain, where relevant:
+
+- Evidence coverage.
+- Independent family coverage.
+- Reliability.
+- Agreement.
+- Conflict.
+- Family confidence contribution.
+
+Confidence-only overlays must remain explicit bounded point adjustments.
+
+Examples:
+
+- Event Risk: negative confidence points only, maximum -12.
+- Historical Setup Validation: maximum ±8 final-confidence points.
+
+They are never normalized into the directional 100% basis.
+
+Final confidence conceptually reconciles as:
+
+Evidence-derived confidence
++/- bounded confidence modifiers
+= Final confidence
+
+Confidence is not a probability-of-profit guarantee.
 
 ## v0.10.1 Explainability architecture rule
 
@@ -263,6 +345,114 @@ Reusable explanation content exposes, where applicable:
 Architecture tests must fail when registered production metrics lack complete explainability metadata.
 
 Behavioral tests must preserve semantic-role boundaries, evidence-family de-duplication, direction/confidence separation and BUY/SELL analytical parity.
+
+## v0.11.0 Swing Strategy Brain rule
+
+Detailed implementation contract:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+v0.11.0 activates Swing as TradePilot AI's second real strategy.
+
+Swing is a days-to-weeks strategy and must not inherit Trader evidence semantics automatically.
+
+Before any existing capability affects a Swing recommendation, the implementation must explicitly determine:
+
+1. Whether Swing should use it.
+2. Why it matters to Swing.
+3. Correct Swing timeframe and lookback.
+4. Calculation and threshold policy.
+5. Direction effect.
+6. Confidence effect.
+7. Risk or entry-quality effect.
+8. Evidence-family/de-duplication relationship.
+9. BUY and SELL interpretation.
+10. Human-readable presentation.
+11. Individual info/explainability behavior.
+12. Attribution behavior.
+13. Important limitations.
+
+### Strategy-aware policy
+
+v0.11.0 must introduce a strategy-aware analysis/evidence policy before Swing is activated in the UI.
+
+The policy must support per-strategy:
+
+- Provider applicability.
+- Strategy-specific parameters.
+- Lookbacks.
+- Thresholds.
+- Base reliability/weight.
+- Semantic role.
+- Direction behavior.
+- Confidence behavior.
+- Risk / entry-quality behavior.
+- Evidence-family constraints.
+
+Shared provider implementations are preferred where the underlying calculation is genuinely reusable.
+
+Duplicating an entire Trader provider merely to create a Swing version is not the default architecture.
+
+### Approved initial Swing evidence decisions
+
+- Candle Trend — reuse with Swing calibration.
+- EMA Structure — reuse with Swing calibration.
+- Multi-Timeframe Trend — core Swing evidence.
+- RSI — reuse with materially different trend/regime-aware interpretation.
+- MACD Momentum — reuse with Swing calibration.
+- Relative Volume — conditional reuse; 4H must not fabricate same-time-of-day normalization.
+- Volume Confirmation — reuse with Swing calibration.
+- Current analysis-window VWAP Position — excluded from initial Swing scoring.
+- Support & Resistance — core Swing evidence with confirmation-aware semantics.
+- Price Extension — primarily entry-quality/confidence/risk context and must not automatically claim trend reversal.
+- Market & Sector Context / Relative Strength — core Swing evidence.
+- Market Breadth — reused inside Market Context.
+- News Sentiment — reuse with Swing-specific freshness/materiality policy.
+- Event Risk — confidence/risk-only with maximum 12-point penalty and no positive bonus.
+- Stock DNA — core strategy context and must become strategy-aware.
+- Historical Setup Validation — confidence-only, strategy/timeframe specific and bounded to ±8 points.
+
+### Swing UI and explainability
+
+Every Swing card, evidence item, decision helper, metric and recommendation input must remain understandable in plain language.
+
+Every individual analytical input/value requires its own visible info/explainability path.
+
+The main UI should describe human meaning first.
+
+Example:
+
+Preferred:
+
+`Entry stretch: Extended`
+
+with detailed ATR calculation behind info.
+
+Avoid:
+
+`Extension score: 1.82`
+
+without explanation.
+
+Decision helpers may summarize existing evidence but must not create another independent vote when derived from evidence already counted by the Consensus Engine.
+
+### Swing attribution
+
+Direction attribution must reconcile to 100% of active effective directional influence after family de-duplication and caps.
+
+Provider shares must reconcile to their family's capped contribution.
+
+Direction attribution and confidence attribution remain separate.
+
+Event Risk and Historical Setup Validation remain explicit bounded confidence-point adjustments rather than fake pieces of the directional 100%.
+
+### Data honesty
+
+Synthetic/mock data must remain explicitly identified.
+
+Swing weights or thresholds must not be described as statistically optimized from synthetic historical outcomes.
+
+Neutral or unavailable evidence is preferable to fabricated information.
 
 ## Historical Setup Validation rule
 

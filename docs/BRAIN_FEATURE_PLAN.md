@@ -105,16 +105,114 @@ Primary families:
 - Event risk.
 
 ### Swing
-Horizon: days to weeks.
 
-Primary families:
-- Daily/weekly trend alignment.
+Horizon:
+
+**Days to weeks.**
+
+Current release:
+
+**v0.11.0 — Swing Strategy Brain**
+
+Status:
+
+**Active development / scope approved.**
+
+Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
+
+Detailed evidence, capability and acceptance contract:
+
+`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+
+Swing is not Trader logic running on slower candles.
+
+### Approved Swing timeframe hierarchy
+
+Default:
+
+- 1D primary.
+- 1W confirmation.
+- 1M regime.
+
+Alternate:
+
+- 4H primary.
+- 1D confirmation.
+- 1W regime.
+
+### Primary Swing analytical areas
+
+- Multi-timeframe trend alignment.
+- Trend structure.
 - Momentum.
 - Support/resistance.
-- Participation.
+- Breakout/breakdown structure.
+- Participation and volume confirmation.
 - Relative strength.
-- Market/sector regime.
-- Earnings/event risk.
+- Market and sector regime.
+- Market breadth.
+- Volatility.
+- Entry-quality / price-stretch context.
+- Reliable/material news context.
+- Scheduled event risk.
+- Strategy-specific Historical Setup Validation.
+
+### Evidence applicability rule
+
+No Trader evidence provider is automatically enabled for Swing.
+
+Every existing evidence provider and capability requires an explicit decision covering:
+
+- Whether Swing should use it.
+- Why it matters.
+- Correct timeframe/lookback.
+- Calculation/threshold changes.
+- Direction impact.
+- Confidence impact.
+- Risk or entry-quality impact.
+- Evidence-family relationship.
+- BUY/SELL behavior.
+- Human-readable presentation.
+- Individual info/explainability path.
+- Attribution behavior.
+- Limitations.
+
+### Current approved evidence decisions
+
+- Candle Trend — reuse with Swing calibration.
+- EMA Structure — reuse with Swing calibration.
+- Multi-Timeframe Trend — core Swing evidence.
+- RSI — reuse with trend/regime-aware Swing interpretation.
+- MACD Momentum — reuse with Swing calibration.
+- Relative Volume — conditional reuse; 4H must not fabricate same-time-of-day normalization.
+- Volume Confirmation — reuse with Swing calibration.
+- Current analysis-window VWAP Position — excluded from initial Swing scoring.
+- Support & Resistance — core Swing evidence with confirmation-aware semantics.
+- Price Extension — primarily entry-quality/confidence/risk context; must not automatically claim reversal.
+- Market & Sector Context / Relative Strength — core Swing evidence.
+- Market Breadth — reused within Market Context.
+- News Sentiment — reuse with Swing-specific freshness/materiality.
+- Event Risk — confidence/risk-only; maximum 12-point penalty and no positive bonus.
+- Stock DNA — core contextual input and must become strategy-aware.
+- Historical Setup Validation — confidence-only, strategy/timeframe-specific and bounded to ±8 points.
+
+### Swing UI / explainability rules
+
+Every Swing card, evidence item, metric, decision helper and recommendation input must be understandable in plain human language.
+
+Every individual analytical input/value requires its own visible info/explainability path.
+
+The normal UI should show the human meaning first and technical details second.
+
+Direction attribution must reconcile to **100%** of active effective directional influence after evidence-family de-duplication and caps.
+
+Provider attribution must reconcile to the capped family contribution.
+
+Confidence attribution remains separate from direction attribution.
+
+Confidence-only modifiers such as Event Risk and Historical Setup Validation remain explicit bounded point adjustments rather than fake percentages.
+
+Decision helpers may summarize already-counted evidence but must not create another independent vote.
 
 ### Investor
 Horizon: months to years.
@@ -195,8 +293,52 @@ Completed safeguards include:
 - Evidence-family de-duplication and direction/confidence separation preserved.
 - BUY/SELL provider regression coverage preserved.
 
-### v1.0 — Swing + Investor Engines
-Separate strategy-specific data and logic, all visible in the Strategy Summary.
+### v0.11.0 — Swing Strategy Brain
+
+Activate Swing as TradePilot AI's second real strategy.
+
+Includes:
+
+- Strategy-aware analysis/evidence policy.
+- Swing-specific provider applicability.
+- Swing-specific provider calibration.
+- Swing timeframe/context orchestration.
+- Strategy-aware Stock DNA adjustment.
+- Swing-specific Event Risk relevance.
+- Swing-specific Historical Setup Validation horizon.
+- Swing recommendation policy.
+- Reconciled direction attribution.
+- Separate confidence attribution.
+- Human-readable Swing cards and decision helpers.
+- Individual info paths for every user-facing analytical input.
+- BUY/SELL parity and regression protection.
+
+### v0.12.0 — Investor Strategy Brain
+
+Introduce the dedicated long-horizon Investor engine.
+
+Planned analytical families include:
+
+- Growth.
+- Profitability / Quality.
+- Financial Strength.
+- Valuation.
+- Revisions.
+- Competitive / industry context.
+- Long-term market and technical context.
+
+Investor must use strategy-specific fundamental logic rather than reusing Swing or Trader semantics.
+
+### v1.0.0 — Validated Multi-Strategy Milestone
+
+TradePilot AI reaches the v1.0.0 strategy milestone when:
+
+- Trader is implemented and validated.
+- Swing is implemented and validated.
+- Investor is implemented and validated.
+- Each strategy has independent horizon-appropriate evidence and recommendation logic.
+- Strategy Summary cleanly switches between real strategy recommendations.
+- Explainability, attribution, BUY/SELL parity and data-honesty rules remain consistent across strategies.
 
 ### v1.x — Historical Calibration + AI Analyst
 Replace development historical analogs with real setup/outcome data, add walk-forward/out-of-sample calibration, “what would change this recommendation?”, and AI explanations grounded only in deterministic evidence plus validated history.
