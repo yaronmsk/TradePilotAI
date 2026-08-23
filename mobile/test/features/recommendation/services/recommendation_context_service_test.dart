@@ -21,11 +21,13 @@ void main() {
 
     expect(context.multiTimeframeProfile.hasSufficientData, isTrue);
     expect(context.multiTimeframeProfile.alignment, TimeframeAlignment.aligned);
+
     expect(context.marketContextProfile.hasSufficientData, isTrue);
     expect(
       context.marketContextProfile.relativeStrength,
       RelativeStrengthState.outperforming,
     );
+
     expect(context.externalContextProfile.marketBreadth.isAvailable, isTrue);
     expect(context.externalContextProfile.eventRisk.isAvailable, isTrue);
     expect(context.externalContextProfile.newsSentiment.isAvailable, isTrue);
@@ -50,6 +52,7 @@ void main() {
       timeframe: '15m',
       candleCount: 48,
     );
+
     final plan = StrategyTimeframePlan.traderForPrimary('15m');
 
     final context = await service.loadTraderContext(primary, plan: plan);
@@ -58,5 +61,49 @@ void main() {
     expect(context.multiTimeframeProfile.primary.timeframe, '15m');
     expect(context.multiTimeframeProfile.confirmation.timeframe, '1h');
     expect(context.multiTimeframeProfile.regime.timeframe, '1d');
+  });
+
+  test('loads the approved default Swing context hierarchy', () async {
+    final plan = StrategyTimeframePlan.swing;
+
+    final primary = await marketService.loadSnapshot(
+      symbol: 'NVDA',
+      timeframe: plan.primaryTimeframe,
+      candleCount: plan.primaryCandleCount,
+    );
+
+    final context = await service.loadSwingContext(primary, plan: plan);
+
+    expect(context.multiTimeframeProfile.hasSufficientData, isTrue);
+
+    expect(context.multiTimeframeProfile.primary.timeframe, '1d');
+    expect(context.multiTimeframeProfile.confirmation.timeframe, '1w');
+    expect(context.multiTimeframeProfile.regime.timeframe, '1mo');
+
+    expect(context.multiTimeframeProfile.alignment, TimeframeAlignment.aligned);
+
+    expect(context.marketContextProfile.hasSufficientData, isTrue);
+  });
+
+  test('loads the approved alternate 4h Swing context hierarchy', () async {
+    final plan = StrategyTimeframePlan.swingForPrimary('4h');
+
+    final primary = await marketService.loadSnapshot(
+      symbol: 'NVDA',
+      timeframe: plan.primaryTimeframe,
+      candleCount: plan.primaryCandleCount,
+    );
+
+    final context = await service.loadSwingContext(primary, plan: plan);
+
+    expect(context.multiTimeframeProfile.hasSufficientData, isTrue);
+
+    expect(context.multiTimeframeProfile.primary.timeframe, '4h');
+    expect(context.multiTimeframeProfile.confirmation.timeframe, '1d');
+    expect(context.multiTimeframeProfile.regime.timeframe, '1w');
+
+    expect(context.multiTimeframeProfile.alignment, TimeframeAlignment.aligned);
+
+    expect(context.marketContextProfile.hasSufficientData, isTrue);
   });
 }

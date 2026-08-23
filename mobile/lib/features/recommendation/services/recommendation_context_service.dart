@@ -3,8 +3,8 @@ import '../../market/services/market_service.dart';
 import '../context/external_context_profile.dart';
 import '../context/external_context_provider.dart';
 import '../context/market_context_profile.dart';
-import '../context/market_context_target.dart';
 import '../context/market_context_profile_service.dart';
+import '../context/market_context_target.dart';
 import '../context/mock_external_context_provider.dart';
 import '../context/mock_security_context_resolver.dart';
 import '../context/multi_timeframe_profile.dart';
@@ -37,6 +37,17 @@ class RecommendationContextService {
       primarySnapshot,
       plan: plan,
       strategy: StrategyType.trader,
+    );
+  }
+
+  Future<RecommendationAnalysisContext> loadSwingContext(
+    MarketSnapshot primarySnapshot, {
+    StrategyTimeframePlan plan = StrategyTimeframePlan.swing,
+  }) {
+    return loadContext(
+      primarySnapshot,
+      plan: plan,
+      strategy: StrategyType.swing,
     );
   }
 
@@ -89,6 +100,7 @@ class RecommendationContextService {
 
     final loaded = await Future.wait(futures);
     final externalContext = await externalContextFuture;
+
     final stockConfirmation = loaded[0];
     final stockRegime = loaded[1];
     final marketConfirmation = loaded[2];
@@ -103,6 +115,7 @@ class RecommendationContextService {
             confirmation: stockConfirmation,
             regime: stockRegime,
             plan: plan,
+            strategy: strategy,
           )
         : MultiTimeframeProfile.unknown(plan: plan);
 
