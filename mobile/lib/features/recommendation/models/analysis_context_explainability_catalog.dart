@@ -1,5 +1,6 @@
 import 'analysis_context_metric.dart';
 import 'metric_explainability.dart';
+import 'strategy_summary.dart';
 
 class AnalysisContextExplainabilityCatalog {
   const AnalysisContextExplainabilityCatalog._();
@@ -18,7 +19,32 @@ class AnalysisContextExplainabilityCatalog {
       limitations:
           'A candle interval is not the expected holding period. Different intervals can legitimately show different market conditions, especially during transitions.',
     ),
-
+    AnalysisContextMetric.confirmationInterval: MetricExplainability(
+      semanticRole: MetricSemanticRole.contextConfiguration,
+      whatItIs:
+          'The broader candle interval used to check whether the primary setup has trend support.',
+      calculation:
+          'TradePilot automatically derives the confirmation interval from the selected strategy and primary analysis interval, then evaluates trend behavior on that broader view.',
+      whyItMatters:
+          'A setup is generally better confirmed when the next broader trend agrees with it and less confirmed when that trend conflicts with it.',
+      recommendationImpact:
+          'The interval itself does not create bullish or bearish evidence. The trend observed on this interval participates inside Multi-Timeframe Trend evidence and is de-duplicated inside the Trend family.',
+      limitations:
+          'The broader confirmation trend can lag fast reversals. Disagreement is valid information and should weaken confirmation rather than automatically invalidate the primary setup.',
+    ),
+    AnalysisContextMetric.broaderRegimeInterval: MetricExplainability(
+      semanticRole: MetricSemanticRole.contextConfiguration,
+      whatItIs:
+          'The slowest configured timeframe used to show the larger trend backdrop around the active setup.',
+      calculation:
+          'TradePilot automatically selects a regime interval from the active strategy timeframe plan and evaluates the broader trend on that interval.',
+      whyItMatters:
+          'A larger trend backdrop helps identify whether the active setup is occurring with, against or during a transition in the broader market structure.',
+      recommendationImpact:
+          'The interval itself is configuration and does not vote Buy or Sell. The trend measured on it contributes only through Multi-Timeframe Trend evidence inside the capped Trend family.',
+      limitations:
+          'A slow regime view reacts later than the primary setup. It should provide context rather than override fresh evidence merely because it changes more slowly.',
+    ),
     AnalysisContextMetric.timeframeAlignment: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
@@ -26,7 +52,7 @@ class AnalysisContextExplainabilityCatalog {
       calculation:
           'TradePilot evaluates trend direction on the primary, confirmation and regime timeframes selected by the active strategy and compares their directional agreement.',
       whyItMatters:
-          'A short-term setup generally has stronger confirmation when broader trend views agree with it and weaker confirmation when they oppose it.',
+          'An active setup generally has stronger confirmation when broader trend views agree with it and weaker confirmation when they oppose it.',
       supportiveInterpretation:
           'Alignment between the active setup and broader trend views strengthens confirmation in that direction.',
       opposingInterpretation:
@@ -38,7 +64,6 @@ class AnalysisContextExplainabilityCatalog {
       limitations:
           'Different timeframes can legitimately disagree during reversals and regime changes. Alignment improves context but does not guarantee continuation.',
     ),
-
     AnalysisContextMetric.marketEnvironment: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
@@ -58,7 +83,6 @@ class AnalysisContextExplainabilityCatalog {
       limitations:
           'Benchmark and sector selection matter, and stock-specific events can overwhelm the broader environment. Market context is supporting evidence, not a standalone trading decision.',
     ),
-
     AnalysisContextMetric.marketBreadth: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
@@ -78,7 +102,6 @@ class AnalysisContextExplainabilityCatalog {
       limitations:
           'Breadth quality depends on the completeness of the underlying stock universe. The current development source is synthetic and must not be treated as authoritative live market intelligence.',
     ),
-
     AnalysisContextMetric.relativeStrength: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
@@ -98,7 +121,6 @@ class AnalysisContextExplainabilityCatalog {
       limitations:
           'Relative performance depends on the selected benchmark and observation window. Short-lived divergence does not necessarily indicate a lasting trend.',
     ),
-
     AnalysisContextMetric.eventRisk: MetricExplainability(
       semanticRole: MetricSemanticRole.confidenceRiskOnly,
       whatItIs:
@@ -114,7 +136,6 @@ class AnalysisContextExplainabilityCatalog {
       boundedImpact:
           'Event Risk can reduce confidence by at most 12 points. It cannot increase confidence and cannot create Buy/Sell direction.',
     ),
-
     AnalysisContextMetric.newsSentiment: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
@@ -136,7 +157,84 @@ class AnalysisContextExplainabilityCatalog {
     ),
   };
 
-  static MetricExplainability forMetric(AnalysisContextMetric metric) {
+  static const _swingPrimaryAnalysisInterval = MetricExplainability(
+    semanticRole: MetricSemanticRole.contextConfiguration,
+    whatItIs: 'The candle interval used to identify the active Swing setup.',
+    calculation:
+        'Swing currently supports a 1-day primary interval by default or a 4-hour alternate interval. Selecting the primary interval automatically selects its confirmation and broader-regime views.',
+    whyItMatters:
+        'The primary interval defines the market structure TradePilot treats as the current Swing setup. It is analysis granularity, not a promise about how many days a position should be held.',
+    recommendationImpact:
+        'The interval itself does not create bullish or bearish evidence. Within Swing Multi-Timeframe Trend analysis, the trend measured on the primary interval anchors the active setup direction.',
+    limitations:
+        'Different primary intervals can legitimately produce different Swing setups. A 4-hour setup can change before the daily structure changes.',
+  );
+
+  static const _swingConfirmationInterval = MetricExplainability(
+    semanticRole: MetricSemanticRole.contextConfiguration,
+    whatItIs:
+        'The next broader timeframe used to check whether the active Swing setup has trend confirmation.',
+    calculation:
+        'For a 1-day Swing setup, TradePilot uses 1-week candles for confirmation. For a 4-hour Swing setup, it uses 1-day candles.',
+    whyItMatters:
+        'A broader confirming trend can make a Swing setup more coherent. Opposition is a warning that the primary setup is moving against a larger trend.',
+    recommendationImpact:
+        'The interval itself is not bullish or bearish. The trend observed on it can strengthen or weaken Multi-Timeframe Trend evidence, but it cannot independently flip the primary Swing setup direction.',
+    limitations:
+        'Confirmation is intentionally slower than the primary setup. During genuine reversals it may initially disagree with a new primary trend.',
+  );
+
+  static const _swingBroaderRegimeInterval = MetricExplainability(
+    semanticRole: MetricSemanticRole.contextConfiguration,
+    whatItIs:
+        'The slowest Swing timeframe used to describe the larger trend regime behind the setup.',
+    calculation:
+        'For a 1-day Swing setup, TradePilot uses 1-month candles as the broader regime view. For a 4-hour Swing setup, it uses 1-week candles.',
+    whyItMatters:
+        'The regime view helps show whether a Swing trade is aligned with the larger structure or attempting to move against it.',
+    recommendationImpact:
+        'The interval itself does not create direction. Its measured trend may reinforce or weaken Multi-Timeframe Trend evidence, but it is contextual and cannot independently reverse the primary Swing setup.',
+    limitations:
+        'The broader regime reacts slowly and can remain opposed during the early stage of a real trend change. It must not automatically veto newer evidence.',
+  );
+
+  static const _swingTimeframeAlignment = MetricExplainability(
+    semanticRole: MetricSemanticRole.directionalEvaluative,
+    whatItIs:
+        'Shows whether the broader Swing trend views support or conflict with the active primary Swing setup.',
+    calculation:
+        'Within Swing Multi-Timeframe Trend context, the primary setup carries 60% of the internal role-weighted directional strength, confirmation 25%, and broader regime 15%. Confirmation quality uses the two broader views with 65% emphasis on the confirmation interval and 35% on the regime interval.',
+    whyItMatters:
+        'Swing setups are generally stronger when daily/weekly/monthly structure agrees and less reliable when the active setup is fighting broader trends.',
+    supportiveInterpretation:
+        'Broader timeframes aligned with the primary Swing setup strengthen trend confirmation.',
+    opposingInterpretation:
+        'Broader timeframes opposing the primary Swing setup reduce its trend strength and confidence.',
+    neutralInterpretation:
+        'Mixed or neutral broader views provide limited confirmation and can move the Multi-Timeframe Trend result toward neutral.',
+    recommendationImpact:
+        'The primary Swing timeframe anchors direction. Broader views may strengthen or weaken that setup, but they cannot independently flip it by simple voting. Multi-Timeframe Trend remains one capped Trend-family evidence source. The 60/25/15 figures are internal timeframe-role weights, not percentages of the final recommendation.',
+    limitations:
+        'These role weights are deterministic v0.11 policy assumptions, not statistically optimized performance weights. Broader-timeframe disagreement is common during real regime transitions.',
+  );
+
+  static MetricExplainability forMetric(
+    AnalysisContextMetric metric, {
+    StrategyType? strategy,
+  }) {
+    if (strategy == StrategyType.swing) {
+      return switch (metric) {
+        AnalysisContextMetric.primaryAnalysisInterval =>
+          _swingPrimaryAnalysisInterval,
+        AnalysisContextMetric.confirmationInterval =>
+          _swingConfirmationInterval,
+        AnalysisContextMetric.broaderRegimeInterval =>
+          _swingBroaderRegimeInterval,
+        AnalysisContextMetric.timeframeAlignment => _swingTimeframeAlignment,
+        _ => definitions[metric]!,
+      };
+    }
+
     return definitions[metric]!;
   }
 

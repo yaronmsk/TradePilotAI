@@ -126,6 +126,10 @@ void main() {
     expect(find.text('15m'), findsOneWidget);
     expect(find.text('30m'), findsOneWidget);
     expect(find.text('1h'), findsOneWidget);
+    expect(find.text('Confirmation Interval'), findsOneWidget);
+    expect(find.textContaining('1-hour candles'), findsOneWidget);
+    expect(find.text('Broader Regime Interval'), findsOneWidget);
+    expect(find.textContaining('1-day candles'), findsOneWidget);
     expect(find.text('Timeframe Alignment'), findsOneWidget);
     expect(find.text('Aligned'), findsOneWidget);
     expect(find.text('Market Environment'), findsOneWidget);
@@ -140,15 +144,9 @@ void main() {
     expect(find.text('News Sentiment'), findsOneWidget);
     expect(find.text('Positive'), findsOneWidget);
     expect(
-      find.textContaining('Primary trend (5-minute candles): Bullish'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('Confirmation trend (1-hour candles): Bullish'),
-      findsOneWidget,
-    );
-    expect(
-      find.textContaining('Daily backdrop (1-day candles): Bullish'),
+      find.textContaining(
+        'Both broader trend views support the primary Trader setup',
+      ),
       findsOneWidget,
     );
   });
@@ -219,6 +217,8 @@ void main() {
 
       const tooltips = [
         'About Primary Analysis Interval',
+        'About Confirmation Interval',
+        'About Broader Regime Interval',
         'About Timeframe Alignment',
         'About Market Environment',
         'About Market Breadth',
@@ -271,6 +271,104 @@ void main() {
       expect(find.text('Directional / evaluative'), findsOneWidget);
       expect(find.text('Supportive interpretation'), findsOneWidget);
       expect(find.text('Opposing interpretation'), findsOneWidget);
+    },
+  );
+  testWidgets(
+    'presents human-readable Swing timeframe roles with individual info paths',
+    (tester) async {
+      tester.view.devicePixelRatio = 1.0;
+      tester.view.physicalSize = const Size(900, 1200);
+
+      addTearDown(() {
+        tester.view.resetPhysicalSize();
+        tester.view.resetDevicePixelRatio();
+      });
+
+      final swingContext = RecommendationAnalysisContext(
+        multiTimeframeProfile: MultiTimeframeProfile(
+          plan: StrategyTimeframePlan.swing,
+          primary: const TimeframeTrendSignal(
+            role: TimeframeRole.primary,
+            timeframe: '1d',
+            direction: EvidenceDirection.bullish,
+            movePercent: 8,
+            strengthScore: 75,
+            trendEfficiency: 0.72,
+            sampleSize: 90,
+          ),
+          confirmation: const TimeframeTrendSignal(
+            role: TimeframeRole.confirmation,
+            timeframe: '1w',
+            direction: EvidenceDirection.bullish,
+            movePercent: 14,
+            strengthScore: 80,
+            trendEfficiency: 0.76,
+            sampleSize: 78,
+          ),
+          regime: const TimeframeTrendSignal(
+            role: TimeframeRole.regime,
+            timeframe: '1mo',
+            direction: EvidenceDirection.bearish,
+            movePercent: -12,
+            strengthScore: 65,
+            trendEfficiency: 0.68,
+            sampleSize: 60,
+          ),
+          alignment: TimeframeAlignment.mixed,
+          directionScore: 48,
+          agreement: 0.65,
+          reliability: 0.82,
+        ),
+        marketContextProfile: analysisContext.marketContextProfile,
+        externalContextProfile: analysisContext.externalContextProfile,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: AnalysisContextCard(
+                strategy: StrategyType.swing,
+                analysisContext: swingContext,
+                timeframePlan: StrategyTimeframePlan.swing,
+                availablePrimaryTimeframes:
+                    StrategyTimeframePlan.swingPrimaryTimeframes,
+                onPrimaryTimeframeSelected: null,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.text('Swing Analysis Context'), findsOneWidget);
+      expect(find.text('Confirmation Interval'), findsOneWidget);
+      expect(find.textContaining('1-week candles • Bullish'), findsOneWidget);
+      expect(find.text('Broader Regime Interval'), findsOneWidget);
+      expect(find.textContaining('1-month candles • Bearish'), findsOneWidget);
+
+      expect(find.byTooltip('About Confirmation Interval'), findsOneWidget);
+      expect(find.byTooltip('About Broader Regime Interval'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('About Confirmation Interval'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Confirmation Interval'), findsOneWidget);
+      expect(find.text('Context / configuration'), findsOneWidget);
+      expect(find.textContaining('cannot independently flip'), findsOneWidget);
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byTooltip('About Timeframe Alignment'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Timeframe Alignment'), findsOneWidget);
+      expect(find.text('Directional / evaluative'), findsOneWidget);
+      expect(find.textContaining('60%'), findsOneWidget);
+      expect(
+        find.textContaining('not percentages of the final recommendation'),
+        findsOneWidget,
+      );
     },
   );
 }

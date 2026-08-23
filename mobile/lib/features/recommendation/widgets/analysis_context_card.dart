@@ -74,15 +74,41 @@ class AnalysisContextCard extends StatelessWidget {
           const SizedBox(height: 12),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
+            metric: AnalysisContextMetric.confirmationInterval,
+            label: AnalysisContextMetric.confirmationInterval.label,
+            value:
+                '${StrategyTimeframePlan.timeframeDescription(timeframePlan.confirmationTimeframe)}'
+                '${multiTimeframe.confirmation.isAvailable ? ' • ${_directionLabel(multiTimeframe.confirmation.direction)}' : ''}',
+            detail: strategy == StrategyType.swing
+                ? 'Checks whether the active Swing setup has broader trend support'
+                : 'Checks the next broader trend for confirmation',
+          ),
+          const Divider(),
+          _ContextRow(
+            strategy: strategy,
+            metric: AnalysisContextMetric.broaderRegimeInterval,
+            label: AnalysisContextMetric.broaderRegimeInterval.label,
+            value:
+                '${StrategyTimeframePlan.timeframeDescription(timeframePlan.regimeTimeframe)}'
+                '${multiTimeframe.regime.isAvailable ? ' • ${_directionLabel(multiTimeframe.regime.direction)}' : ''}',
+            detail: strategy == StrategyType.swing
+                ? 'Shows the larger trend backdrop behind the Swing setup'
+                : 'Shows the larger trend backdrop behind the setup',
+          ),
+          const Divider(),
+          _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.timeframeAlignment,
             label: AnalysisContextMetric.timeframeAlignment.label,
             value: _alignmentLabel(multiTimeframe.alignment),
             detail: multiTimeframe.hasSufficientData
-                ? _timeframeAlignmentDetail(multiTimeframe)
+                ? _timeframeAlignmentDetail(multiTimeframe, strategy)
                 : 'Higher-timeframe data unavailable',
           ),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.marketEnvironment,
             label: AnalysisContextMetric.marketEnvironment.label,
             value: _marketEnvironmentLabel(market.backdrop),
@@ -92,6 +118,7 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.marketBreadth,
             label: AnalysisContextMetric.marketBreadth.label,
             value: _breadthLabel(external.marketBreadth.state),
@@ -102,6 +129,7 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.relativeStrength,
             label: AnalysisContextMetric.relativeStrength.label,
             value: _relativeStrengthLabel(market.relativeStrength),
@@ -111,6 +139,7 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.eventRisk,
             label: AnalysisContextMetric.eventRisk.label,
             value: _eventRiskLabel(external.eventRisk.level),
@@ -120,6 +149,7 @@ class AnalysisContextCard extends StatelessWidget {
           ),
           const Divider(),
           _ContextRow(
+            strategy: strategy,
             metric: AnalysisContextMetric.newsSentiment,
             label: AnalysisContextMetric.newsSentiment.label,
             value: _newsLabel(external.newsSentiment.state),
@@ -263,31 +293,23 @@ class AnalysisContextCard extends StatelessWidget {
     return parts.isEmpty ? 'Context is still loading.' : parts.join(' ');
   }
 
-  String _timeframeAlignmentDetail(MultiTimeframeProfile profile) {
-    return '${_timeframeRoleLabel(profile.primary)}: '
-        '${_directionLabel(profile.primary.direction)} • '
-        '${_timeframeRoleLabel(profile.confirmation)}: '
-        '${_directionLabel(profile.confirmation.direction)} • '
-        '${_timeframeRoleLabel(profile.regime)}: '
-        '${_directionLabel(profile.regime.direction)}';
-  }
+  String _timeframeAlignmentDetail(
+    MultiTimeframeProfile profile,
+    StrategyType strategy,
+  ) {
+    final setup = strategy == StrategyType.swing
+        ? 'primary Swing setup'
+        : 'primary ${strategy.title} setup';
 
-  String _timeframeRoleLabel(TimeframeTrendSignal signal) {
-    final description = StrategyTimeframePlan.timeframeDescription(
-      signal.timeframe,
-    );
-
-    switch (signal.role) {
-      case TimeframeRole.primary:
-        return 'Primary trend ($description)';
-      case TimeframeRole.confirmation:
-        return 'Confirmation trend ($description)';
-      case TimeframeRole.regime:
-        if (signal.timeframe == '1d') {
-          return 'Daily backdrop ($description)';
-        }
-        return 'Broader backdrop ($description)';
-    }
+    return switch (profile.alignment) {
+      TimeframeAlignment.aligned =>
+        'Both broader trend views support the $setup',
+      TimeframeAlignment.opposed =>
+        'Both broader trend views oppose the $setup and reduce confirmation',
+      TimeframeAlignment.mixed =>
+        'Broader trend views are mixed, so confirmation is limited',
+      TimeframeAlignment.unknown => 'Broader trend confirmation is unavailable',
+    };
   }
 
   String _marketEnvironmentDetail(MarketContextProfile market) {
@@ -439,6 +461,7 @@ class _AnalysisTimeframeSelector extends StatelessWidget {
               ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),
             ),
             _MetricInfoButton(
+              strategy: strategy,
               metric: AnalysisContextMetric.primaryAnalysisInterval,
             ),
             if (isReloading) ...[
@@ -482,8 +505,9 @@ class _AnalysisTimeframeSelector extends StatelessWidget {
 }
 
 class _MetricInfoButton extends StatelessWidget {
-  const _MetricInfoButton({required this.metric});
+  const _MetricInfoButton({required this.strategy, required this.metric});
 
+  final StrategyType strategy;
   final AnalysisContextMetric metric;
 
   @override
@@ -500,6 +524,7 @@ class _MetricInfoButton extends StatelessWidget {
           title: metric.label,
           explainability: AnalysisContextExplainabilityCatalog.forMetric(
             metric,
+            strategy: strategy,
           ),
         );
       },
@@ -509,12 +534,14 @@ class _MetricInfoButton extends StatelessWidget {
 
 class _ContextRow extends StatelessWidget {
   const _ContextRow({
+    required this.strategy,
     required this.metric,
     required this.label,
     required this.value,
     required this.detail,
   });
 
+  final StrategyType strategy;
   final AnalysisContextMetric metric;
   final String label;
   final String value;
@@ -540,7 +567,7 @@ class _ContextRow extends StatelessWidget {
                     ),
                   ),
                 ),
-                _MetricInfoButton(metric: metric),
+                _MetricInfoButton(strategy: strategy, metric: metric),
               ],
             ),
           ),

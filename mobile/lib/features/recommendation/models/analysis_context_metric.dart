@@ -1,5 +1,7 @@
 enum AnalysisContextMetric {
   primaryAnalysisInterval,
+  confirmationInterval,
+  broaderRegimeInterval,
   timeframeAlignment,
   marketEnvironment,
   marketBreadth,
@@ -13,6 +15,8 @@ extension AnalysisContextMetricPresentation on AnalysisContextMetric {
     return switch (this) {
       AnalysisContextMetric.primaryAnalysisInterval =>
         'Primary Analysis Interval',
+      AnalysisContextMetric.confirmationInterval => 'Confirmation Interval',
+      AnalysisContextMetric.broaderRegimeInterval => 'Broader Regime Interval',
       AnalysisContextMetric.timeframeAlignment => 'Timeframe Alignment',
       AnalysisContextMetric.marketEnvironment => 'Market Environment',
       AnalysisContextMetric.marketBreadth => 'Market Breadth',
