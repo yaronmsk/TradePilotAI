@@ -6,17 +6,19 @@ import '../context/recommendation_analysis_context.dart';
 import '../context/stock_behavior_profile.dart';
 import '../context/stock_behavior_profile_service.dart';
 import '../engines/consensus_engine.dart';
+import '../engines/recommendation_engine.dart';
 import '../history/historical_confidence_adjuster.dart';
 import '../history/historical_setup_validation.dart';
-import '../engines/recommendation_engine.dart';
 import '../models/evidence_report.dart';
 import '../models/evidence_result.dart';
 import '../models/recommendation.dart';
+import '../models/strategy_summary.dart';
 import '../providers/evidence_provider.dart';
 import '../providers/market_breadth_evidence_provider.dart';
 import '../providers/market_context_evidence_provider.dart';
 import '../providers/multi_timeframe_trend_evidence_provider.dart';
 import '../providers/news_sentiment_evidence_provider.dart';
+import '../strategy/strategy_evidence_selector.dart';
 
 class RecommendationService {
   const RecommendationService({
@@ -32,25 +34,40 @@ class RecommendationService {
     this.consensusEngine = const ConsensusEngine(),
     this.recommendationEngine = const RecommendationEngine(),
     this.historicalConfidenceAdjuster = const HistoricalConfidenceAdjuster(),
+    this.strategyEvidenceSelector = const StrategyEvidenceSelector(),
   }) : _providers = providers;
 
   final List<EvidenceProvider> _providers;
+
   final StockBehaviorProfileService stockBehaviorProfileService;
   final ContextualEvidenceAdjuster contextualEvidenceAdjuster;
+
   final MultiTimeframeTrendEvidenceProvider multiTimeframeTrendEvidenceProvider;
+
   final MarketContextEvidenceProvider marketContextEvidenceProvider;
   final MarketBreadthEvidenceProvider marketBreadthEvidenceProvider;
   final NewsSentimentEvidenceProvider newsSentimentEvidenceProvider;
+
   final EventRiskConfidenceAdjuster eventRiskConfidenceAdjuster;
   final ConsensusEngine consensusEngine;
   final RecommendationEngine recommendationEngine;
   final HistoricalConfidenceAdjuster historicalConfidenceAdjuster;
 
+  final StrategyEvidenceSelector strategyEvidenceSelector;
+
   List<EvidenceProvider> get providers =>
       List<EvidenceProvider>.unmodifiable(_providers);
 
-  List<EvidenceResult> collectEvidence(MarketSnapshot snapshot) {
-    return _providers
+  List<EvidenceResult> collectEvidence(
+    MarketSnapshot snapshot, {
+    StrategyType strategy = StrategyType.trader,
+  }) {
+    final selectedProviders = strategyEvidenceSelector.selectProviders(
+      providers: _providers,
+      strategy: strategy,
+    );
+
+    return selectedProviders
         .map((provider) => provider.evaluate(snapshot))
         .toList(growable: false);
   }
@@ -59,8 +76,10 @@ class RecommendationService {
     MarketSnapshot snapshot, {
     List<MarketCandle> historicalDailyCandles = const [],
     RecommendationAnalysisContext? analysisContext,
+    StrategyType strategy = StrategyType.trader,
   }) {
-    final rawResults = collectEvidence(snapshot);
+    final rawResults = collectEvidence(snapshot, strategy: strategy);
+
     final profile = stockBehaviorProfileService.evaluate(
       snapshot,
       historicalDailyCandles: historicalDailyCandles,
@@ -75,21 +94,12 @@ class RecommendationService {
       return adjusted;
     }
 
-    return List<EvidenceResult>.unmodifiable([
-      ...adjusted,
-      multiTimeframeTrendEvidenceProvider.evaluate(
-        analysisContext.multiTimeframeProfile,
-      ),
-      marketContextEvidenceProvider.evaluate(
-        analysisContext.marketContextProfile,
-      ),
-      marketBreadthEvidenceProvider.evaluate(
-        analysisContext.externalContextProfile.marketBreadth,
-      ),
-      newsSentimentEvidenceProvider.evaluate(
-        analysisContext.externalContextProfile.newsSentiment,
-      ),
-    ]);
+    final contextResults = _collectContextEvidence(
+      analysisContext: analysisContext,
+      strategy: strategy,
+    );
+
+    return List<EvidenceResult>.unmodifiable([...adjusted, ...contextResults]);
   }
 
   Recommendation applyHistoricalValidation({
@@ -116,7 +126,18 @@ class RecommendationService {
     StockBehaviorProfile? profile,
     List<MarketCandle> historicalDailyCandles = const [],
     RecommendationAnalysisContext? analysisContext,
+    StrategyType strategy = StrategyType.trader,
   }) {
+    final strategyPolicy = strategyEvidenceSelector.policyFor(strategy);
+
+    if (!strategyPolicy.isRecommendationActive) {
+      throw StateError(
+        '${strategy.title} recommendation is not active yet. '
+        'Its strategy-specific evidence calibration and recommendation '
+        'orchestration must be completed before analysis can run.',
+      );
+    }
+
     final resolvedProfile =
         profile ??
         stockBehaviorProfileService.evaluate(
@@ -124,7 +145,8 @@ class RecommendationService {
           historicalDailyCandles: historicalDailyCandles,
         );
 
-    final rawResults = collectEvidence(snapshot);
+    final rawResults = collectEvidence(snapshot, strategy: strategy);
+
     final adjustedBaseResults = contextualEvidenceAdjuster.adjust(
       results: rawResults,
       profile: resolvedProfile,
@@ -132,20 +154,10 @@ class RecommendationService {
 
     final contextResults = analysisContext == null
         ? const <EvidenceResult>[]
-        : <EvidenceResult>[
-            multiTimeframeTrendEvidenceProvider.evaluate(
-              analysisContext.multiTimeframeProfile,
-            ),
-            marketContextEvidenceProvider.evaluate(
-              analysisContext.marketContextProfile,
-            ),
-            marketBreadthEvidenceProvider.evaluate(
-              analysisContext.externalContextProfile.marketBreadth,
-            ),
-            newsSentimentEvidenceProvider.evaluate(
-              analysisContext.externalContextProfile.newsSentiment,
-            ),
-          ];
+        : _collectContextEvidence(
+            analysisContext: analysisContext,
+            strategy: strategy,
+          );
 
     final evidenceResults = <EvidenceResult>[
       ...adjustedBaseResults,
@@ -154,10 +166,11 @@ class RecommendationService {
 
     final evidenceReport = EvidenceReport.fromResults(
       results: evidenceResults,
-      expectedProviderCount: _providers.length + contextResults.length,
+      expectedProviderCount: evidenceResults.length,
     );
 
     final consensusResult = consensusEngine.calculate(evidenceReport);
+
     final contextAdjustedResult = analysisContext == null
         ? consensusResult
         : eventRiskConfidenceAdjuster.apply(
@@ -172,5 +185,58 @@ class RecommendationService {
       candleCount: snapshot.candleCount,
       analysisTime: snapshot.timestamp,
     );
+  }
+
+  List<EvidenceResult> _collectContextEvidence({
+    required RecommendationAnalysisContext analysisContext,
+    required StrategyType strategy,
+  }) {
+    final results = <EvidenceResult>[];
+
+    if (strategyEvidenceSelector.allowsDefinition(
+      definition: MultiTimeframeTrendEvidenceProvider.kDefinition,
+      strategy: strategy,
+    )) {
+      results.add(
+        multiTimeframeTrendEvidenceProvider.evaluate(
+          analysisContext.multiTimeframeProfile,
+        ),
+      );
+    }
+
+    if (strategyEvidenceSelector.allowsDefinition(
+      definition: MarketContextEvidenceProvider.kDefinition,
+      strategy: strategy,
+    )) {
+      results.add(
+        marketContextEvidenceProvider.evaluate(
+          analysisContext.marketContextProfile,
+        ),
+      );
+    }
+
+    if (strategyEvidenceSelector.allowsDefinition(
+      definition: MarketBreadthEvidenceProvider.kDefinition,
+      strategy: strategy,
+    )) {
+      results.add(
+        marketBreadthEvidenceProvider.evaluate(
+          analysisContext.externalContextProfile.marketBreadth,
+        ),
+      );
+    }
+
+    if (strategyEvidenceSelector.allowsDefinition(
+      definition: NewsSentimentEvidenceProvider.kDefinition,
+      strategy: strategy,
+    )) {
+      results.add(
+        newsSentimentEvidenceProvider.evaluate(
+          analysisContext.externalContextProfile.newsSentiment,
+        ),
+      );
+    }
+
+    return List<EvidenceResult>.unmodifiable(results);
   }
 }

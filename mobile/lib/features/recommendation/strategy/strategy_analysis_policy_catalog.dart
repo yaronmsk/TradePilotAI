@@ -17,6 +17,7 @@ class StrategyAnalysisPolicyCatalog {
           strategy: StrategyType.trader,
           kind: kind,
           applicability: StrategyEvidenceApplicability.reuseCurrentBehavior,
+          implementationReady: true,
           affectsDirection: true,
           affectsConfidence: true,
           affectsRiskOrEntryQuality:
@@ -275,12 +276,14 @@ class StrategyAnalysisPolicyCatalog {
     required String rationale,
     String? calibrationNotes,
     String? dataQualityRequirement,
+    bool implementationReady = false,
   }) {
     return StrategyEvidencePolicy(
       strategy: strategy,
       kind: kind,
       family: _familyFor(kind),
       applicability: applicability,
+      implementationReady: implementationReady,
       affectsDirection: affectsDirection,
       affectsConfidence: affectsConfidence,
       affectsRiskOrEntryQuality: affectsRiskOrEntryQuality,

@@ -33,18 +33,13 @@ extension StrategyEvidenceApplicabilityBehavior
   }
 }
 
-/// Strategy-specific decision describing whether and how an existing evidence
-/// capability is allowed to participate in a recommendation.
-///
-/// This object deliberately does not contain numeric provider weights or
-/// thresholds yet. Those values must be justified during the provider-specific
-/// Swing calibration batches rather than invented in the architecture layer.
 class StrategyEvidencePolicy {
   const StrategyEvidencePolicy({
     required this.strategy,
     required this.kind,
     required this.family,
     required this.applicability,
+    required this.implementationReady,
     required this.affectsDirection,
     required this.affectsConfidence,
     required this.affectsRiskOrEntryQuality,
@@ -66,34 +61,36 @@ class StrategyEvidencePolicy {
   final EvidenceKind kind;
   final EvidenceFamily family;
 
-  /// Whether the existing capability is usable for this strategy and whether
-  /// strategy-specific calibration or data-quality gating is required.
   final StrategyEvidenceApplicability applicability;
 
-  /// Whether the capability may contribute signed bullish/bearish influence.
+  /// True only when the current production implementation has been explicitly
+  /// validated as safe for this strategy.
+  ///
+  /// Applicability and implementation readiness are deliberately separate.
+  /// A capability may belong in Swing scope while its current Trader-oriented
+  /// implementation remains blocked until Swing calibration is complete.
+  final bool implementationReady;
+
+  /// Whether this capability may contribute bullish/bearish direction.
   final bool affectsDirection;
 
-  /// Whether the capability may participate in evidence-derived confidence.
+  /// Whether this capability may participate in evidence-derived confidence.
   final bool affectsConfidence;
 
-  /// Whether the capability may describe risk, stretch or entry quality.
+  /// Whether this capability may affect risk, stretch or entry quality.
   ///
-  /// This is intentionally separate from direction. A capability such as
-  /// Swing Price Extension may reduce entry quality without claiming that the
-  /// opposite trend has started.
+  /// This is separate from direction. For example, Swing Price Extension can
+  /// reduce entry quality without claiming that the opposite trend has begun.
   final bool affectsRiskOrEntryQuality;
 
-  /// Human-readable architectural reason for this strategy decision.
   final String rationale;
-
-  /// Required strategy-specific behavior that later implementation batches
-  /// must provide before this evidence is considered calibrated.
   final String? calibrationNotes;
-
-  /// Explicit data-quality requirement for conditionally usable evidence.
   final String? dataQualityRequirement;
 
   bool get isEligibleForEvaluation => applicability.isEligibleForEvaluation;
+
+  bool get canUseCurrentImplementation =>
+      implementationReady && isEligibleForEvaluation;
 
   bool get requiresStrategyCalibration =>
       applicability.requiresStrategyCalibration;

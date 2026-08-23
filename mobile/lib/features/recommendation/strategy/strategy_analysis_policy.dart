@@ -4,12 +4,6 @@ import 'strategy_evidence_policy.dart';
 
 enum StrategyAnalysisPolicyStatus { active, scopeApproved, planned }
 
-/// Strategy-level policy describing which existing evidence capabilities are
-/// allowed to participate and which still require strategy calibration.
-///
-/// Recommendation activation is intentionally separate from scope approval.
-/// Swing remains non-active until its provider semantics and orchestration have
-/// been implemented and validated.
 class StrategyAnalysisPolicy {
   const StrategyAnalysisPolicy({
     required this.strategy,
@@ -30,6 +24,12 @@ class StrategyAnalysisPolicy {
   List<EvidenceKind> get eligibleEvidenceKinds => List.unmodifiable(
     evidencePolicies.entries
         .where((entry) => entry.value.isEligibleForEvaluation)
+        .map((entry) => entry.key),
+  );
+
+  List<EvidenceKind> get implementationReadyEvidenceKinds => List.unmodifiable(
+    evidencePolicies.entries
+        .where((entry) => entry.value.canUseCurrentImplementation)
         .map((entry) => entry.key),
   );
 
