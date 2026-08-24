@@ -104,6 +104,7 @@ void main() {
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
         EvidenceKind.emaStructure,
+        EvidenceKind.multiTimeframeTrend,
       ]);
     });
 
@@ -301,7 +302,11 @@ void main() {
       );
 
       expect(traderResults, hasLength(4));
-      expect(swingResults, isEmpty);
+      expect(swingResults, hasLength(1));
+      expect(
+        swingResults.single.definition.kind,
+        EvidenceKind.multiTimeframeTrend,
+      );
     });
 
     test('production Swing recommendation cannot run before activation', () {

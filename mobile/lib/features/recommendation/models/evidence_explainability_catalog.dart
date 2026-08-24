@@ -186,11 +186,11 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.multiTimeframeTrend: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Compares the active Trader trend with confirmation and broader-regime timeframes.',
+          'Compares the active strategy trend with confirmation and broader-regime timeframes.',
       calculation:
           'Evaluates normalized price direction across the primary, confirmation and regime timeframe roles and combines them using strategy-specific weights.',
       whyItMatters:
-          'A short-term setup is generally more credible when higher timeframes agree and less credible when broader trends oppose it.',
+          'An active setup is generally more credible when broader timeframes agree and less confirmed when broader trends oppose it.',
       supportiveInterpretation:
           'Alignment of primary and higher-timeframe trends strengthens evidence in their shared direction.',
       opposingInterpretation:
@@ -200,7 +200,7 @@ class EvidenceExplainabilityCatalog {
       recommendationImpact:
           'Multi-Timeframe Trend contributes inside the Trend family. It does not receive an additional independent vote simply because multiple timeframes were inspected.',
       limitations:
-          'Different timeframes can legitimately disagree during transitions. Alignment improves context but does not guarantee continuation.',
+          'Different timeframes can legitimately disagree during transitions. For Swing, broader views may strengthen or weaken the primary setup but cannot independently flip its direction. Alignment improves context but does not guarantee continuation.',
     ),
 
     EvidenceKind.marketContext: MetricExplainability(

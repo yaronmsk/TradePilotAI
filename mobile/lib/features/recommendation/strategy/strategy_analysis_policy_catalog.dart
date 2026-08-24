@@ -174,6 +174,7 @@ class StrategyAnalysisPolicyCatalog {
         strategy: StrategyType.swing,
         kind: EvidenceKind.multiTimeframeTrend,
         applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+        implementationReady: true,
         affectsDirection: true,
         affectsConfidence: true,
         affectsRiskOrEntryQuality: false,

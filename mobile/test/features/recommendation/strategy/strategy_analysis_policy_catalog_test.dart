@@ -62,6 +62,7 @@ void main() {
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
         EvidenceKind.emaStructure,
+        EvidenceKind.multiTimeframeTrend,
       ]);
 
       final candleTrend = policy.policyFor(EvidenceKind.candleTrend);

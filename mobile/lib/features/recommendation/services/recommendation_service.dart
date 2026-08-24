@@ -224,6 +224,7 @@ class RecommendationService {
       results.add(
         multiTimeframeTrendEvidenceProvider.evaluate(
           analysisContext.multiTimeframeProfile,
+          strategy: strategy,
         ),
       );
     }
