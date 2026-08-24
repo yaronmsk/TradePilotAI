@@ -56,11 +56,12 @@ void main() {
       expect(policy.isRecommendationActive, isFalse);
     });
 
-    test('calibrated Swing trend evidence is implementation-ready', () {
+    test('calibrated Swing evidence is implementation-ready', () {
       final policy = StrategyAnalysisPolicyCatalog.swing;
 
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
+        EvidenceKind.rsi,
         EvidenceKind.emaStructure,
         EvidenceKind.multiTimeframeTrend,
       ]);
@@ -121,6 +122,7 @@ void main() {
       expect(policy.affectsConfidence, isTrue);
       expect(policy.affectsRiskOrEntryQuality, isTrue);
       expect(policy.calibrationNotes, isNotEmpty);
+      expect(policy.implementationReady, isTrue);
     });
 
     test('Swing Relative Volume is explicitly data-quality conditional', () {

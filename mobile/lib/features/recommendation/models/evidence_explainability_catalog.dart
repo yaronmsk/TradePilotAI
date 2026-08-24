@@ -28,21 +28,20 @@ class EvidenceExplainabilityCatalog {
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs: 'Measures recent price momentum on a scale from 0 to 100.',
       calculation:
-          'Uses average gains and average losses over the selected RSI lookback period to calculate the Relative Strength Index.',
+          'Uses average gains and losses over the RSI lookback. Interpretation is strategy-specific: Swing also considers the active trend structure so RSI can confirm momentum, show deterioration, or flag excessive stretch without automatically treating 70 as SELL or 30 as BUY.',
       whyItMatters:
-          'Extreme momentum can identify stretched conditions where continuation may become less reliable and reversal risk may increase.',
+          'RSI can show whether momentum supports the active setup, is weakening against it, or has become stretched enough to reduce entry quality.',
       supportiveInterpretation:
-          'Oversold RSI conditions can contribute bullish reversal evidence when downward momentum appears unusually stretched.',
+          'Momentum aligned with the active setup can reinforce that direction. In Swing, strong RSI during a strong trend can remain supportive rather than becoming an automatic reversal signal.',
       opposingInterpretation:
-          'Overbought RSI conditions can contribute bearish pullback evidence when upward momentum appears unusually stretched.',
+          'Momentum materially moving against the active trend can challenge that setup. Opposing evidence comes from momentum deterioration, not simply from crossing a traditional overbought or oversold threshold.',
       neutralInterpretation:
-          'Mid-range RSI values do not provide strong reversal evidence in either direction.',
+          'Mid-range or unclear RSI conditions provide limited directional confirmation.',
       recommendationImpact:
-          'RSI contributes directional and confidence information inside the Momentum family and is aggregated with related momentum evidence.',
+          'RSI contributes inside the Momentum family. Swing trend context is used only to interpret RSI and does not create an additional Trend-family vote. Extreme stretch reduces RSI influence rather than automatically reversing its direction.',
       limitations:
-          'Overbought does not automatically mean price will fall and oversold does not automatically mean price will rise. Strong trends can keep RSI extreme for extended periods.',
+          'RSI can remain elevated or depressed for long periods during strong trends. The Swing thresholds are deterministic v0.11 policy assumptions and are not presented as historically optimized parameters.',
     ),
-
     EvidenceKind.relativeVolume: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

@@ -2,12 +2,16 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/market/models/market_candle.dart';
 import 'package:mobile/features/market/models/market_snapshot.dart';
 import 'package:mobile/features/recommendation/models/evidence_result.dart';
+import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
 
 void main() {
   const provider = RsiEvidenceProvider();
 
-  MarketSnapshot createSnapshot({required List<double> closes}) {
+  MarketSnapshot createSnapshot({
+    required List<double> closes,
+    String timeframe = '5m',
+  }) {
     final candles = List<MarketCandle>.generate(closes.length, (index) {
       final close = closes[index];
 
@@ -23,7 +27,7 @@ void main() {
 
     return MarketSnapshot(
       symbol: 'TEST',
-      timeframe: '5m',
+      timeframe: timeframe,
       timestamp: candles.isEmpty
           ? DateTime(2026, 8, 14)
           : candles.last.timestamp,
@@ -98,6 +102,169 @@ void main() {
       );
 
       expect(result.reliability, lessThanOrEqualTo(0.90));
+    });
+  });
+  group('Swing RSI', () {
+    test('Trader behavior remains unchanged through strategy interface', () {
+      final snapshot = createSnapshot(
+        closes: List<double>.generate(20, (index) => 100 + index.toDouble()),
+      );
+
+      final legacy = provider.evaluate(snapshot);
+      final strategyResult = provider.evaluateForStrategy(
+        snapshot,
+        strategy: StrategyType.trader,
+      );
+
+      expect(strategyResult.direction, legacy.direction);
+      expect(strategyResult.score, legacy.score);
+      expect(strategyResult.currentValue, legacy.currentValue);
+    });
+
+    test(
+      'strong rising Swing trend does not turn RSI 100 into SELL evidence',
+      () {
+        final result = provider.evaluateForStrategy(
+          createSnapshot(
+            timeframe: '1d',
+            closes: List<double>.generate(80, (index) => 100 + (index * 0.5)),
+          ),
+          strategy: StrategyType.swing,
+        );
+
+        expect(result.status, EvidenceStatus.available);
+        expect(result.direction, EvidenceDirection.bullish);
+        expect(result.currentValue, 'RSI 100.00');
+        expect(result.relativeValue, contains('extended'));
+        expect(result.dynamicWeight, lessThan(1));
+        expect(
+          result.explanation,
+          contains('does not convert this condition into automatic bearish'),
+        );
+      },
+    );
+
+    test(
+      'strong falling Swing trend does not turn RSI 0 into BUY evidence',
+      () {
+        final result = provider.evaluateForStrategy(
+          createSnapshot(
+            timeframe: '1d',
+            closes: List<double>.generate(80, (index) => 140 - (index * 0.5)),
+          ),
+          strategy: StrategyType.swing,
+        );
+
+        expect(result.status, EvidenceStatus.available);
+        expect(result.direction, EvidenceDirection.bearish);
+        expect(result.currentValue, 'RSI 0.00');
+        expect(result.relativeValue, contains('extended'));
+        expect(result.dynamicWeight, lessThan(1));
+        expect(
+          result.explanation,
+          contains('does not convert this condition into automatic bullish'),
+        );
+      },
+    );
+
+    test(
+      'moderate bullish RSI confirms established bullish Swing structure',
+      () {
+        final closes = <double>[];
+
+        for (var index = 0; index < 66; index++) {
+          closes.add(100 + (index * 0.5));
+        }
+
+        var value = closes.last;
+
+        for (var index = 0; index < 14; index++) {
+          value += index.isEven ? 1.0 : -0.5;
+          closes.add(value);
+        }
+
+        final result = provider.evaluateForStrategy(
+          createSnapshot(timeframe: '1d', closes: closes),
+          strategy: StrategyType.swing,
+        );
+
+        expect(result.direction, EvidenceDirection.bullish);
+        expect(
+          result.relativeValue,
+          anyOf(
+            contains('Bullish momentum confirmation'),
+            contains('Moderate bullish momentum'),
+          ),
+        );
+        expect(
+          result.explanation,
+          contains('does not create another Trend-family vote'),
+        );
+      },
+    );
+
+    test(
+      'moderate bearish RSI confirms established bearish Swing structure',
+      () {
+        final closes = <double>[];
+
+        for (var index = 0; index < 66; index++) {
+          closes.add(140 - (index * 0.5));
+        }
+
+        var value = closes.last;
+
+        for (var index = 0; index < 14; index++) {
+          value += index.isEven ? -1.0 : 0.5;
+          closes.add(value);
+        }
+
+        final result = provider.evaluateForStrategy(
+          createSnapshot(timeframe: '1d', closes: closes),
+          strategy: StrategyType.swing,
+        );
+
+        expect(result.direction, EvidenceDirection.bearish);
+        expect(
+          result.relativeValue,
+          anyOf(
+            contains('Bearish momentum confirmation'),
+            contains('Moderate bearish momentum'),
+          ),
+        );
+      },
+    );
+
+    test('4H Swing RSI is supported', () {
+      final result = provider.evaluateForStrategy(
+        createSnapshot(
+          timeframe: '4h',
+          closes: List<double>.generate(60, (index) => 100 + (index * 0.3)),
+        ),
+        strategy: StrategyType.swing,
+      );
+
+      expect(result.status, EvidenceStatus.available);
+      expect(result.direction, EvidenceDirection.bullish);
+    });
+
+    test('unsupported Swing timeframe and Investor remain unavailable', () {
+      final closes = List<double>.generate(80, (index) => 100 + (index * 0.2));
+
+      final unsupported = provider.evaluateForStrategy(
+        createSnapshot(timeframe: '1h', closes: closes),
+        strategy: StrategyType.swing,
+      );
+
+      final investor = provider.evaluateForStrategy(
+        createSnapshot(timeframe: '1d', closes: closes),
+        strategy: StrategyType.investor,
+      );
+
+      expect(unsupported.status, EvidenceStatus.unavailable);
+      expect(unsupported.direction, EvidenceDirection.unknown);
+      expect(investor.status, EvidenceStatus.unavailable);
+      expect(investor.direction, EvidenceDirection.unknown);
     });
   });
 }

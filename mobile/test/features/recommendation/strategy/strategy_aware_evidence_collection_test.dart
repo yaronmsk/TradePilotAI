@@ -9,6 +9,7 @@ import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_evidence_selector.dart';
@@ -103,6 +104,7 @@ void main() {
       expect(policy.eligibleEvidenceKinds, isNotEmpty);
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
+        EvidenceKind.rsi,
         EvidenceKind.emaStructure,
         EvidenceKind.multiTimeframeTrend,
       ]);
@@ -229,12 +231,49 @@ void main() {
       expect(results.single.baselineValue, contains('EMA 50'));
     });
 
+    test('Swing executes calibrated RSI', () {
+      final candles = List<MarketCandle>.generate(60, (index) {
+        final close = 100 + (index * 0.30);
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 8, 1).add(Duration(hours: index * 4)),
+          open: close,
+          high: close + 0.4,
+          low: close - 0.4,
+          close: close,
+          volume: 1000000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '4h',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(providers: [RsiEvidenceProvider()]);
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.rsi);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.currentValue, 'RSI 100.00');
+      expect(results.single.relativeValue, contains('extended'));
+    });
+
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.rsi,
+          kind: EvidenceKind.macdMomentum,
           family: EvidenceFamily.momentum,
-          name: 'Test RSI',
+          name: 'Test MACD',
         ),
       );
 

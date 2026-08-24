@@ -55,6 +55,7 @@ class StrategyAnalysisPolicyCatalog {
         strategy: StrategyType.swing,
         kind: EvidenceKind.rsi,
         applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+        implementationReady: true,
         affectsDirection: true,
         affectsConfidence: true,
         affectsRiskOrEntryQuality: true,
