@@ -36,10 +36,22 @@ class StrategyEvidenceSelector {
     required EvidenceProvider provider,
     required StrategyType strategy,
   }) {
-    return allowsDefinition(
+    final definitionAllowed = allowsDefinition(
       definition: provider.definition,
       strategy: strategy,
     );
+
+    if (!definitionAllowed) {
+      return false;
+    }
+
+    if (strategy == StrategyType.trader) {
+      return true;
+    }
+
+    // A non-Trader provider must explicitly implement strategy-aware
+    // evaluation before its implementation-ready policy may execute it.
+    return provider is StrategyAwareEvidenceProvider;
   }
 
   List<EvidenceProvider> selectProviders({

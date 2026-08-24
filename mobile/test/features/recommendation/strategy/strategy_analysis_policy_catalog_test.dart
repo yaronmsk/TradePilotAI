@@ -56,6 +56,21 @@ void main() {
       expect(policy.isRecommendationActive, isFalse);
     });
 
+    test('Swing Candle Trend is the first implementation-ready evidence', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing;
+
+      expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
+        EvidenceKind.candleTrend,
+      ]);
+
+      final candleTrend = policy.policyFor(EvidenceKind.candleTrend);
+
+      expect(candleTrend, isNotNull);
+      expect(candleTrend!.implementationReady, isTrue);
+      expect(candleTrend.affectsDirection, isTrue);
+      expect(candleTrend.affectsConfidence, isTrue);
+    });
+
     test('Swing explicitly excludes current VWAP Position', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
         EvidenceKind.vwapPosition,

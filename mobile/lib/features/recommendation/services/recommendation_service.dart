@@ -68,8 +68,32 @@ class RecommendationService {
     );
 
     return selectedProviders
-        .map((provider) => provider.evaluate(snapshot))
+        .map(
+          (provider) => _evaluateProvider(
+            provider: provider,
+            snapshot: snapshot,
+            strategy: strategy,
+          ),
+        )
         .toList(growable: false);
+  }
+
+  EvidenceResult _evaluateProvider({
+    required EvidenceProvider provider,
+    required MarketSnapshot snapshot,
+    required StrategyType strategy,
+  }) {
+    if (strategy == StrategyType.trader) {
+      return provider.evaluate(snapshot);
+    }
+
+    if (provider is StrategyAwareEvidenceProvider) {
+      return provider.evaluateForStrategy(snapshot, strategy: strategy);
+    }
+
+    throw StateError(
+      '${provider.name} is not strategy-aware for ${strategy.title}.',
+    );
   }
 
   List<EvidenceResult> collectContextualEvidence(

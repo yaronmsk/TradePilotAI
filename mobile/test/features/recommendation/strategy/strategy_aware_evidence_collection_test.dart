@@ -6,6 +6,7 @@ import 'package:mobile/features/recommendation/models/evidence_definition.dart';
 import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_result.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
+import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
@@ -95,15 +96,14 @@ void main() {
       );
     });
 
-    test(
-      'Swing evidence is in scope but not executable before calibration',
-      () {
-        final policy = StrategyAnalysisPolicyCatalog.swing;
+    test('only calibrated Swing evidence is implementation-ready', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing;
 
-        expect(policy.eligibleEvidenceKinds, isNotEmpty);
-        expect(policy.implementationReadyEvidenceKinds, isEmpty);
-      },
-    );
+      expect(policy.eligibleEvidenceKinds, isNotEmpty);
+      expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
+        EvidenceKind.candleTrend,
+      ]);
+    });
 
     test('Trader executes a classified production provider', () {
       final provider = _CountingEvidenceProvider(
@@ -123,6 +123,68 @@ void main() {
 
       expect(results, hasLength(1));
       expect(provider.evaluationCount, 1);
+    });
+
+    test(
+      'Swing rejects a non-strategy-aware implementation even for a ready kind',
+      () {
+        final provider = _CountingEvidenceProvider(
+          definition: productionDefinition(
+            kind: EvidenceKind.candleTrend,
+            family: EvidenceFamily.trend,
+            name: 'Fake Candle Trend',
+          ),
+        );
+
+        final service = RecommendationService(providers: [provider]);
+
+        final results = service.collectEvidence(
+          createSnapshot(),
+          strategy: StrategyType.swing,
+        );
+
+        expect(results, isEmpty);
+        expect(provider.evaluationCount, 0);
+      },
+    );
+
+    test('Swing executes the calibrated Candle Trend implementation', () {
+      final candles = List<MarketCandle>.generate(20, (index) {
+        final close = 100 + ((8 / 19) * index);
+        final halfRange = close * 0.0075;
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 8, 1).add(Duration(days: index)),
+          open: close,
+          high: close + halfRange,
+          low: close - halfRange,
+          close: close,
+          volume: 1000000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '1d',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [CandleTrendEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.candleTrend);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.currentValue, contains('Rising'));
     });
 
     test('Swing does not execute an uncalibrated provider', () {
