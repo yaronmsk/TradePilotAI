@@ -7,6 +7,7 @@ import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_result.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
@@ -102,6 +103,7 @@ void main() {
       expect(policy.eligibleEvidenceKinds, isNotEmpty);
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
+        EvidenceKind.emaStructure,
       ]);
     });
 
@@ -185,6 +187,45 @@ void main() {
       expect(results.single.definition.kind, EvidenceKind.candleTrend);
       expect(results.single.direction, EvidenceDirection.bullish);
       expect(results.single.currentValue, contains('Rising'));
+    });
+
+    test('Swing executes calibrated EMA Structure', () {
+      final candles = List<MarketCandle>.generate(60, (index) {
+        final close = 100 + (index * 0.30);
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 8, 1).add(Duration(hours: index * 4)),
+          open: close,
+          high: close + 0.4,
+          low: close - 0.4,
+          close: close,
+          volume: 1000000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '4h',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [EmaStructureEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.emaStructure);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.baselineValue, contains('EMA 20'));
+      expect(results.single.baselineValue, contains('EMA 50'));
     });
 
     test('Swing does not execute an uncalibrated provider', () {

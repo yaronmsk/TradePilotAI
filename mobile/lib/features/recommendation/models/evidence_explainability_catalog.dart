@@ -68,7 +68,7 @@ class EvidenceExplainabilityCatalog {
       whatItIs:
           'Checks the ordering of current price and fast and slow exponential moving averages.',
       calculation:
-          'Compares price with the fast EMA and slow EMA and measures the normalized distance between them.',
+          'Uses strategy-specific fast and slow EMA periods. It compares price/EMA ordering and structure strength. Swing also checks EMA slope, recent persistence, and ATR-normalized separation.',
       whyItMatters:
           'A clean moving-average structure can indicate that short-term price action agrees with the underlying trend.',
       supportiveInterpretation:
