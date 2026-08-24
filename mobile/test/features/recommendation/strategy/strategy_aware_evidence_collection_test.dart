@@ -9,6 +9,7 @@ import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/macd_momentum_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
@@ -106,6 +107,7 @@ void main() {
         EvidenceKind.candleTrend,
         EvidenceKind.rsi,
         EvidenceKind.emaStructure,
+        EvidenceKind.macdMomentum,
         EvidenceKind.multiTimeframeTrend,
       ]);
     });
@@ -268,12 +270,50 @@ void main() {
       expect(results.single.relativeValue, contains('extended'));
     });
 
+    test('Swing executes calibrated MACD Momentum', () {
+      final candles = List<MarketCandle>.generate(60, (index) {
+        final close = 100 + (0.02 * index * index);
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 8, 1).add(Duration(hours: index * 4)),
+          open: close,
+          high: close + 0.5,
+          low: close - 0.5,
+          close: close,
+          volume: 1000000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '4h',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [MacdMomentumEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.macdMomentum);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.relativeValue, contains('× ATR'));
+    });
+
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.macdMomentum,
-          family: EvidenceFamily.momentum,
-          name: 'Test MACD',
+          kind: EvidenceKind.relativeVolume,
+          family: EvidenceFamily.participation,
+          name: 'Test Relative Volume',
         ),
       );
 

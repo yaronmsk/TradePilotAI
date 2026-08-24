@@ -104,6 +104,7 @@ class StrategyAnalysisPolicyCatalog {
         strategy: StrategyType.swing,
         kind: EvidenceKind.macdMomentum,
         applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+        implementationReady: true,
         affectsDirection: true,
         affectsConfidence: true,
         affectsRiskOrEntryQuality: false,

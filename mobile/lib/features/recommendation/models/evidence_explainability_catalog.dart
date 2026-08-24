@@ -85,23 +85,22 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.macdMomentum: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Measures momentum using the relationship between fast and slow exponential moving averages and a MACD signal line.',
+          'Measures momentum using the relationship between fast and slow exponential moving averages, the MACD signal line and the histogram.',
       calculation:
-          'Calculates MACD from the fast EMA minus the slow EMA, compares it with the signal line, and normalizes histogram magnitude by stock price.',
+          'MACD is the fast EMA minus the slow EMA and the signal line is an EMA of MACD. Swing also evaluates whether the histogram is strengthening or weakening, whether a crossover is recent, whether MACD is above or below zero, and histogram magnitude relative to ATR.',
       whyItMatters:
-          'MACD can show whether momentum is strengthening, weakening or transitioning.',
+          'MACD can distinguish established momentum from a fresh transition or a move that is beginning to lose momentum.',
       supportiveInterpretation:
-          'MACD above its signal line with a positive histogram can contribute bullish momentum evidence.',
+          'MACD above its signal line supports bullish momentum; MACD below its signal line supports bearish momentum. A strengthening histogram and aligned zero-line context increase confirmation.',
       opposingInterpretation:
-          'MACD below its signal line with a negative histogram can contribute bearish momentum evidence.',
+          'Momentum crossing in the opposite direction or materially weakening can challenge the existing setup. Zero-line disagreement reduces confirmation rather than creating a separate trend vote.',
       neutralInterpretation:
-          'Mixed or very small MACD relationships provide weak or neutral directional information.',
+          'Mixed MACD/signal relationships or very weak momentum provide limited directional information.',
       recommendationImpact:
-          'MACD contributes inside the Momentum family. Its influence is combined with other momentum evidence rather than treated as an independent duplicate confirmation.',
+          'MACD contributes inside the Momentum family. For Swing, fresh crossovers, histogram phase and zero-line context alter momentum quality. The zero line is interpretation context only and does not create another Trend-family vote.',
       limitations:
-          'MACD is derived from moving averages and therefore lags price. Rapidly changing or sideways markets can create false momentum transitions.',
+          'MACD is derived from moving averages and therefore lags price. Sideways markets can create repeated false crossovers. Swing thresholds are deterministic v0.11 assumptions and are not presented as historically optimized parameters.',
     ),
-
     EvidenceKind.vwapPosition: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

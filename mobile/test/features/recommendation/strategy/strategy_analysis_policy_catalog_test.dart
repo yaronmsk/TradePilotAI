@@ -63,6 +63,7 @@ void main() {
         EvidenceKind.candleTrend,
         EvidenceKind.rsi,
         EvidenceKind.emaStructure,
+        EvidenceKind.macdMomentum,
         EvidenceKind.multiTimeframeTrend,
       ]);
 
@@ -123,6 +124,23 @@ void main() {
       expect(policy.affectsRiskOrEntryQuality, isTrue);
       expect(policy.calibrationNotes, isNotEmpty);
       expect(policy.implementationReady, isTrue);
+    });
+
+    test('Swing MACD uses strategy-specific momentum calibration', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.macdMomentum,
+      );
+
+      expect(policy, isNotNull);
+      expect(
+        policy!.applicability,
+        StrategyEvidenceApplicability.recalibrateForStrategy,
+      );
+      expect(policy.implementationReady, isTrue);
+      expect(policy.affectsDirection, isTrue);
+      expect(policy.affectsConfidence, isTrue);
+      expect(policy.affectsRiskOrEntryQuality, isFalse);
+      expect(policy.calibrationNotes, isNotEmpty);
     });
 
     test('Swing Relative Volume is explicitly data-quality conditional', () {
