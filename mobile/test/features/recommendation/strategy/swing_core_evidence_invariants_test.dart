@@ -15,10 +15,15 @@ void main() {
   ];
 
   group('Swing Batch 3 core evidence invariants', () {
-    test('exactly five core Trend and Momentum capabilities are ready', () {
+    test('Batch 3 core evidence remains ready as later batches advance', () {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
-      expect(swing.implementationReadyEvidenceKinds, coreSwingKinds);
+      expect(
+        swing.implementationReadyEvidenceKinds.toSet().containsAll(
+          coreSwingKinds,
+        ),
+        isTrue,
+      );
 
       expect(swing.isRecommendationActive, isFalse);
     });
@@ -118,7 +123,6 @@ void main() {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
       const pendingKinds = <EvidenceKind>[
-        EvidenceKind.relativeVolume,
         EvidenceKind.supportResistance,
         EvidenceKind.volumeConfirmation,
         EvidenceKind.priceExtension,
@@ -138,6 +142,25 @@ void main() {
         );
         expect(policy.canUseCurrentImplementation, isFalse);
       }
+    });
+
+    test('Relative Volume is ready but remains data-quality conditional', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.relativeVolume,
+      );
+
+      expect(policy, isNotNull);
+
+      expect(policy!.family, EvidenceFamily.participation);
+
+      expect(
+        policy.applicability,
+        StrategyEvidenceApplicability.conditionalOnDataQuality,
+      );
+
+      expect(policy.implementationReady, isTrue);
+      expect(policy.canUseCurrentImplementation, isTrue);
+      expect(policy.dataQualityRequirement, isNotEmpty);
     });
 
     test('current analysis-window VWAP stays excluded from Swing', () {

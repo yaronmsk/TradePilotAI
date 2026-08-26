@@ -10,6 +10,7 @@ import 'package:mobile/features/recommendation/providers/candle_trend_evidence_p
 import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/macd_momentum_evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/relative_volume_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
@@ -106,6 +107,7 @@ void main() {
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
         EvidenceKind.rsi,
+        EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
         EvidenceKind.multiTimeframeTrend,
@@ -308,12 +310,52 @@ void main() {
       expect(results.single.relativeValue, contains('× ATR'));
     });
 
+    test('Swing executes calibrated 1D Relative Volume', () {
+      final candles = List<MarketCandle>.generate(21, (index) {
+        final isLast = index == 20;
+        final close = isLast ? 102.0 : 100.0;
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 7, 1).add(Duration(days: index)),
+          open: 100,
+          high: 103,
+          low: 99,
+          close: close,
+          volume: isLast ? 2200000 : 1000000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '1d',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [RelativeVolumeEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.relativeVolume);
+      expect(results.single.status, EvidenceStatus.available);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.baselineValue, contains('20-day average'));
+    });
+
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.relativeVolume,
-          family: EvidenceFamily.participation,
-          name: 'Test Relative Volume',
+          kind: EvidenceKind.supportResistance,
+          family: EvidenceFamily.priceStructure,
+          name: 'Test Support Resistance',
         ),
       );
 

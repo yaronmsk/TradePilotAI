@@ -45,23 +45,22 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.relativeVolume: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Compares current trading activity with the stock\'s recent volume baseline.',
+          'Compares current trading activity with an appropriate historical volume baseline.',
       calculation:
-          'Divides the current candle volume by average volume from prior candles in the configured lookback.',
+          'Trader uses the validated recent-candle baseline. Swing 1D compares the current daily candle with prior daily volume history. Swing 4H is withheld unless comparable 4-hour candles from the same session position across prior sessions are available.',
       whyItMatters:
           'A price move accompanied by unusually strong participation can carry more conviction than the same move on ordinary or weak volume.',
       supportiveInterpretation:
-          'Above-average volume strengthens the significance of the latest price move. It can therefore confirm either bullish or bearish price action.',
+          'Above-average volume strengthens the significance of the latest price move and can confirm either bullish or bearish price action.',
       opposingInterpretation:
-          'Weak participation does not automatically create evidence in the opposite direction. Instead it reduces conviction in the price move and is normally treated as neutral directional evidence.',
+          'Weak participation does not automatically create evidence in the opposite direction. It reduces conviction in the price move and remains directionally neutral.',
       neutralInterpretation:
-          'Volume close to its recent baseline provides little unusual confirmation.',
+          'Volume close to its valid historical baseline provides little unusual confirmation.',
       recommendationImpact:
-          'Relative Volume affects the Participation family. Strong participation can reinforce the direction of price action, while weak participation reduces confirmation without inventing an opposite signal.',
+          'Relative Volume contributes inside the Participation family. Strong participation can reinforce price direction, while weak participation reduces confirmation without inventing an opposite signal.',
       limitations:
-          'Intraday volume naturally varies by time of day. The current development calculation uses a recent-candle baseline and will require stronger time-of-day normalization with authoritative live data.',
+          'Intraday volume varies materially by session position, so ordinary sequential 4H candles are not treated as a valid Swing baseline. The current market model also does not identify whether the latest daily candle is complete; a still-forming daily candle can understate eventual full-session RVOL.',
     ),
-
     EvidenceKind.emaStructure: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

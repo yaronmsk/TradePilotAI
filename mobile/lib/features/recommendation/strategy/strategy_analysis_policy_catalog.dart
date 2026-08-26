@@ -71,6 +71,7 @@ class StrategyAnalysisPolicyCatalog {
         strategy: StrategyType.swing,
         kind: EvidenceKind.relativeVolume,
         applicability: StrategyEvidenceApplicability.conditionalOnDataQuality,
+        implementationReady: true,
         affectsDirection: true,
         affectsConfidence: true,
         affectsRiskOrEntryQuality: false,

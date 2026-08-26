@@ -62,6 +62,7 @@ void main() {
       expect(policy.implementationReadyEvidenceKinds, <EvidenceKind>[
         EvidenceKind.candleTrend,
         EvidenceKind.rsi,
+        EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
         EvidenceKind.multiTimeframeTrend,
@@ -154,7 +155,10 @@ void main() {
         StrategyEvidenceApplicability.conditionalOnDataQuality,
       );
       expect(policy.isEligibleForEvaluation, isTrue);
+      expect(policy.implementationReady, isTrue);
       expect(policy.dataQualityRequirement, isNotEmpty);
+      expect(policy.affectsDirection, isTrue);
+      expect(policy.affectsConfidence, isTrue);
     });
 
     test('Investor evidence semantics remain deferred to v0.12.0', () {
