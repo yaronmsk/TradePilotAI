@@ -68,6 +68,7 @@ void main() {
         EvidenceKind.macdMomentum,
         EvidenceKind.supportResistance,
         EvidenceKind.volumeConfirmation,
+        EvidenceKind.priceExtension,
         EvidenceKind.multiTimeframeTrend,
       ]);
 
@@ -97,21 +98,33 @@ void main() {
       expect(policy.affectsRiskOrEntryQuality, isFalse);
     });
 
-    test('Swing Price Extension is not directional evidence', () {
-      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
-        EvidenceKind.priceExtension,
-      );
+    test(
+      'Swing Price Extension is confidence/risk-only and implementation-ready',
+      () {
+        final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+          EvidenceKind.priceExtension,
+        );
 
-      expect(policy, isNotNull);
-      expect(
-        policy!.applicability,
-        StrategyEvidenceApplicability.recalibrateForStrategy,
-      );
-      expect(policy.affectsDirection, isFalse);
-      expect(policy.affectsConfidence, isTrue);
-      expect(policy.affectsRiskOrEntryQuality, isTrue);
-      expect(policy.requiresStrategyCalibration, isTrue);
-    });
+        expect(policy, isNotNull);
+
+        expect(
+          policy!.applicability,
+          StrategyEvidenceApplicability.recalibrateForStrategy,
+        );
+
+        expect(policy.implementationReady, isTrue);
+        expect(policy.family, EvidenceFamily.volatility);
+        expect(policy.affectsDirection, isFalse);
+        expect(policy.affectsConfidence, isTrue);
+        expect(policy.affectsRiskOrEntryQuality, isTrue);
+        expect(policy.requiresStrategyCalibration, isTrue);
+
+        expect(
+          policy.calibrationNotes,
+          contains('must not independently claim'),
+        );
+      },
+    );
 
     test('Swing RSI requires strategy-specific trend-aware calibration', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(

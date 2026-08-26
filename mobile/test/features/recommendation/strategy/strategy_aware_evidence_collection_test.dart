@@ -10,6 +10,7 @@ import 'package:mobile/features/recommendation/providers/candle_trend_evidence_p
 import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/macd_momentum_evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/price_extension_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/relative_volume_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/support_resistance_evidence_provider.dart';
@@ -114,6 +115,7 @@ void main() {
         EvidenceKind.macdMomentum,
         EvidenceKind.supportResistance,
         EvidenceKind.volumeConfirmation,
+        EvidenceKind.priceExtension,
         EvidenceKind.multiTimeframeTrend,
       ]);
     });
@@ -451,12 +453,62 @@ void main() {
       expect(results.single.explanation, contains('Swing breakout'));
     });
 
+    test(
+      'Swing executes calibrated Price Extension without creating direction',
+      () {
+        final candles = List<MarketCandle>.generate(50, (index) {
+          final isLast = index == 49;
+
+          final close = isLast ? 106.0 : 100 + ((index % 3) * 0.05);
+
+          return MarketCandle(
+            timestamp: DateTime(2026, 6, 1).add(Duration(days: index)),
+            open: close - 0.05,
+            high: close + 0.5,
+            low: close - 0.5,
+            close: close,
+            volume: 1000000,
+          );
+        });
+
+        final snapshot = MarketSnapshot(
+          symbol: 'TEST',
+          timeframe: '1d',
+          timestamp: candles.last.timestamp,
+          currentPrice: candles.last.close,
+          currentVolume: candles.last.volume,
+          candles: candles,
+        );
+
+        const service = RecommendationService(
+          providers: [PriceExtensionEvidenceProvider()],
+        );
+
+        final results = service.collectEvidence(
+          snapshot,
+          strategy: StrategyType.swing,
+        );
+
+        expect(results, hasLength(1));
+
+        expect(results.single.definition.kind, EvidenceKind.priceExtension);
+
+        expect(results.single.definition.family, EvidenceFamily.volatility);
+
+        expect(results.single.status, EvidenceStatus.available);
+
+        expect(results.single.direction, EvidenceDirection.neutral);
+
+        expect(results.single.relativeValue, contains('Very extended'));
+      },
+    );
+
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.priceExtension,
-          family: EvidenceFamily.volatility,
-          name: 'Test Price Extension',
+          kind: EvidenceKind.marketContext,
+          family: EvidenceFamily.marketContext,
+          name: 'Test Market Context',
         ),
       );
 

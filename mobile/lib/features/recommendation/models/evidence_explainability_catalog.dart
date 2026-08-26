@@ -161,23 +161,24 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.priceExtension: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Measures how far price is stretched from a short-term equilibrium after adjusting for the stock\'s own volatility.',
+          'Measures how far price is stretched from a strategy-appropriate equilibrium after adjusting for recent volatility.',
       calculation:
-          'Measures price distance from EMA 21 and divides that distance by ATR to express extension in volatility-normalized ATR units.',
+          'Trader preserves the validated EMA 21 reference and ATR-normalized extension. Swing uses its strategy-specific EMA reference and ATR thresholds. The signed value shows whether price is above or below equilibrium, while the magnitude describes how stretched the entry has become.',
       whyItMatters:
-          'A trend can remain directionally valid while price becomes a poor entry because it has moved too far too quickly.',
+          'A strong trend can remain valid while the current price becomes a poor place to initiate a new position.',
       supportiveInterpretation:
-          'Material extension below short-term equilibrium can contribute bullish mean-reversion evidence by reducing conviction in chasing further downside.',
+          'In Trader, material extension below equilibrium can oppose chasing further downside and may contribute bullish counter-extension evidence. Swing deliberately does not convert downside extension into bullish direction.',
       opposingInterpretation:
-          'Material extension above short-term equilibrium can contribute bearish mean-reversion evidence by increasing the risk of chasing further upside.',
+          'In Trader, material extension above equilibrium can oppose chasing further upside and may contribute bearish counter-extension evidence. Swing deliberately does not convert upside extension into bearish direction.',
       neutralInterpretation:
-          'Price within a normal ATR-adjusted distance from equilibrium does not create meaningful extension evidence.',
+          'Near equilibrium, Trader has little extension signal. For Swing, Price Extension is always directionally neutral regardless of whether price is above or below the reference.',
       recommendationImpact:
-          'Price Extension contributes through the Volatility family. It can challenge an otherwise strong directional setup without claiming that the underlying trend has already reversed.',
+          'Impact is strategy-specific. Trader preserves its existing directional/evaluative behavior. For Swing, Price Extension belongs to the Volatility family and affects evidence-derived confidence, entry quality and risk only; the Swing strategy policy explicitly disables directional influence.',
       limitations:
-          'Strong trends can remain extended for long periods. Extension indicates entry and reversal risk, not a guaranteed turning point.',
+          'Strong trends can remain extended for long periods, so extension is not proof of mean reversion. The v0.11 Swing EMA references and ATR thresholds are deterministic policy assumptions rather than historically optimized parameters. Stock-DNA and regime adjustment belong to later contextual calibration.',
+      boundedImpact:
+          'Swing directional impact is exactly zero: Price Extension cannot create, flip or oppose BUY/SELL direction for Swing. Trader retains its previously validated directional behavior.',
     ),
-
     EvidenceKind.multiTimeframeTrend: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

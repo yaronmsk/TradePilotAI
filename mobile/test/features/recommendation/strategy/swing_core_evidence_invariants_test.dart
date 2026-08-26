@@ -123,7 +123,6 @@ void main() {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
       const pendingKinds = <EvidenceKind>[
-        EvidenceKind.priceExtension,
         EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
         EvidenceKind.newsSentiment,
@@ -215,6 +214,39 @@ void main() {
       expect(explanation!.isComplete, isTrue);
       expect(explanation.allowsDirectionalInfluence, isTrue);
       expect(explanation.neutralInterpretation, contains('Proximity'));
+    });
+
+    test('Price Extension is ready but cannot influence Swing direction', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.priceExtension,
+      );
+
+      expect(policy, isNotNull);
+      expect(policy!.implementationReady, isTrue);
+      expect(policy.family, EvidenceFamily.volatility);
+
+      // This is the authoritative Swing-specific rule.
+      expect(policy.affectsDirection, isFalse);
+      expect(policy.affectsConfidence, isTrue);
+      expect(policy.affectsRiskOrEntryQuality, isTrue);
+
+      final explanation = EvidenceExplainabilityCatalog.forKind(
+        EvidenceKind.priceExtension,
+      );
+
+      expect(explanation, isNotNull);
+      expect(explanation!.isComplete, isTrue);
+
+      // The explainability catalog is currently global across strategies.
+      // Trader retains directional Price Extension behavior, so the global
+      // evidence definition remains directional/evaluative.
+      expect(explanation.allowsDirectionalInfluence, isTrue);
+
+      expect(explanation.boundedImpact, isNotNull);
+      expect(
+        explanation.boundedImpact,
+        contains('Swing directional impact is exactly zero'),
+      );
     });
 
     test('current analysis-window VWAP stays excluded from Swing', () {
