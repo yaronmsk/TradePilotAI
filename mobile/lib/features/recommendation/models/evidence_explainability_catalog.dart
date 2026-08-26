@@ -143,23 +143,22 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.volumeConfirmation: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Checks whether recent changes in trading participation confirm or challenge recent price direction.',
+          'Checks whether changing trading participation confirms or challenges a meaningful price move.',
       calculation:
-          'Compares average volume in the recent part of the analysis window with the preceding part and evaluates that change together with price direction.',
+          'Trader preserves its validated recent-half versus prior-half volume comparison and fixed price-move gate. Swing uses equal prior and recent volume windows, then measures the net price move in ATR units. The Swing lookback and minimum meaningful move are strategy/timeframe specific for 1D and 4H.',
       whyItMatters:
-          'Directional price movement with expanding participation is generally more convincing than movement occurring while participation fades.',
+          'A multi-session move with expanding participation is generally more convincing than the same move occurring while participation fades.',
       supportiveInterpretation:
-          'Expanding volume in the same direction as a meaningful price move reinforces that direction.',
+          'Expanding participation during a volatility-significant bullish move supports bullish evidence. Expanding participation during a volatility-significant bearish move supports bearish evidence.',
       opposingInterpretation:
-          'A directional price move accompanied by materially fading volume can create divergence evidence against the move.',
+          'Materially fading participation during a volatility-significant move creates divergence evidence against that move, symmetrically for bullish and bearish cases.',
       neutralInterpretation:
-          'When neither price nor participation changes enough to be meaningful, the result remains neutral.',
+          'A price move that is small relative to ATR, or volume that is neither meaningfully expanding nor fading, remains neutral.',
       recommendationImpact:
-          'Volume Confirmation contributes inside the Participation family and is combined with Relative Volume rather than counted as a separate independent participation vote.',
+          'Volume Confirmation contributes inside the Participation family and is aggregated with Relative Volume rather than counted as a second independent participation vote.',
       limitations:
-          'Volume relationships depend on the selected window and can be distorted by unusual sessions, opening or closing activity, news events and incomplete market data.',
+          'Volume patterns can be distorted by unusual sessions, news, gaps, opening/closing activity and incomplete market data. Intraday session composition can still affect 4H averages. The v0.11 Swing ATR and volume thresholds are deterministic policy assumptions and are not presented as historically optimized parameters.',
     ),
-
     EvidenceKind.priceExtension: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

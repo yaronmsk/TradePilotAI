@@ -124,7 +124,6 @@ void main() {
 
       const pendingKinds = <EvidenceKind>[
         EvidenceKind.supportResistance,
-        EvidenceKind.volumeConfirmation,
         EvidenceKind.priceExtension,
         EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
@@ -162,6 +161,40 @@ void main() {
       expect(policy.canUseCurrentImplementation, isTrue);
       expect(policy.dataQualityRequirement, isNotEmpty);
     });
+
+    test(
+      'Volume Confirmation is ready and shares the Participation family',
+      () {
+        final swing = StrategyAnalysisPolicyCatalog.swing;
+
+        final relativeVolume = swing.policyFor(EvidenceKind.relativeVolume);
+
+        final volumeConfirmation = swing.policyFor(
+          EvidenceKind.volumeConfirmation,
+        );
+
+        expect(relativeVolume, isNotNull);
+        expect(volumeConfirmation, isNotNull);
+
+        expect(relativeVolume!.family, EvidenceFamily.participation);
+
+        expect(volumeConfirmation!.family, EvidenceFamily.participation);
+
+        expect(volumeConfirmation.implementationReady, isTrue);
+        expect(volumeConfirmation.affectsDirection, isTrue);
+        expect(volumeConfirmation.affectsConfidence, isTrue);
+
+        final explanation = EvidenceExplainabilityCatalog.forKind(
+          EvidenceKind.volumeConfirmation,
+        );
+
+        expect(explanation, isNotNull);
+        expect(explanation!.isComplete, isTrue);
+        expect(explanation.allowsDirectionalInfluence, isTrue);
+        expect(explanation.supportiveInterpretation, isNotNull);
+        expect(explanation.opposingInterpretation, isNotNull);
+      },
+    );
 
     test('current analysis-window VWAP stays excluded from Swing', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(

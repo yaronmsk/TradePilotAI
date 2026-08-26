@@ -12,6 +12,7 @@ import 'package:mobile/features/recommendation/providers/evidence_provider.dart'
 import 'package:mobile/features/recommendation/providers/macd_momentum_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/relative_volume_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/volume_confirmation_evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_evidence_selector.dart';
@@ -110,6 +111,7 @@ void main() {
         EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
+        EvidenceKind.volumeConfirmation,
         EvidenceKind.multiTimeframeTrend,
       ]);
     });
@@ -348,6 +350,46 @@ void main() {
       expect(results.single.status, EvidenceStatus.available);
       expect(results.single.direction, EvidenceDirection.bullish);
       expect(results.single.baselineValue, contains('20-day average'));
+    });
+
+    test('Swing executes calibrated Volume Confirmation', () {
+      final candles = List<MarketCandle>.generate(20, (index) {
+        final close = 100 + (index * 0.25);
+
+        return MarketCandle(
+          timestamp: DateTime(2026, 7, 1).add(Duration(days: index)),
+          open: close,
+          high: close + 0.30,
+          low: close - 0.30,
+          close: close,
+          volume: index < 10 ? 1000000 : 1500000,
+        );
+      });
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '1d',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [VolumeConfirmationEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.volumeConfirmation);
+      expect(results.single.status, EvidenceStatus.available);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.definition.family, EvidenceFamily.participation);
+      expect(results.single.relativeValue, contains('ATR'));
     });
 
     test('Swing does not execute an uncalibrated provider', () {

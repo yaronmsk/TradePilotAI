@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_kind.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy.dart';
@@ -65,6 +66,7 @@ void main() {
         EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
+        EvidenceKind.volumeConfirmation,
         EvidenceKind.multiTimeframeTrend,
       ]);
 
@@ -160,6 +162,27 @@ void main() {
       expect(policy.affectsDirection, isTrue);
       expect(policy.affectsConfidence, isTrue);
     });
+
+    test(
+      'Swing Volume Confirmation uses volatility-aware Participation calibration',
+      () {
+        final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+          EvidenceKind.volumeConfirmation,
+        );
+
+        expect(policy, isNotNull);
+        expect(
+          policy!.applicability,
+          StrategyEvidenceApplicability.recalibrateForStrategy,
+        );
+        expect(policy.implementationReady, isTrue);
+        expect(policy.family, EvidenceFamily.participation);
+        expect(policy.affectsDirection, isTrue);
+        expect(policy.affectsConfidence, isTrue);
+        expect(policy.affectsRiskOrEntryQuality, isFalse);
+        expect(policy.calibrationNotes, contains('volatility-aware'));
+      },
+    );
 
     test('Investor evidence semantics remain deferred to v0.12.0', () {
       final policy = StrategyAnalysisPolicyCatalog.investor;

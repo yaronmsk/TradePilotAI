@@ -147,6 +147,7 @@ class StrategyAnalysisPolicyCatalog {
         strategy: StrategyType.swing,
         kind: EvidenceKind.volumeConfirmation,
         applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+        implementationReady: true,
         affectsDirection: true,
         affectsConfidence: true,
         affectsRiskOrEntryQuality: false,
