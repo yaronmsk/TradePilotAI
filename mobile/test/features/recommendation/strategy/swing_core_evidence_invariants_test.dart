@@ -148,10 +148,7 @@ void main() {
     test('uncalibrated Swing evidence remains blocked', () {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
-      const pendingKinds = <EvidenceKind>[
-        EvidenceKind.marketBreadth,
-        EvidenceKind.newsSentiment,
-      ];
+      const pendingKinds = <EvidenceKind>[EvidenceKind.newsSentiment];
 
       for (final kind in pendingKinds) {
         final policy = swing.policyFor(kind);
@@ -275,7 +272,7 @@ void main() {
     });
 
     test(
-      'Market Context is ready while Breadth remains in the same capped family',
+      'Market Context and Breadth are both ready inside one capped family',
       () {
         final swing = StrategyAnalysisPolicyCatalog.swing;
 
@@ -284,25 +281,36 @@ void main() {
         final breadth = swing.policyFor(EvidenceKind.marketBreadth);
 
         expect(context, isNotNull);
-        expect(context!.implementationReady, isTrue);
-        expect(context.family, EvidenceFamily.marketContext);
-        expect(context.affectsDirection, isTrue);
-        expect(context.affectsConfidence, isTrue);
-
         expect(breadth, isNotNull);
-        expect(breadth!.implementationReady, isFalse);
+
+        expect(context!.implementationReady, isTrue);
+        expect(breadth!.implementationReady, isTrue);
+
+        expect(context.family, EvidenceFamily.marketContext);
+
         expect(breadth.family, EvidenceFamily.marketContext);
 
-        final explanation = EvidenceExplainabilityCatalog.forKind(
-          EvidenceKind.marketContext,
+        expect(context.affectsDirection, isTrue);
+        expect(breadth.affectsDirection, isTrue);
+
+        expect(context.affectsConfidence, isTrue);
+        expect(breadth.affectsConfidence, isTrue);
+
+        final breadthExplanation = EvidenceExplainabilityCatalog.forKind(
+          EvidenceKind.marketBreadth,
         );
 
-        expect(explanation, isNotNull);
-        expect(explanation!.isComplete, isTrue);
-        expect(explanation.allowsDirectionalInfluence, isTrue);
-        expect(explanation.supportiveInterpretation, isNotNull);
-        expect(explanation.opposingInterpretation, isNotNull);
-        expect(explanation.recommendationImpact, contains('Market Breadth'));
+        expect(breadthExplanation, isNotNull);
+        expect(breadthExplanation!.isComplete, isTrue);
+
+        expect(breadthExplanation.allowsDirectionalInfluence, isTrue);
+
+        expect(
+          breadthExplanation.recommendationImpact,
+          contains('without becoming an independent second market vote'),
+        );
+
+        expect(swing.isRecommendationActive, isFalse);
       },
     );
 

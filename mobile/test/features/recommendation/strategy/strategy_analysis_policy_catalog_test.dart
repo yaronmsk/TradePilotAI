@@ -71,6 +71,7 @@ void main() {
         EvidenceKind.priceExtension,
         EvidenceKind.multiTimeframeTrend,
         EvidenceKind.marketContext,
+        EvidenceKind.marketBreadth,
       ]);
 
       final candleTrend = policy.policyFor(EvidenceKind.candleTrend);
@@ -234,6 +235,29 @@ void main() {
       );
       expect(policy.calibrationNotes, contains('stock-vs-market'));
     });
+
+    test(
+      'Swing Market Breadth is calibrated inside the Market Context family',
+      () {
+        final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+          EvidenceKind.marketBreadth,
+        );
+
+        expect(policy, isNotNull);
+        expect(policy!.implementationReady, isTrue);
+        expect(policy.family, EvidenceFamily.marketContext);
+        expect(policy.affectsDirection, isTrue);
+        expect(policy.affectsConfidence, isTrue);
+        expect(policy.affectsRiskOrEntryQuality, isFalse);
+
+        expect(
+          policy.applicability,
+          StrategyEvidenceApplicability.recalibrateForStrategy,
+        );
+
+        expect(policy.calibrationNotes, contains('de-duplicated'));
+      },
+    );
 
     test('Investor evidence semantics remain deferred to v0.12.0', () {
       final policy = StrategyAnalysisPolicyCatalog.investor;

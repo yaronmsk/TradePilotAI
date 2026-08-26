@@ -248,6 +248,7 @@ class RecommendationService {
       results.add(
         marketBreadthEvidenceProvider.evaluate(
           analysisContext.externalContextProfile.marketBreadth,
+          strategy: strategy,
         ),
       );
     }

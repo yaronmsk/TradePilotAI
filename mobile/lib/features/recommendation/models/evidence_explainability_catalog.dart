@@ -223,21 +223,20 @@ class EvidenceExplainabilityCatalog {
       whatItIs:
           'Measures how broadly a market move is supported across underlying stocks and sectors.',
       calculation:
-          'Combines advancing-stock participation, stocks above a medium-term trend reference, sector participation and a volatility-regime adjustment.',
+          'Trader preserves its validated breadth score. Swing recalculates breadth from advancing-stock participation, stocks above the 50-day medium-term trend reference and sector participation. Medium-term participation receives the greatest Swing weight. High volatility reduces Breadth influence but does not create bearish direction by itself.',
       whyItMatters:
-          'A headline index can move strongly while participation underneath it is narrow. Broader participation generally makes market direction more robust.',
+          'A headline index can move strongly while participation underneath it is narrow. Broad participation can make a days-to-weeks market move more credible, while persistent narrow participation can make it less robust.',
       supportiveInterpretation:
-          'Broad and healthy participation can contribute bullish market-context evidence.',
+          'Broad participation across advancers, medium-term trend participation and sectors can contribute bullish Market Context evidence.',
       opposingInterpretation:
-          'Weak or stressed participation can contribute bearish market-context evidence.',
+          'Persistently weak participation across those same breadth components can contribute bearish Market Context evidence.',
       neutralInterpretation:
-          'Mixed breadth provides limited directional confirmation.',
+          'Mixed breadth, or component readings close to the 50% participation reference, remain neutral rather than being forced into a directional conclusion.',
       recommendationImpact:
-          'Market Breadth contributes inside the existing Market Context family and therefore cannot double-count broader market evidence as an independent family.',
+          'Market Breadth contributes only inside the existing Market Context family. For Swing it has lower standalone influence than Market & Sector Context, so it can reinforce or challenge that family without becoming an independent second market vote.',
       limitations:
-          'Breadth depends on the quality and completeness of the underlying universe. The current development source is synthetic and must not be presented as authoritative live market intelligence.',
+          'Breadth depends on the quality, representativeness and completeness of the underlying universe. Cross-sectional breadth can change quickly. High volatility is context rather than directional proof. The current development breadth source is synthetic and must not be presented as authoritative live market intelligence. Swing thresholds are deterministic v0.11 assumptions rather than historically optimized parameters.',
     ),
-
     EvidenceKind.newsSentiment: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
