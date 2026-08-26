@@ -116,7 +116,7 @@ Current release:
 
 Status:
 
-**Active development / scope approved.**
+**Active development / Batches 1-3 implemented and validated.**
 
 Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
 
@@ -195,6 +195,28 @@ Every existing evidence provider and capability requires an explicit decision co
 - Event Risk — confidence/risk-only; maximum 12-point penalty and no positive bonus.
 - Stock DNA — core contextual input and must become strategy-aware.
 - Historical Setup Validation — confidence-only, strategy/timeframe-specific and bounded to ±8 points.
+
+### Current v0.11 implementation checkpoint
+
+Completed through Batch 3:
+
+- Strategy-aware evidence policy and execution gates.
+- Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
+- Trend family:
+  - Candle Trend.
+  - EMA Structure.
+  - Multi-Timeframe Trend.
+- Momentum family:
+  - RSI.
+  - MACD Momentum.
+- All five capabilities are Swing-calibrated and implementation-ready.
+- Trend-family and Momentum-family de-duplication boundaries remain intact.
+- Trader regression behavior remains protected.
+- Swing recommendation activation remains intentionally blocked.
+
+Next implementation batch:
+
+**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
 
 ### Swing UI / explainability rules
 

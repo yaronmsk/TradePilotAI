@@ -1,10 +1,10 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Approved scope
+Status: Implementation in progress — Batches 0-3 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
-Date: 2026-08-23
+Last implementation checkpoint: 2026-08-26
 
 ## 1. Purpose
 
@@ -993,12 +993,22 @@ Validate:
 ### Batch 3
 Trend and Momentum Swing calibration.
 
-Audit:
-- Candle Trend.
-- EMA Structure.
-- Multi-Timeframe Trend.
-- RSI.
-- MACD.
+Status:
+
+**Completed and regression-validated on 2026-08-26.**
+
+Implemented:
+- Candle Trend — strategy-specific recent-window and volatility-normalized Swing calibration.
+- EMA Structure — Swing 20/50 EMA structure with slope, persistence and ATR-normalized separation.
+- Multi-Timeframe Trend — primary-anchored Swing direction using the approved timeframe-role policy.
+- RSI — trend-context-aware Swing momentum; overbought/oversold no longer automatically creates SELL/BUY direction.
+- MACD Momentum — Swing momentum phase, recent crossover, zero-line context and ATR-normalized histogram interpretation.
+
+Invariant boundary:
+- Candle Trend, EMA Structure and Multi-Timeframe Trend remain de-duplicated inside the Trend family.
+- RSI and MACD Momentum remain de-duplicated inside the Momentum family.
+- Trader behavior remains protected by regression tests.
+- Swing recommendation generation remains inactive until later orchestration batches are complete.
 
 ### Batch 4
 Participation, Price Structure and Volatility Swing calibration.

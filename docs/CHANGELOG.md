@@ -13,7 +13,7 @@ Status:
 Approved
 
 Last Updated:
-2026-08-23
+2026-08-26
 
 Owner:
 TradePilot AI
@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Scope Approved
+Development — Batches 1-3 Complete
 
 Date
 
@@ -41,6 +41,38 @@ Opened v0.11.0 as the dedicated Swing Strategy Brain release.
 This checkpoint defines architecture, evidence applicability, explainability, attribution and acceptance requirements before production implementation begins.
 
 No production recommendation behavior has changed in this checkpoint.
+
+### Implementation Progress — 2026-08-26
+
+Batches 1-3 are implemented and regression-validated.
+
+Completed:
+
+- Strategy-aware evidence policy and collection gates.
+- Swing timeframe/context orchestration.
+- Candle Trend Swing calibration.
+- EMA Structure Swing calibration.
+- Multi-Timeframe Trend Swing calibration.
+- RSI trend-context-aware Swing calibration.
+- MACD Momentum Swing calibration.
+- Explainability updates required by those capabilities.
+- Trader regression protection and strategy-readiness tests.
+
+Current implementation-ready Swing evidence:
+
+- Trend:
+  - Candle Trend.
+  - EMA Structure.
+  - Multi-Timeframe Trend.
+- Momentum:
+  - RSI.
+  - MACD Momentum.
+
+Swing recommendation generation remains intentionally inactive.
+
+Next planned implementation work:
+
+**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
 
 ### Release Boundary
 

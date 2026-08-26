@@ -3,7 +3,7 @@
 **Document ID:** TP-012
 **Version:** 2.0
 **Status:** Active
-**Last Updated:** 2026-08-23
+**Last Updated:** 2026-08-26
 **Primary Branch:** `develop`
 
 ---
@@ -26,7 +26,7 @@ Current active development release:
 
 Status:
 
-**Scope approved / production implementation not yet started.**
+**Production implementation active — Batches 1-3 completed and validated.**
 
 Detailed v0.11.0 evidence, capability and acceptance contract:
 
@@ -608,32 +608,36 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Documentation / architecture scope before production implementation.**
+**Batches 1-3 implemented and regression-validated.**
 
-Before production code:
+Completed production foundations:
 
-1. Commit the approved Swing evidence/capability audit.
-2. Ensure all six canonical continuation documents identify v0.11.0 as the active release.
-3. Preserve `v0.10.1` as the clean tagged baseline.
+1. Strategy-aware evidence/applicability policy and execution gates.
+2. Swing timeframe/context orchestration.
+3. Trend and Momentum Swing calibration:
+   * Candle Trend.
+   * EMA Structure.
+   * Multi-Timeframe Trend.
+   * RSI.
+   * MACD Momentum.
 
-The first production-code batch must implement the strategy-aware analysis/evidence policy foundation.
+Current implementation-ready Swing evidence families:
 
-Do not activate Swing in the UI first.
+* Trend:
+  * Candle Trend.
+  * EMA Structure.
+  * Multi-Timeframe Trend.
+* Momentum:
+  * RSI.
+  * MACD Momentum.
 
-The strategy policy must be able to express, per strategy:
+Swing recommendation generation remains intentionally inactive until
+the remaining evidence-family calibration, recommendation orchestration,
+attribution, UI activation and release-validation work is complete.
 
-* Provider applicability.
-* Strategy-specific parameters.
-* Lookbacks.
-* Threshold model.
-* Base reliability/weight.
-* Semantic role.
-* Direction behavior.
-* Confidence behavior.
-* Risk / entry-quality behavior.
-* Family/de-duplication constraints.
+Current next implementation batch:
 
-v0.11.0 must audit every existing evidence and capability individually.
+**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
 
 Permanent Swing acceptance constraints:
 
