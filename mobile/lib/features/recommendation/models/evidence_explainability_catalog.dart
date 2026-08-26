@@ -123,23 +123,22 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.supportResistance: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Evaluates current price relative to recent local support and resistance levels.',
+          'Evaluates price relative to recent structural support and resistance levels.',
       calculation:
-          'Uses prior candle highs and lows to identify local levels and uses ATR to normalize breakout and proximity thresholds.',
+          'Trader preserves its validated local high/low behavior. Swing builds support and resistance from candles before a reserved confirmation window, normalizes distances with ATR, and requires confirmed closes or a decisive rejection candle before structure becomes directional evidence.',
       whyItMatters:
-          'Price can react near established levels, while a sufficiently strong break through a level can strengthen directional evidence.',
+          'Structural levels can affect entry quality, stop placement and risk. A confirmed break or rejection can also provide directional information.',
       supportiveInterpretation:
-          'Holding near support or breaking above resistance can contribute bullish price-structure evidence.',
+          'A confirmed break above resistance supports bullish structure evidence, while a confirmed break below support supports bearish structure evidence. A decisive bullish rejection from support or bearish rejection from resistance can also become directional evidence.',
       opposingInterpretation:
-          'Holding near resistance or breaking below support can contribute bearish price-structure evidence.',
+          'A confirmed breakdown challenges bullish structure; a confirmed breakout challenges bearish structure. Rejection from the opposite structural boundary can provide opposing evidence.',
       neutralInterpretation:
-          'Price between meaningful levels without a breakout or immediate level test is treated as neutral.',
+          'Being merely near support or resistance is directionally neutral for Swing. Proximity is treated as entry/risk context until price actually confirms a hold, rejection, breakout or breakdown.',
       recommendationImpact:
-          'Support and Resistance contributes inside the Price Structure family and is aggregated with related structure evidence such as VWAP.',
+          'Support & Resistance contributes through the Price Structure family. Direction requires a confirmed structural event, while simple proximity mainly informs entry quality and risk.',
       limitations:
-          'Detected levels are local to the analysis window and are not guaranteed barriers. Volatility, gaps and changing market conditions can invalidate them quickly.',
+          'Local extrema are simplified structural references rather than guaranteed supply/demand levels. Gaps, news and volatility can invalidate them quickly. The v0.11 Swing lookbacks, ATR buffers and confirmation counts are deterministic policy assumptions and are not presented as historically optimized parameters.',
     ),
-
     EvidenceKind.volumeConfirmation: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

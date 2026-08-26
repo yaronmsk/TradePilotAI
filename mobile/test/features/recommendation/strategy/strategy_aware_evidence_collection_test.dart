@@ -12,6 +12,7 @@ import 'package:mobile/features/recommendation/providers/evidence_provider.dart'
 import 'package:mobile/features/recommendation/providers/macd_momentum_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/relative_volume_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
+import 'package:mobile/features/recommendation/providers/support_resistance_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/volume_confirmation_evidence_provider.dart';
 import 'package:mobile/features/recommendation/services/recommendation_service.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
@@ -111,6 +112,7 @@ void main() {
         EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
+        EvidenceKind.supportResistance,
         EvidenceKind.volumeConfirmation,
         EvidenceKind.multiTimeframeTrend,
       ]);
@@ -392,12 +394,69 @@ void main() {
       expect(results.single.relativeValue, contains('ATR'));
     });
 
+    test('Swing executes calibrated Support & Resistance', () {
+      final candles = <MarketCandle>[];
+
+      for (var index = 0; index < 40; index++) {
+        candles.add(
+          MarketCandle(
+            timestamp: DateTime(2026, 6, 1).add(Duration(days: index)),
+            open: 100,
+            high: 101,
+            low: 99,
+            close: 100,
+            volume: 1000000,
+          ),
+        );
+      }
+
+      for (var index = 0; index < 2; index++) {
+        final close = 101.60 + (index * 0.10);
+
+        candles.add(
+          MarketCandle(
+            timestamp: DateTime(2026, 7, 11).add(Duration(days: index)),
+            open: close - 0.20,
+            high: close + 0.20,
+            low: close - 0.20,
+            close: close,
+            volume: 1000000,
+          ),
+        );
+      }
+
+      final snapshot = MarketSnapshot(
+        symbol: 'TEST',
+        timeframe: '1d',
+        timestamp: candles.last.timestamp,
+        currentPrice: candles.last.close,
+        currentVolume: candles.last.volume,
+        candles: candles,
+      );
+
+      const service = RecommendationService(
+        providers: [SupportResistanceEvidenceProvider()],
+      );
+
+      final results = service.collectEvidence(
+        snapshot,
+        strategy: StrategyType.swing,
+      );
+
+      expect(results, hasLength(1));
+      expect(results.single.definition.kind, EvidenceKind.supportResistance);
+      expect(results.single.status, EvidenceStatus.available);
+      expect(results.single.direction, EvidenceDirection.bullish);
+      expect(results.single.definition.family, EvidenceFamily.priceStructure);
+      expect(results.single.explanation, contains('Swing breakout'));
+    });
+
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.supportResistance,
-          family: EvidenceFamily.priceStructure,
-          name: 'Test Support Resistance',
+          kind: EvidenceKind.priceExtension,
+          family: EvidenceFamily.volatility,
+          name: 'Test Price Extension',
         ),
       );
 

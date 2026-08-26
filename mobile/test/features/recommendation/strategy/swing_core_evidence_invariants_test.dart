@@ -123,7 +123,6 @@ void main() {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
       const pendingKinds = <EvidenceKind>[
-        EvidenceKind.supportResistance,
         EvidenceKind.priceExtension,
         EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
@@ -195,6 +194,28 @@ void main() {
         expect(explanation.opposingInterpretation, isNotNull);
       },
     );
+
+    test('Support & Resistance is ready with structure and risk semantics', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.supportResistance,
+      );
+
+      expect(policy, isNotNull);
+      expect(policy!.implementationReady, isTrue);
+      expect(policy.family, EvidenceFamily.priceStructure);
+      expect(policy.affectsDirection, isTrue);
+      expect(policy.affectsConfidence, isTrue);
+      expect(policy.affectsRiskOrEntryQuality, isTrue);
+
+      final explanation = EvidenceExplainabilityCatalog.forKind(
+        EvidenceKind.supportResistance,
+      );
+
+      expect(explanation, isNotNull);
+      expect(explanation!.isComplete, isTrue);
+      expect(explanation.allowsDirectionalInfluence, isTrue);
+      expect(explanation.neutralInterpretation, contains('Proximity'));
+    });
 
     test('current analysis-window VWAP stays excluded from Swing', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(

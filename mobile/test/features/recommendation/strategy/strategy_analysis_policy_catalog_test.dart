@@ -66,6 +66,7 @@ void main() {
         EvidenceKind.relativeVolume,
         EvidenceKind.emaStructure,
         EvidenceKind.macdMomentum,
+        EvidenceKind.supportResistance,
         EvidenceKind.volumeConfirmation,
         EvidenceKind.multiTimeframeTrend,
       ]);
@@ -161,6 +162,24 @@ void main() {
       expect(policy.dataQualityRequirement, isNotEmpty);
       expect(policy.affectsDirection, isTrue);
       expect(policy.affectsConfidence, isTrue);
+    });
+
+    test('Swing Support & Resistance separates proximity from direction', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.supportResistance,
+      );
+
+      expect(policy, isNotNull);
+      expect(
+        policy!.applicability,
+        StrategyEvidenceApplicability.recalibrateForStrategy,
+      );
+      expect(policy.implementationReady, isTrue);
+      expect(policy.family, EvidenceFamily.priceStructure);
+      expect(policy.affectsDirection, isTrue);
+      expect(policy.affectsConfidence, isTrue);
+      expect(policy.affectsRiskOrEntryQuality, isTrue);
+      expect(policy.calibrationNotes, contains('Proximity alone'));
     });
 
     test(
