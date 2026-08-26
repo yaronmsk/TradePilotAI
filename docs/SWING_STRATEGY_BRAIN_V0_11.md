@@ -1,10 +1,10 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-3 complete
+Status: Implementation in progress — Batches 0-4 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
-Last implementation checkpoint: 2026-08-26
+Last implementation checkpoint: 2026-08-27
 
 ## 1. Purpose
 
@@ -1013,12 +1013,30 @@ Invariant boundary:
 ### Batch 4
 Participation, Price Structure and Volatility Swing calibration.
 
-Audit:
-- Relative Volume.
-- Volume Confirmation.
-- VWAP exclusion.
-- Support & Resistance.
-- Price Extension.
+Status:
+
+**Completed and regression-validated on 2026-08-27.**
+
+Implemented:
+- Relative Volume — 1D Swing uses valid daily history; 4H refuses fabricated same-session-position normalization.
+- Volume Confirmation — volatility-aware ATR significance replaces the fixed Trader price-move gate for Swing.
+- Support & Resistance — proximity alone is neutral; confirmed breakout, breakdown, hold or rejection may create direction.
+- Price Extension — Swing remains directionally neutral and affects confidence, entry quality and risk only.
+- Current analysis-window VWAP remains excluded from initial Swing scoring.
+
+Invariant boundary:
+- Relative Volume and Volume Confirmation share the Participation family and cannot become two independent participation votes.
+- Support & Resistance remains in the Price Structure family.
+- Price Extension remains in the Volatility family with exactly zero Swing directional influence.
+- 4H Relative Volume does not fabricate comparable session-position history.
+- Support/resistance proximity alone cannot manufacture BUY/SELL direction.
+- Trader behavior remains protected by regression tests.
+- Swing recommendation generation remains inactive until later orchestration batches are complete.
+
+Functional completion validation before this documentation checkpoint:
+- Flutter analyzer: clean.
+- Provider suite: 113 passing tests.
+- Full automated suite: 404 passing tests.
 
 ### Batch 5
 Market Context, Sentiment, Stock DNA and Event Risk.

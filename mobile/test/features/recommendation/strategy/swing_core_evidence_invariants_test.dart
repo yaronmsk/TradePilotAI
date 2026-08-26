@@ -14,7 +14,14 @@ void main() {
     EvidenceKind.multiTimeframeTrend,
   ];
 
-  group('Swing Batch 3 core evidence invariants', () {
+  const batch4Kinds = <EvidenceKind>[
+    EvidenceKind.relativeVolume,
+    EvidenceKind.volumeConfirmation,
+    EvidenceKind.supportResistance,
+    EvidenceKind.priceExtension,
+  ];
+
+  group('Swing evidence readiness invariants', () {
     test('Batch 3 core evidence remains ready as later batches advance', () {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
@@ -117,6 +124,25 @@ void main() {
           reason: '$kind requires opposing interpretation.',
         );
       }
+    });
+
+    test('Batch 4 calibrated capabilities remain implementation-ready', () {
+      final swing = StrategyAnalysisPolicyCatalog.swing;
+
+      expect(
+        swing.implementationReadyEvidenceKinds.toSet().containsAll(batch4Kinds),
+        isTrue,
+      );
+
+      for (final kind in batch4Kinds) {
+        expect(
+          swing.policyFor(kind)?.implementationReady,
+          isTrue,
+          reason: '$kind must remain Swing implementation-ready.',
+        );
+      }
+
+      expect(swing.isRecommendationActive, isFalse);
     });
 
     test('uncalibrated Swing evidence remains blocked', () {

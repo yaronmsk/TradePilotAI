@@ -13,7 +13,7 @@ Status:
 Approved
 
 Last Updated:
-2026-08-26
+2026-08-27
 
 Owner:
 TradePilot AI
@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-3 Complete
+Development — Batches 1-4 Complete
 
 Date
 
@@ -42,37 +42,46 @@ This checkpoint defines architecture, evidence applicability, explainability, at
 
 No production recommendation behavior has changed in this checkpoint.
 
-### Implementation Progress — 2026-08-26
+### Implementation Progress — 2026-08-27
 
-Batches 1-3 are implemented and regression-validated.
+Batches 1-4 are implemented and regression-validated.
 
 Completed:
-
 - Strategy-aware evidence policy and collection gates.
 - Swing timeframe/context orchestration.
-- Candle Trend Swing calibration.
-- EMA Structure Swing calibration.
-- Multi-Timeframe Trend Swing calibration.
-- RSI trend-context-aware Swing calibration.
-- MACD Momentum Swing calibration.
-- Explainability updates required by those capabilities.
-- Trader regression protection and strategy-readiness tests.
-
-Current implementation-ready Swing evidence:
-
-- Trend:
+- Trend family calibration:
   - Candle Trend.
   - EMA Structure.
   - Multi-Timeframe Trend.
-- Momentum:
+- Momentum family calibration:
   - RSI.
   - MACD Momentum.
+- Participation family calibration:
+  - Relative Volume.
+  - Volume Confirmation.
+- Price Structure calibration:
+  - Support & Resistance.
+- Volatility / Entry Quality calibration:
+  - Price Extension.
+- Current analysis-window VWAP remains excluded from Swing.
+- Trader regression protection and strategy-readiness invariants.
+
+Batch 4 semantic boundaries:
+- Relative Volume and Volume Confirmation share one Participation family.
+- 4H Relative Volume refuses fabricated same-session-position normalization.
+- Support/resistance proximity alone is not directional evidence.
+- Price Extension has exactly zero Swing directional influence and affects confidence, entry quality and risk only.
+
+Functional validation at Batch 4 implementation completion:
+- Flutter analyzer: clean.
+- Provider regression suite: 113 passing tests.
+- Full automated suite: 404 passing tests.
 
 Swing recommendation generation remains intentionally inactive.
 
 Next planned implementation work:
 
-**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
+**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
 
 ### Release Boundary
 

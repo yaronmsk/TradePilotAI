@@ -116,7 +116,7 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-3 implemented and validated.**
+**Active development / Batches 1-4 implemented and validated.**
 
 Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
 
@@ -198,7 +198,7 @@ Every existing evidence provider and capability requires an explicit decision co
 
 ### Current v0.11 implementation checkpoint
 
-Completed through Batch 3:
+Completed through Batch 4:
 
 - Strategy-aware evidence policy and execution gates.
 - Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
@@ -209,14 +209,27 @@ Completed through Batch 3:
 - Momentum family:
   - RSI.
   - MACD Momentum.
-- All five capabilities are Swing-calibrated and implementation-ready.
-- Trend-family and Momentum-family de-duplication boundaries remain intact.
+- Participation family:
+  - Relative Volume.
+  - Volume Confirmation.
+- Price Structure family:
+  - Support & Resistance.
+- Volatility / Entry Quality:
+  - Price Extension — zero Swing directional influence.
+- Current analysis-window VWAP remains excluded from Swing.
+- Family de-duplication boundaries remain intact.
 - Trader regression behavior remains protected.
 - Swing recommendation activation remains intentionally blocked.
 
+Batch 4 functional validation baseline:
+
+- Flutter analyzer clean.
+- 113 provider tests passing.
+- 404 total automated tests passing.
+
 Next implementation batch:
 
-**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
+**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
 
 ### Swing UI / explainability rules
 

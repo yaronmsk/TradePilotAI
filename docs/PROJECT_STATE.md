@@ -3,7 +3,7 @@
 **Document ID:** TP-012
 **Version:** 2.0
 **Status:** Active
-**Last Updated:** 2026-08-26
+**Last Updated:** 2026-08-27
 **Primary Branch:** `develop`
 
 ---
@@ -26,7 +26,7 @@ Current active development release:
 
 Status:
 
-**Production implementation active — Batches 1-3 completed and validated.**
+**Production implementation active — Batches 1-4 completed and validated.**
 
 Detailed v0.11.0 evidence, capability and acceptance contract:
 
@@ -608,18 +608,14 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-3 implemented and regression-validated.**
+**Batches 1-4 implemented and regression-validated.**
 
 Completed production foundations:
 
 1. Strategy-aware evidence/applicability policy and execution gates.
 2. Swing timeframe/context orchestration.
-3. Trend and Momentum Swing calibration:
-   * Candle Trend.
-   * EMA Structure.
-   * Multi-Timeframe Trend.
-   * RSI.
-   * MACD Momentum.
+3. Trend and Momentum Swing calibration.
+4. Participation, Price Structure and Volatility Swing calibration.
 
 Current implementation-ready Swing evidence families:
 
@@ -630,14 +626,30 @@ Current implementation-ready Swing evidence families:
 * Momentum:
   * RSI.
   * MACD Momentum.
+* Participation:
+  * Relative Volume.
+  * Volume Confirmation.
+* Price Structure:
+  * Support & Resistance.
+* Volatility / Entry Quality:
+  * Price Extension — confidence/risk/entry-quality only for Swing; zero directional influence.
+
+Current analysis-window VWAP remains excluded from Swing.
+
+Batch 4 functional validation baseline:
+
+* Flutter analyzer: clean.
+* Provider regression suite: 113 passing tests.
+* Full automated suite: 404 passing tests.
 
 Swing recommendation generation remains intentionally inactive until
-the remaining evidence-family calibration, recommendation orchestration,
-attribution, UI activation and release-validation work is complete.
+the remaining context calibration, historical validation,
+recommendation orchestration, attribution, UI activation and
+release-validation work is complete.
 
 Current next implementation batch:
 
-**Batch 4 — Participation, Price Structure and Volatility Swing calibration.**
+**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
 
 Permanent Swing acceptance constraints:
 
