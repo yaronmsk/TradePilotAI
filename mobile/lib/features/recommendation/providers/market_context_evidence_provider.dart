@@ -2,6 +2,8 @@ import '../context/market_context_profile.dart';
 import '../models/evidence_definition.dart';
 import '../models/evidence_family.dart';
 import '../models/evidence_result.dart';
+import '../models/strategy_summary.dart';
+import '../strategy/market_context_strategy_policy.dart';
 
 class MarketContextEvidenceProvider {
   const MarketContextEvidenceProvider();
@@ -15,10 +17,22 @@ class MarketContextEvidenceProvider {
     whyItMatters:
         'A stock does not trade in isolation. Relative strength can distinguish stock-specific leadership from a move that merely follows the broader market.',
     calculation:
-        'TradePilot compares the stock with the broad-market and sector benchmarks on the Trader confirmation and regime timeframes. Stock-vs-market and stock-vs-sector relative performance receive the most weight; sector leadership and broad-market direction contribute smaller context weights.',
+        'TradePilot compares the stock with broad-market and sector benchmarks over strategy-specific confirmation and regime horizons. Relative stock leadership receives most of the context weight, while sector leadership and broad-market direction remain smaller supporting inputs.',
   );
 
-  EvidenceResult evaluate(MarketContextProfile profile) {
+  EvidenceResult evaluate(
+    MarketContextProfile profile, {
+    StrategyType strategy = StrategyType.trader,
+  }) {
+    final policy = MarketContextStrategyPolicy.forStrategy(strategy);
+
+    if (policy == null) {
+      return _unavailable(
+        profile,
+        'Market & Sector Context has not been calibrated for Investor yet.',
+      );
+    }
+
     if (!profile.hasSufficientData) {
       return EvidenceResult(
         providerName: kDefinition.name,
@@ -40,11 +54,21 @@ class MarketContextEvidenceProvider {
     }
 
     final score = profile.directionScore.abs().clamp(0.0, 100.0);
-    final direction = profile.directionScore > 8
+
+    final hasConflict =
+        strategy == StrategyType.swing && profile.hasContextConflict;
+
+    final directionThreshold = hasConflict
+        ? policy.conflictDirectionThreshold
+        : policy.directionThreshold;
+
+    final direction = profile.directionScore > directionThreshold
         ? EvidenceDirection.bullish
-        : profile.directionScore < -8
+        : profile.directionScore < -directionThreshold
         ? EvidenceDirection.bearish
         : EvidenceDirection.neutral;
+
+    final dynamicWeight = hasConflict ? policy.conflictDynamicWeight : 1.0;
 
     return EvidenceResult(
       providerName: kDefinition.name,
@@ -53,8 +77,8 @@ class MarketContextEvidenceProvider {
       direction: direction,
       strength: _strength(score),
       score: score,
-      baseWeight: 0.85,
-      dynamicWeight: 1,
+      baseWeight: policy.providerBaseWeight,
+      dynamicWeight: dynamicWeight,
       reliability: profile.reliability,
       currentValue: _relativeStrengthLabel(profile.relativeStrength),
       baselineValue: profile.target.hasSectorBenchmark
@@ -64,9 +88,30 @@ class MarketContextEvidenceProvider {
           ? 'vs market ${_signed(profile.stockVsMarketPercent)} pp • vs sector ${_signed(profile.stockVsSectorPercent)} pp'
           : 'vs market ${_signed(profile.stockVsMarketPercent)} pp',
       explanation:
+          '${strategy == StrategyType.swing ? 'Swing context uses the approved confirmation and regime horizons. ' : ''}'
           'The broader backdrop is ${_backdropLabel(profile.backdrop).toLowerCase()}. '
           'The stock is ${_relativeStrengthLabel(profile.relativeStrength).toLowerCase()} relative to its benchmarks. '
-          '${profile.target.hasSectorBenchmark ? '${profile.target.sectorName} is compared with ${profile.target.marketSymbol} as an additional independent context check.' : 'A dedicated sector benchmark is not available for this symbol, so reliability is reduced.'}',
+          '${hasConflict ? 'Stock relative strength and the broader backdrop conflict, so Market Context influence is deliberately reduced rather than forcing certainty. ' : ''}'
+          '${profile.target.hasSectorBenchmark ? '${profile.target.sectorName} provides a sector-relative comparison alongside ${profile.target.marketSymbol}.' : 'A dedicated sector benchmark is unavailable, so Swing does not manufacture a second independent relative-strength comparison and reliability is reduced.'}',
+    );
+  }
+
+  EvidenceResult _unavailable(MarketContextProfile profile, String reason) {
+    return EvidenceResult(
+      providerName: kDefinition.name,
+      definition: kDefinition,
+      status: EvidenceStatus.unavailable,
+      direction: EvidenceDirection.unknown,
+      strength: EvidenceStrength.veryWeak,
+      score: 0,
+      baseWeight: 0.85,
+      dynamicWeight: 1,
+      reliability: 0,
+      currentValue: 'Unavailable',
+      baselineValue: profile.target.marketSymbol,
+      relativeValue: 'Strategy context unavailable',
+      explanation: reason,
+      unavailableReason: reason,
     );
   }
 

@@ -4,6 +4,8 @@ import 'package:mobile/features/market/models/market_snapshot.dart';
 import 'package:mobile/features/recommendation/context/market_context_profile.dart';
 import 'package:mobile/features/recommendation/context/market_context_profile_service.dart';
 import 'package:mobile/features/recommendation/context/market_context_target.dart';
+import 'package:mobile/features/recommendation/context/strategy_timeframe_plan.dart';
+import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 
 void main() {
   const service = MarketContextProfileService();
@@ -139,5 +141,112 @@ void main() {
 
     expect(profile.relativeStrength, RelativeStrengthState.underperforming);
     expect(profile.directionScore, lessThan(0));
+  });
+  test('Swing emphasizes confirmation while retaining regime context', () {
+    final profile = service.evaluate(
+      target: target,
+      strategy: StrategyType.swing,
+      plan: StrategyTimeframePlan.swing,
+      stockConfirmation: buildSnapshot(
+        symbol: 'TEST',
+        timeframe: '1w',
+        start: 100,
+        end: 110,
+        count: 24,
+      ),
+      stockRegime: buildSnapshot(
+        symbol: 'TEST',
+        timeframe: '1mo',
+        start: 100,
+        end: 95,
+        count: 24,
+      ),
+      marketConfirmation: buildSnapshot(
+        symbol: 'SPY',
+        timeframe: '1w',
+        start: 100,
+        end: 102,
+        count: 24,
+      ),
+      marketRegime: buildSnapshot(
+        symbol: 'SPY',
+        timeframe: '1mo',
+        start: 100,
+        end: 100,
+        count: 24,
+      ),
+      sectorConfirmation: buildSnapshot(
+        symbol: 'XLK',
+        timeframe: '1w',
+        start: 100,
+        end: 103,
+        count: 24,
+      ),
+      sectorRegime: buildSnapshot(
+        symbol: 'XLK',
+        timeframe: '1mo',
+        start: 100,
+        end: 98,
+        count: 24,
+      ),
+    );
+
+    expect(profile.hasSufficientData, isTrue);
+    expect(profile.stockVsMarketPercent, greaterThan(0));
+    expect(profile.stockVsSectorPercent, greaterThan(0));
+    expect(profile.directionScore, greaterThan(0));
+  });
+
+  test('Swing rejects benchmark snapshots outside the selected plan', () {
+    final profile = service.evaluate(
+      target: target,
+      strategy: StrategyType.swing,
+      plan: StrategyTimeframePlan.swing,
+      stockConfirmation: buildSnapshot(
+        symbol: 'TEST',
+        timeframe: '1d',
+        start: 100,
+        end: 105,
+        count: 24,
+      ),
+      stockRegime: buildSnapshot(
+        symbol: 'TEST',
+        timeframe: '1w',
+        start: 100,
+        end: 110,
+        count: 24,
+      ),
+      marketConfirmation: buildSnapshot(
+        symbol: 'SPY',
+        timeframe: '1d',
+        start: 100,
+        end: 102,
+        count: 24,
+      ),
+      marketRegime: buildSnapshot(
+        symbol: 'SPY',
+        timeframe: '1w',
+        start: 100,
+        end: 104,
+        count: 24,
+      ),
+      sectorConfirmation: buildSnapshot(
+        symbol: 'XLK',
+        timeframe: '1d',
+        start: 100,
+        end: 103,
+        count: 24,
+      ),
+      sectorRegime: buildSnapshot(
+        symbol: 'XLK',
+        timeframe: '1w',
+        start: 100,
+        end: 105,
+        count: 24,
+      ),
+    );
+
+    expect(profile.hasSufficientData, isFalse);
+    expect(profile.relativeStrength, RelativeStrengthState.unknown);
   });
 }

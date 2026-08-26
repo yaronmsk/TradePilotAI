@@ -134,6 +134,8 @@ class RecommendationContextService {
             marketRegime: marketRegime,
             sectorConfirmation: sectorConfirmation,
             sectorRegime: sectorRegime,
+            strategy: strategy,
+            plan: plan,
           )
         : MarketContextProfile.unknown(target: target);
 

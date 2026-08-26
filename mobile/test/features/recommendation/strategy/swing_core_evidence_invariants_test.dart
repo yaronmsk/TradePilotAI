@@ -149,7 +149,6 @@ void main() {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
       const pendingKinds = <EvidenceKind>[
-        EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
         EvidenceKind.newsSentiment,
       ];
@@ -274,6 +273,38 @@ void main() {
         contains('Swing directional impact is exactly zero'),
       );
     });
+
+    test(
+      'Market Context is ready while Breadth remains in the same capped family',
+      () {
+        final swing = StrategyAnalysisPolicyCatalog.swing;
+
+        final context = swing.policyFor(EvidenceKind.marketContext);
+
+        final breadth = swing.policyFor(EvidenceKind.marketBreadth);
+
+        expect(context, isNotNull);
+        expect(context!.implementationReady, isTrue);
+        expect(context.family, EvidenceFamily.marketContext);
+        expect(context.affectsDirection, isTrue);
+        expect(context.affectsConfidence, isTrue);
+
+        expect(breadth, isNotNull);
+        expect(breadth!.implementationReady, isFalse);
+        expect(breadth.family, EvidenceFamily.marketContext);
+
+        final explanation = EvidenceExplainabilityCatalog.forKind(
+          EvidenceKind.marketContext,
+        );
+
+        expect(explanation, isNotNull);
+        expect(explanation!.isComplete, isTrue);
+        expect(explanation.allowsDirectionalInfluence, isTrue);
+        expect(explanation.supportiveInterpretation, isNotNull);
+        expect(explanation.opposingInterpretation, isNotNull);
+        expect(explanation.recommendationImpact, contains('Market Breadth'));
+      },
+    );
 
     test('current analysis-window VWAP stays excluded from Swing', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(

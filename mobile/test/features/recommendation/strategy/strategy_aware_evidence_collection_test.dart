@@ -117,6 +117,7 @@ void main() {
         EvidenceKind.volumeConfirmation,
         EvidenceKind.priceExtension,
         EvidenceKind.multiTimeframeTrend,
+        EvidenceKind.marketContext,
       ]);
     });
 
@@ -506,9 +507,9 @@ void main() {
     test('Swing does not execute an uncalibrated provider', () {
       final provider = _CountingEvidenceProvider(
         definition: productionDefinition(
-          kind: EvidenceKind.marketContext,
+          kind: EvidenceKind.marketBreadth,
           family: EvidenceFamily.marketContext,
-          name: 'Test Market Context',
+          name: 'Test Market Breadth',
         ),
       );
 
@@ -576,10 +577,14 @@ void main() {
       );
 
       expect(traderResults, hasLength(4));
-      expect(swingResults, hasLength(1));
+      expect(swingResults, hasLength(2));
+
       expect(
-        swingResults.single.definition.kind,
-        EvidenceKind.multiTimeframeTrend,
+        swingResults.map((result) => result.definition.kind).toSet(),
+        <EvidenceKind>{
+          EvidenceKind.multiTimeframeTrend,
+          EvidenceKind.marketContext,
+        },
       );
     });
 

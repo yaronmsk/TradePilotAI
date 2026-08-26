@@ -236,6 +236,7 @@ class RecommendationService {
       results.add(
         marketContextEvidenceProvider.evaluate(
           analysisContext.marketContextProfile,
+          strategy: strategy,
         ),
       );
     }

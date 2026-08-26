@@ -202,23 +202,22 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.marketContext: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Evaluates the stock relative to its broad-market and sector backdrop.',
+          'Evaluates stock leadership or weakness relative to the broad market and, when available, its sector backdrop.',
       calculation:
-          'Combines stock-versus-market and stock-versus-sector relative performance with smaller contributions from sector leadership and broad-market direction.',
+          'Trader preserves its validated confirmation/regime behavior. Swing uses the approved confirmation and regime horizons with greater emphasis on the nearer confirmation horizon. Stock-versus-market and stock-versus-sector relative strength dominate the context calculation; sector leadership and broad-market direction are smaller inputs.',
       whyItMatters:
-          'Stocks do not trade in isolation. Relative performance can separate genuine stock leadership or weakness from movement caused mainly by the broader market.',
+          'A days-to-weeks stock move is generally more credible when the stock shows genuine leadership or weakness rather than merely following the index.',
       supportiveInterpretation:
-          'Outperformance combined with a supportive market or sector backdrop can strengthen bullish context.',
+          'Stock leadership with a supportive or improving broader environment can strengthen bullish context. Persistent stock weakness in a challenging environment can strengthen bearish context.',
       opposingInterpretation:
-          'Underperformance combined with a challenging market or sector backdrop can strengthen bearish context.',
+          'Underperformance can oppose a bullish setup, while strong relative leadership can oppose a bearish setup. Market Context supports both BUY and SELL interpretation symmetrically.',
       neutralInterpretation:
-          'Mixed benchmark relationships or a neutral backdrop provide limited directional context.',
+          'Mixed stock-relative and broader-market conditions are exposed as conflict rather than forced into certainty. Mild context scores remain neutral.',
       recommendationImpact:
-          'Market and Sector Context contributes through the Market Context family. Related breadth evidence is aggregated within the same family rather than counted independently.',
+          'Market & Sector Context contributes only through the Market Context family. Swing uses a lower base influence than Trader, and conflicting relative-strength/backdrop states are discounted. Market Breadth shares this family and cannot become an independent second market vote.',
       limitations:
-          'Benchmark choice matters, sector mappings can be imperfect, and temporary stock-specific events can overwhelm broader market relationships.',
+          'Benchmark choice and sector mapping matter. A missing sector benchmark lowers reliability and is not duplicated as fake independent evidence. Stock-specific news can overwhelm market relationships. Swing calibration values are deterministic v0.11 policy assumptions rather than historically optimized parameters.',
     ),
-
     EvidenceKind.marketBreadth: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:

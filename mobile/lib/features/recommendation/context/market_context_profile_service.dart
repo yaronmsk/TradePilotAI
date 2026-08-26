@@ -1,8 +1,11 @@
 import 'dart:math' as math;
 
 import '../../market/models/market_snapshot.dart';
+import '../models/strategy_summary.dart';
+import '../strategy/market_context_strategy_policy.dart';
 import 'market_context_profile.dart';
 import 'market_context_target.dart';
+import 'strategy_timeframe_plan.dart';
 
 class MarketContextProfileService {
   const MarketContextProfileService();
@@ -15,17 +18,43 @@ class MarketContextProfileService {
     required MarketSnapshot marketRegime,
     required MarketSnapshot sectorConfirmation,
     required MarketSnapshot sectorRegime,
+    StrategyType strategy = StrategyType.trader,
+    StrategyTimeframePlan? plan,
   }) {
-    final snapshots = [
+    final policy = MarketContextStrategyPolicy.forStrategy(strategy);
+
+    if (policy == null) {
+      return MarketContextProfile.unknown(target: target);
+    }
+
+    final confirmationSnapshots = [
       stockConfirmation,
-      stockRegime,
       marketConfirmation,
-      marketRegime,
       sectorConfirmation,
-      sectorRegime,
     ];
 
-    if (snapshots.any((snapshot) => snapshot.candles.length < 3)) {
+    final regimeSnapshots = [stockRegime, marketRegime, sectorRegime];
+
+    if (confirmationSnapshots.any(
+          (snapshot) =>
+              snapshot.candles.length < policy.minimumConfirmationCandles,
+        ) ||
+        regimeSnapshots.any(
+          (snapshot) => snapshot.candles.length < policy.minimumRegimeCandles,
+        )) {
+      return MarketContextProfile.unknown(target: target);
+    }
+
+    if (plan != null &&
+        !_matchesPlan(
+          plan: plan,
+          stockConfirmation: stockConfirmation,
+          stockRegime: stockRegime,
+          marketConfirmation: marketConfirmation,
+          marketRegime: marketRegime,
+          sectorConfirmation: sectorConfirmation,
+          sectorRegime: sectorRegime,
+        )) {
       return MarketContextProfile.unknown(target: target);
     }
 
@@ -37,17 +66,20 @@ class MarketContextProfileService {
     final sectorRegimeReturn = _performance(sectorRegime);
 
     final stockVsMarketPercent =
-        ((stockConfirmationReturn - marketConfirmationReturn) * 0.55) +
-        ((stockRegimeReturn - marketRegimeReturn) * 0.45);
+        ((stockConfirmationReturn - marketConfirmationReturn) *
+            policy.confirmationWeight) +
+        ((stockRegimeReturn - marketRegimeReturn) * policy.regimeWeight);
 
     final stockVsSectorPercent = target.hasSectorBenchmark
-        ? ((stockConfirmationReturn - sectorConfirmationReturn) * 0.55) +
-              ((stockRegimeReturn - sectorRegimeReturn) * 0.45)
+        ? ((stockConfirmationReturn - sectorConfirmationReturn) *
+                  policy.confirmationWeight) +
+              ((stockRegimeReturn - sectorRegimeReturn) * policy.regimeWeight)
         : stockVsMarketPercent;
 
     final sectorVsMarketPercent = target.hasSectorBenchmark
-        ? ((sectorConfirmationReturn - marketConfirmationReturn) * 0.55) +
-              ((sectorRegimeReturn - marketRegimeReturn) * 0.45)
+        ? ((sectorConfirmationReturn - marketConfirmationReturn) *
+                  policy.confirmationWeight) +
+              ((sectorRegimeReturn - marketRegimeReturn) * policy.regimeWeight)
         : 0.0;
 
     final stockVsMarketScore =
@@ -97,20 +129,27 @@ class MarketContextProfileService {
     final marketTrendScore =
         (_normalizedReturn(marketConfirmationReturn, marketConfirmation) *
             0.55) +
-        (_normalizedReturn(marketRegimeReturn, marketRegime) * 0.45);
+        (_normalizedReturn(marketRegimeReturn, marketRegime) *
+            policy.regimeWeight);
 
     final sectorTrendScore = target.hasSectorBenchmark
         ? (_normalizedReturn(sectorConfirmationReturn, sectorConfirmation) *
                   0.55) +
-              (_normalizedReturn(sectorRegimeReturn, sectorRegime) * 0.45)
+              (_normalizedReturn(sectorRegimeReturn, sectorRegime) *
+                  policy.regimeWeight)
         : marketTrendScore;
 
     final directionScore =
-        ((stockVsMarketScore * 0.45) +
-                (stockVsSectorScore * 0.35) +
-                (sectorVsMarketScore * 0.10) +
-                (marketTrendScore * 0.10))
-            .clamp(-100.0, 100.0);
+        (target.hasSectorBenchmark || policy.preserveMissingSectorDuplication)
+        ? ((stockVsMarketScore * 0.45) +
+                  (stockVsSectorScore * 0.35) +
+                  (sectorVsMarketScore * 0.10) +
+                  (marketTrendScore * 0.10))
+              .clamp(-100.0, 100.0)
+        : ((stockVsMarketScore * 0.80) + (marketTrendScore * 0.20)).clamp(
+            -100.0,
+            100.0,
+          );
 
     final backdropScore =
         ((marketTrendScore * 0.55) + (sectorTrendScore * 0.45)).clamp(
@@ -134,10 +173,12 @@ class MarketContextProfileService {
         : 0.35;
 
     final reliability =
-        (0.72 +
-                (target.hasSectorBenchmark ? 0.10 : 0) +
-                (relativeAgreement * 0.13))
-            .clamp(0.65, 0.95);
+        (policy.reliabilityBase +
+                (target.hasSectorBenchmark
+                    ? policy.sectorReliabilityBonus
+                    : 0) +
+                (relativeAgreement * policy.agreementReliabilityBonus))
+            .clamp(0.60, 0.95);
 
     return MarketContextProfile(
       target: target,
@@ -149,10 +190,29 @@ class MarketContextProfileService {
       stockVsSectorPercent: stockVsSectorPercent,
       sectorVsMarketPercent: sectorVsMarketPercent,
       marketCompositeReturnPercent:
-          (marketConfirmationReturn * 0.55) + (marketRegimeReturn * 0.45),
+          (marketConfirmationReturn * policy.confirmationWeight) +
+          (marketRegimeReturn * policy.regimeWeight),
       sectorCompositeReturnPercent:
-          (sectorConfirmationReturn * 0.55) + (sectorRegimeReturn * 0.45),
+          (sectorConfirmationReturn * policy.confirmationWeight) +
+          (sectorRegimeReturn * policy.regimeWeight),
     );
+  }
+
+  bool _matchesPlan({
+    required StrategyTimeframePlan plan,
+    required MarketSnapshot stockConfirmation,
+    required MarketSnapshot stockRegime,
+    required MarketSnapshot marketConfirmation,
+    required MarketSnapshot marketRegime,
+    required MarketSnapshot sectorConfirmation,
+    required MarketSnapshot sectorRegime,
+  }) {
+    return stockConfirmation.timeframe == plan.confirmationTimeframe &&
+        marketConfirmation.timeframe == plan.confirmationTimeframe &&
+        sectorConfirmation.timeframe == plan.confirmationTimeframe &&
+        stockRegime.timeframe == plan.regimeTimeframe &&
+        marketRegime.timeframe == plan.regimeTimeframe &&
+        sectorRegime.timeframe == plan.regimeTimeframe;
   }
 
   double _performance(MarketSnapshot snapshot) {

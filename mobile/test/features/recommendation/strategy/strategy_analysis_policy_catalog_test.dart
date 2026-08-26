@@ -70,6 +70,7 @@ void main() {
         EvidenceKind.volumeConfirmation,
         EvidenceKind.priceExtension,
         EvidenceKind.multiTimeframeTrend,
+        EvidenceKind.marketContext,
       ]);
 
       final candleTrend = policy.policyFor(EvidenceKind.candleTrend);
@@ -215,6 +216,24 @@ void main() {
         expect(policy.calibrationNotes, contains('volatility-aware'));
       },
     );
+
+    test('Swing Market Context is calibrated and remains family-capped', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+        EvidenceKind.marketContext,
+      );
+
+      expect(policy, isNotNull);
+      expect(policy!.implementationReady, isTrue);
+      expect(policy.family, EvidenceFamily.marketContext);
+      expect(policy.affectsDirection, isTrue);
+      expect(policy.affectsConfidence, isTrue);
+      expect(policy.affectsRiskOrEntryQuality, isFalse);
+      expect(
+        policy.applicability,
+        StrategyEvidenceApplicability.recalibrateForStrategy,
+      );
+      expect(policy.calibrationNotes, contains('stock-vs-market'));
+    });
 
     test('Investor evidence semantics remain deferred to v0.12.0', () {
       final policy = StrategyAnalysisPolicyCatalog.investor;

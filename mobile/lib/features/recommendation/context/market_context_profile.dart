@@ -43,5 +43,11 @@ class MarketContextProfile {
   final double marketCompositeReturnPercent;
   final double sectorCompositeReturnPercent;
 
+  bool get hasContextConflict =>
+      (relativeStrength == RelativeStrengthState.outperforming &&
+          backdrop == MarketBackdrop.challenging) ||
+      (relativeStrength == RelativeStrengthState.underperforming &&
+          backdrop == MarketBackdrop.supportive);
+
   bool get hasSufficientData => reliability > 0;
 }
