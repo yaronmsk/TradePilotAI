@@ -160,6 +160,11 @@ class MockExternalContextProvider implements ExternalContextProvider {
 
     final articleCount = 6 + (_stableHash('$symbol|articles') % 10);
     final sourceCount = 3 + (_stableHash('$symbol|sources') % 5);
+
+    final independentStoryCount = (2 + (_stableHash('$symbol|stories') % 4))
+        .clamp(2, sourceCount)
+        .toInt();
+
     final freshnessHours =
         1.0 + (_stableHash('$symbol|freshness') % 18).toDouble() / 3;
     final materiality = (0.45 + (_stableHash('$symbol|materiality') % 45) / 100)
@@ -189,6 +194,7 @@ class MockExternalContextProvider implements ExternalContextProvider {
       sentimentScore: score,
       articleCount: articleCount,
       sourceCount: sourceCount,
+      independentStoryCount: independentStoryCount,
       freshnessHours: freshnessHours,
       materiality: materiality,
       reliability: reliability.clamp(0.0, 0.95).toDouble(),

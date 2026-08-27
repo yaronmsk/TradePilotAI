@@ -119,6 +119,7 @@ void main() {
         EvidenceKind.multiTimeframeTrend,
         EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
+        EvidenceKind.newsSentiment,
       ]);
     });
 
@@ -505,24 +506,18 @@ void main() {
       },
     );
 
-    test('Swing does not execute an uncalibrated provider', () {
-      final provider = _CountingEvidenceProvider(
-        definition: productionDefinition(
-          kind: EvidenceKind.newsSentiment,
-          family: EvidenceFamily.sentiment,
-          name: 'Test News Sentiment',
-        ),
+    test('all eligible Swing evidence kinds are now calibrated', () {
+      final policy = StrategyAnalysisPolicyCatalog.swing;
+
+      expect(
+        policy.eligibleEvidenceKinds.toSet(),
+        policy.implementationReadyEvidenceKinds.toSet(),
       );
 
-      final service = RecommendationService(providers: [provider]);
-
-      final results = service.collectEvidence(
-        createSnapshot(),
-        strategy: StrategyType.swing,
+      expect(
+        policy.policyFor(EvidenceKind.vwapPosition)?.implementationReady,
+        isFalse,
       );
-
-      expect(results, isEmpty);
-      expect(provider.evaluationCount, 0);
     });
 
     test('generic evidence remains Trader-only', () {
@@ -578,7 +573,7 @@ void main() {
       );
 
       expect(traderResults, hasLength(4));
-      expect(swingResults, hasLength(3));
+      expect(swingResults, hasLength(4));
 
       expect(
         swingResults.map((result) => result.definition.kind).toSet(),
@@ -586,6 +581,7 @@ void main() {
           EvidenceKind.multiTimeframeTrend,
           EvidenceKind.marketContext,
           EvidenceKind.marketBreadth,
+          EvidenceKind.newsSentiment,
         },
       );
     });

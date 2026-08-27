@@ -75,6 +75,7 @@ class NewsSentimentProfile {
     required this.sentimentScore,
     required this.articleCount,
     required this.sourceCount,
+    this.independentStoryCount,
     required this.freshnessHours,
     required this.materiality,
     required this.reliability,
@@ -86,6 +87,7 @@ class NewsSentimentProfile {
       sentimentScore = 0,
       articleCount = 0,
       sourceCount = 0,
+      independentStoryCount = null,
       freshnessHours = 0,
       materiality = 0,
       reliability = 0,
@@ -97,6 +99,14 @@ class NewsSentimentProfile {
   final double sentimentScore;
   final int articleCount;
   final int sourceCount;
+
+  /// Number of independently de-duplicated news-story clusters when the
+  /// upstream source can provide that information.
+  ///
+  /// Swing directional use requires this value so syndicated/repeated
+  /// headlines cannot multiply evidence simply by appearing many times.
+  final int? independentStoryCount;
+
   final double freshnessHours;
 
   /// Importance/relevance of the recent news set, from 0 to 1.

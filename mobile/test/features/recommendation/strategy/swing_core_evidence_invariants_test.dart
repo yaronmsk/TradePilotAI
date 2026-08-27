@@ -145,22 +145,15 @@ void main() {
       expect(swing.isRecommendationActive, isFalse);
     });
 
-    test('uncalibrated Swing evidence remains blocked', () {
+    test('all eligible Swing evidence is calibrated after Batch 5C', () {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
-      const pendingKinds = <EvidenceKind>[EvidenceKind.newsSentiment];
+      expect(
+        swing.implementationReadyEvidenceKinds.toSet(),
+        swing.eligibleEvidenceKinds.toSet(),
+      );
 
-      for (final kind in pendingKinds) {
-        final policy = swing.policyFor(kind);
-
-        expect(policy, isNotNull);
-        expect(
-          policy!.implementationReady,
-          isFalse,
-          reason: '$kind must not execute for Swing before its own audit.',
-        );
-        expect(policy.canUseCurrentImplementation, isFalse);
-      }
+      expect(swing.isRecommendationActive, isFalse);
     });
 
     test('Relative Volume is ready but remains data-quality conditional', () {

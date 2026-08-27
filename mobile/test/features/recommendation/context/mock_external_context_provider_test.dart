@@ -24,6 +24,15 @@ void main() {
     expect(context.eventRisk.isAvailable, isTrue);
     expect(context.newsSentiment.isAvailable, isTrue);
     expect(context.newsSentiment.sentimentScore, 52);
+    expect(context.newsSentiment.independentStoryCount, isNotNull);
+    expect(
+      context.newsSentiment.independentStoryCount!,
+      greaterThanOrEqualTo(2),
+    );
+    expect(
+      context.newsSentiment.independentStoryCount!,
+      lessThanOrEqualTo(context.newsSentiment.sourceCount),
+    );
     expect(context.eventRisk.earningsHoursAway, 28);
     expect(context.isSynthetic, isTrue);
   });

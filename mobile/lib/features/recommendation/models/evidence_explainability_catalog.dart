@@ -240,21 +240,21 @@ class EvidenceExplainabilityCatalog {
     EvidenceKind.newsSentiment: MetricExplainability(
       semanticRole: MetricSemanticRole.directionalEvaluative,
       whatItIs:
-          'Summarizes the directional tone of recent company-specific news.',
+          'Summarizes the directional tone of recent company-specific news while distinguishing raw headline volume from independently de-duplicated stories.',
       calculation:
-          'Uses a signed sentiment score and adjusts reliability using article count, independent source count, freshness and estimated materiality.',
+          'Trader preserves its validated news behavior. Swing requires minimum article coverage, source diversity and independently de-duplicated story clusters. Swing then applies strategy-specific freshness decay and materiality. Article count is only a coverage gate; once that minimum is met, additional repeated headlines do not increase Swing reliability or weight.',
       whyItMatters:
-          'Material company news can reinforce, contradict or invalidate a technical setup.',
+          'A genuinely material company development can influence price behavior for several Swing sessions, while stale, repetitive or low-materiality headlines can create false conviction.',
       supportiveInterpretation:
-          'Sufficiently reliable positive sentiment can contribute bullish sentiment evidence.',
+          'Reliable, sufficiently fresh and material positive developments can contribute bullish Sentiment evidence.',
       opposingInterpretation:
-          'Sufficiently reliable negative sentiment can contribute bearish sentiment evidence.',
+          'Reliable, sufficiently fresh and material negative developments can contribute bearish Sentiment evidence.',
       neutralInterpretation:
-          'Mixed, weak or insufficiently diverse news coverage should not be forced into a directional conclusion.',
+          'Mixed sentiment, weak sentiment magnitude, low materiality or coverage older than the directional Swing freshness window remains neutral rather than being forced bullish or bearish.',
       recommendationImpact:
-          'News Sentiment contributes through its own capped Sentiment family. Its influence remains subject to reliability, materiality and family-level controls.',
+          'News Sentiment contributes through the capped Sentiment family. For Swing, freshness, materiality, independent-story coverage and source diversity determine whether the signal may affect direction and how much reliability and weight it receives.',
       limitations:
-          'Sentiment classification can misinterpret nuance, repeated stories can exaggerate apparent coverage, and the current development data is synthetic rather than authoritative live news intelligence.',
+          'Sentiment classification can misread nuance, irony or changing context. True repeated-story protection depends on the upstream news adapter clustering syndicated or semantically duplicate stories before supplying independentStoryCount. Current development news is synthetic rather than authoritative live intelligence. Swing thresholds and freshness windows are deterministic v0.11 assumptions rather than historically optimized parameters.',
     ),
   };
 

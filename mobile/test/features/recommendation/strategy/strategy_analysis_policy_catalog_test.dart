@@ -72,6 +72,7 @@ void main() {
         EvidenceKind.multiTimeframeTrend,
         EvidenceKind.marketContext,
         EvidenceKind.marketBreadth,
+        EvidenceKind.newsSentiment,
       ]);
 
       final candleTrend = policy.policyFor(EvidenceKind.candleTrend);
@@ -256,6 +257,31 @@ void main() {
         );
 
         expect(policy.calibrationNotes, contains('de-duplicated'));
+      },
+    );
+
+    test(
+      'Swing News Sentiment is calibrated as directional Sentiment evidence',
+      () {
+        final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
+          EvidenceKind.newsSentiment,
+        );
+
+        expect(policy, isNotNull);
+        expect(policy!.implementationReady, isTrue);
+        expect(policy.family, EvidenceFamily.sentiment);
+        expect(policy.affectsDirection, isTrue);
+        expect(policy.affectsConfidence, isTrue);
+        expect(policy.affectsRiskOrEntryQuality, isFalse);
+
+        expect(
+          policy.applicability,
+          StrategyEvidenceApplicability.recalibrateForStrategy,
+        );
+
+        expect(policy.calibrationNotes, contains('freshness'));
+
+        expect(policy.calibrationNotes, contains('de-duplication'));
       },
     );
 

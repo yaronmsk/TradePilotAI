@@ -260,6 +260,7 @@ class RecommendationService {
       results.add(
         newsSentimentEvidenceProvider.evaluate(
           analysisContext.externalContextProfile.newsSentiment,
+          strategy: strategy,
         ),
       );
     }
