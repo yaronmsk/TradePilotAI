@@ -1,4 +1,5 @@
 import '../models/strategy_summary.dart';
+import '../strategy/event_risk_strategy_policy.dart';
 import 'external_context_profile.dart';
 import 'external_context_provider.dart';
 import 'market_context_target.dart';
@@ -15,7 +16,7 @@ class MockExternalContextProvider implements ExternalContextProvider {
   }) async {
     final normalized = symbol.trim().toUpperCase();
     final breadth = _marketBreadthFor(target, primaryTimeframe);
-    final eventRisk = _eventRiskFor(normalized, primaryTimeframe);
+    final eventRisk = _eventRiskFor(normalized, primaryTimeframe, strategy);
     final news = _newsFor(normalized);
 
     return ExternalContextProfile(
@@ -88,7 +89,17 @@ class MockExternalContextProvider implements ExternalContextProvider {
     );
   }
 
-  EventRiskProfile _eventRiskFor(String symbol, String primaryTimeframe) {
+  EventRiskProfile _eventRiskFor(
+    String symbol,
+    String primaryTimeframe,
+    StrategyType strategy,
+  ) {
+    final policy = EventRiskStrategyPolicy.forStrategy(strategy);
+
+    if (policy == null) {
+      return const EventRiskProfile.unavailable();
+    }
+
     final earningsHours = switch (symbol) {
       'NVDA' => 28,
       'PLTR' => 18,
@@ -99,6 +110,10 @@ class MockExternalContextProvider implements ExternalContextProvider {
       _ => 84 + (_stableHash(symbol) % 120),
     };
 
+    // This remains synthetic development timing. Existing Trader interval
+    // behavior is preserved. Swing's supported 4H/1D intervals both use the
+    // same simulated upcoming macro-event timing here; strategy relevance is
+    // expressed by EventRiskStrategyPolicy, not by manufacturing direction.
     final macroHours = switch (primaryTimeframe) {
       '1m' => 9,
       '5m' => 18,
@@ -108,25 +123,10 @@ class MockExternalContextProvider implements ExternalContextProvider {
       _ => 36,
     };
 
-    final earningsPenalty = earningsHours <= 24
-        ? 8.0
-        : earningsHours <= 48
-        ? 6.0
-        : earningsHours <= 96
-        ? 3.5
-        : earningsHours <= 168
-        ? 1.5
-        : 0.0;
-    final macroPenalty = macroHours <= 12
-        ? 4.0
-        : macroHours <= 24
-        ? 2.5
-        : macroHours <= 48
-        ? 1.0
-        : 0.0;
-    final penalty = (earningsPenalty + macroPenalty)
-        .clamp(0.0, 12.0)
-        .toDouble();
+    final penalty = policy.penaltyFor(
+      earningsHoursAway: earningsHours,
+      macroEventHoursAway: macroHours,
+    );
 
     final level = penalty >= 9
         ? EventRiskLevel.critical

@@ -157,6 +157,22 @@ class AnalysisContextExplainabilityCatalog {
     ),
   };
 
+  static const _swingEventRisk = MetricExplainability(
+    semanticRole: MetricSemanticRole.confidenceRiskOnly,
+    whatItIs:
+        'Shows whether known scheduled catalysts fall inside or near the days-to-weeks Swing holding horizon.',
+    calculation:
+        'Swing applies a strategy-specific timing policy. Earnings can remain relevant for up to 14 days and high-impact macro events for up to 7 days. Closer events receive larger penalties. Combined Event Risk is hard-capped at 12 confidence points.',
+    whyItMatters:
+        'A scheduled catalyst can occur while a normal Swing position is still open and can create gaps or volatility that technical evidence cannot fully anticipate.',
+    recommendationImpact:
+        'Swing Event Risk can only reduce final confidence. It never adds confidence, never creates bullish or bearish evidence, never changes Buy/Sell direction and is excluded from the directional evidence attribution denominator.',
+    limitations:
+        'Only known scheduled events can be evaluated. Unexpected catalysts are not captured. Event importance is simplified in the current deterministic policy, and the development event source is synthetic rather than authoritative live event data.',
+    boundedImpact:
+        'Maximum Swing Event Risk impact is -12 confidence points. The adjustment can never be positive and can never create or flip Buy/Sell direction.',
+  );
+
   static const _swingPrimaryAnalysisInterval = MetricExplainability(
     semanticRole: MetricSemanticRole.contextConfiguration,
     whatItIs: 'The candle interval used to identify the active Swing setup.',
@@ -231,6 +247,7 @@ class AnalysisContextExplainabilityCatalog {
         AnalysisContextMetric.broaderRegimeInterval =>
           _swingBroaderRegimeInterval,
         AnalysisContextMetric.timeframeAlignment => _swingTimeframeAlignment,
+        AnalysisContextMetric.eventRisk => _swingEventRisk,
         _ => definitions[metric]!,
       };
     }

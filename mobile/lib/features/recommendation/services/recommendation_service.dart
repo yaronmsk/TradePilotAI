@@ -193,6 +193,7 @@ class RecommendationService {
         : eventRiskConfidenceAdjuster.apply(
             scoringResult: consensusResult,
             eventRisk: analysisContext.externalContextProfile.eventRisk,
+            strategy: strategy,
           );
 
     return recommendationEngine.create(
