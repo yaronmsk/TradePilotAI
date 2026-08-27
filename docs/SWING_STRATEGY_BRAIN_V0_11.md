@@ -1,6 +1,6 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-5 complete
+Status: Implementation in progress — Batches 0-6 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
@@ -1069,13 +1069,54 @@ Functional completion validation before this documentation checkpoint:
 - Full automated suite: 467 passing tests.
 
 ### Batch 6
-Swing historical validation.
+Swing Historical Setup Validation.
 
-Implement:
-- Strategy/timeframe-specific matching.
-- Swing forward outcomes.
-- Same-stock context baseline.
-- +/-8 confidence boundary.
+Status:
+
+**Completed and regression-validated on 2026-08-27.**
+
+Implemented:
+- Existing fingerprints remain strategy- and primary-timeframe-specific.
+- Historical setup matching hard-gates strategy, primary timeframe and Stock Profile before similarity scoring.
+- Same-stock comparison controls hard-gate strategy, primary timeframe, Stock Profile, volatility regime and market backdrop.
+- Swing 4H uses the existing 15 x 4H forward outcome horizon.
+- Swing 1D uses the existing 10-trading-day forward outcome horizon.
+- Historical scoring is now strategy/timeframe-aware rather than applying Trader movement scales universally.
+- Swing 4H and 1D have separate expected-movement scales.
+- Swing requires at least 10 matched cases before validation can become usable.
+- Swing effective-sample reliability begins at 10 effective cases and reaches full sample reliability at 32.
+- Swing match-quality reliability uses a 0.60 floor and 0.84 full-reliability reference.
+- Synthetic development outcomes now respect the requested Swing `forwardBars` horizon.
+- Invalid or strategy/timeframe-inconsistent synthetic dataset requests are rejected.
+
+Swing scoring assumptions:
+- 4H expected movement scale:
+  - Steady: 2.0%.
+  - Balanced: 3.3%.
+  - Volatile: 5.5%.
+- 1D expected movement scale:
+  - Steady: 2.5%.
+  - Balanced: 4.0%.
+  - Volatile: 6.5%.
+- These are deterministic v0.11 policy assumptions, not historically optimized claims.
+
+Invariant boundary:
+- Trader and Swing historical observations cannot pool as equivalent matches.
+- Swing 4H and Swing 1D observations cannot pool as equivalent matches.
+- The same-stock control population preserves the same strategy/timeframe isolation.
+- Positive historical credit still requires performance above both 50% directional follow-through and the same-stock contextual baseline.
+- Historical Setup Validation remains outside directional evidence.
+- Historical Setup Validation can adjust final confidence only.
+- Historical Setup Validation cannot change recommendation direction or evidence-derived confidence.
+- Maximum Historical Setup Validation impact remains ±8 final-confidence points.
+- Synthetic historical outcomes remain explicitly development data and must not be presented as real-world performance evidence.
+- Trader historical-scoring behavior remains regression-protected.
+- Swing recommendation generation remains inactive until recommendation orchestration and later acceptance work are complete.
+
+Functional completion validation before this documentation checkpoint:
+- Flutter analyzer: clean.
+- Historical subsystem suite: 44 passing tests.
+- Full automated suite: 486 passing tests.
 
 ### Batch 7
 Swing recommendation orchestration and strategy policy.

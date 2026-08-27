@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-5 Complete
+Development — Batches 1-6 Complete
 
 Date
 
@@ -44,7 +44,7 @@ No production recommendation behavior has changed in this checkpoint.
 
 ### Implementation Progress — 2026-08-27
 
-Batches 1-5 are implemented and regression-validated.
+Batches 1-6 are implemented and regression-validated.
 
 Completed:
 - Strategy-aware evidence policy and collection gates.
@@ -56,31 +56,38 @@ Completed:
 - News Sentiment freshness/materiality/source-diversity/de-duplication calibration.
 - Stock DNA strategy-aware contextual adjustment.
 - Swing Event Risk horizon and confidence-only enforcement.
+- Swing Historical Setup Validation scoring calibration.
+- Historical dataset/horizon integrity enforcement.
 - Current analysis-window VWAP remains excluded from Swing.
 - Trader regression protection and strategy-readiness invariants.
 
-Batch 5 semantic boundaries:
-- Market Context and Market Breadth cannot become two independent market votes.
-- News Sentiment requires sufficient freshness, materiality and de-duplicated independent-story coverage before it may create Swing direction.
-- Repeated headline count cannot multiply Swing News Sentiment weight after the minimum coverage gate is satisfied.
-- Stock DNA requires the daily historical baseline for Swing and changes existing evidence weight only.
-- Stock DNA cannot create or flip direction, create another evidence vote, or change evidence score/reliability.
-- Event Risk remains outside directional evidence and directional attribution.
-- Swing Event Risk considers earnings up to 14 days and high-impact macro events up to 7 days.
-- Event Risk can never add confidence and remains hard-capped at -12 confidence points.
-- Event Risk cannot change direction score or evidence-derived confidence.
-- External market/news/event development context remains explicitly synthetic.
+Batch 6 Historical Validation boundaries:
+- Historical fingerprints and matches remain strategy- and primary-timeframe-specific.
+- Trader and Swing historical observations cannot pool as equivalent matches.
+- Swing 4H and Swing 1D observations cannot pool as equivalent matches.
+- The same-stock comparison baseline preserves the same strategy/timeframe separation.
+- Swing 4H uses a 15 x 4H-bar forward outcome window.
+- Swing 1D uses a 10-trading-day forward outcome window.
+- Swing uses separate 4H and 1D expected-movement scales.
+- Swing requires at least 10 matched cases.
+- Swing effective-sample reliability uses 10 as its floor and 32 as its full-reliability reference.
+- Swing match-quality reliability uses 0.60 as its floor and 0.84 as its full-reliability reference.
+- Synthetic development outcomes now respect requested Swing `forwardBars`.
+- Historical Setup Validation remains outside directional evidence.
+- Historical Setup Validation changes final confidence only and remains hard-capped at ±8 points.
+- Historical Setup Validation cannot change direction or evidence-derived confidence.
+- Synthetic historical results remain development data, not real-world performance evidence.
 
-Functional validation at Batch 5 implementation completion:
+Functional validation at Batch 6 implementation completion:
 - Flutter analyzer: clean.
-- Provider regression suite: 133 passing tests.
-- Full automated suite: 467 passing tests.
+- Historical subsystem suite: 44 passing tests.
+- Full automated suite: 486 passing tests.
 
 Swing recommendation generation remains intentionally inactive.
 
 Next planned implementation work:
 
-**Batch 6 — Swing Historical Setup Validation.**
+**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
 
 ### Release Boundary
 

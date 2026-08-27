@@ -608,7 +608,7 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-5 implemented and regression-validated.**
+**Batches 1-6 implemented and regression-validated.**
 
 Completed production foundations:
 
@@ -617,6 +617,7 @@ Completed production foundations:
 3. Trend and Momentum Swing calibration.
 4. Participation, Price Structure and Volatility Swing calibration.
 5. Market Context, Sentiment, Stock DNA and Event Risk Swing calibration.
+6. Swing Historical Setup Validation calibration and dataset/horizon integrity.
 
 Current implementation-ready Swing evidence families:
 
@@ -650,22 +651,30 @@ Current contextual/confidence-only capabilities:
   * Earnings relevance up to 14 days.
   * High-impact macro relevance up to 7 days.
   * Confidence-only, no positive bonus, hard maximum -12 points.
+* Historical Setup Validation:
+  * Strategy and primary timeframe are hard matching gates.
+  * 4H and 1D Swing use separate outcome/scoring calibration.
+  * 4H forward horizon: 15 x 4H bars.
+  * 1D forward horizon: 10 trading days.
+  * Minimum 10 matched cases for Swing.
+  * Confidence-only, hard maximum ±8 final-confidence points.
+  * Cannot change direction or evidence-derived confidence.
 
 Current analysis-window VWAP remains excluded from Swing.
 
-Batch 5 functional validation baseline:
+Batch 6 functional validation baseline:
 
 * Flutter analyzer: clean.
-* Provider regression suite: 133 passing tests.
-* Full automated suite: 467 passing tests.
+* Historical subsystem suite: 44 passing tests.
+* Full automated suite: 486 passing tests.
 
 Swing recommendation generation remains intentionally inactive until
-historical validation, recommendation orchestration, attribution,
-UI activation and release-validation work are complete.
+recommendation orchestration, attribution, UI activation and
+release-validation work are complete.
 
 Current next implementation batch:
 
-**Batch 6 — Swing Historical Setup Validation.**
+**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
 
 Permanent Swing acceptance constraints:
 

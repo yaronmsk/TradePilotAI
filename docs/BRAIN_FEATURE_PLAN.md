@@ -116,7 +116,7 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-5 implemented and validated.**
+**Active development / Batches 1-6 implemented and validated.**
 
 Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
 
@@ -198,7 +198,7 @@ Every existing evidence provider and capability requires an explicit decision co
 
 ### Current v0.11 implementation checkpoint
 
-Completed through Batch 5:
+Completed through Batch 6:
 - Strategy-aware evidence policy and execution gates.
 - Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
 - Trend family:
@@ -226,20 +226,27 @@ Completed through Batch 5:
 - Event Risk:
   - strategy-specific 14-day earnings / 7-day macro relevance;
   - confidence-only, no bonus and maximum -12 points.
+- Historical Setup Validation:
+  - strategy/timeframe-isolated matching and same-stock baseline;
+  - 15 x 4H-bar or 10-trading-day Swing outcome horizons;
+  - strategy/timeframe-aware expected-movement scaling;
+  - stricter Swing sample and match-quality reliability gates;
+  - confidence-only and bounded to ±8 points.
+- Synthetic historical outcomes respect the requested Swing forward horizon.
 - Current analysis-window VWAP remains excluded from Swing.
 - Family de-duplication boundaries remain intact.
 - Trader regression behavior remains protected.
 - Swing recommendation activation remains intentionally blocked.
 
-Batch 5 functional validation baseline:
+Batch 6 functional validation baseline:
 
 - Flutter analyzer clean.
-- 133 provider tests passing.
-- 467 total automated tests passing.
+- 44 historical subsystem tests passing.
+- 486 total automated tests passing.
 
 Next implementation batch:
 
-**Batch 6 — Swing Historical Setup Validation.**
+**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
 
 ### Swing UI / explainability rules
 

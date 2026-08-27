@@ -1,4 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/features/recommendation/history/historical_setup_validation.dart';
+import 'package:mobile/features/recommendation/history/historical_setup_validation_explainability.dart';
+import 'package:mobile/features/recommendation/history/historical_validation_strategy_policy.dart';
+import 'package:mobile/features/recommendation/models/metric_explainability.dart';
 import 'package:mobile/features/recommendation/models/analysis_context_explainability_catalog.dart';
 import 'package:mobile/features/recommendation/models/analysis_context_metric.dart';
 import 'package:mobile/features/recommendation/models/stock_behavior_explainability_catalog.dart';
@@ -380,6 +384,55 @@ void main() {
         );
 
         expect(swing.isRecommendationActive, isFalse);
+      },
+    );
+
+    test(
+      'Batch 6 historical validation remains Swing-specific and confidence-only',
+      () {
+        const fourHour = HistoricalValidationStrategyPolicy.swingFourHour;
+        const daily = HistoricalValidationStrategyPolicy.swingDaily;
+
+        expect(fourHour.isStrategyCalibrated, isTrue);
+        expect(daily.isStrategyCalibrated, isTrue);
+
+        expect(fourHour.primaryTimeframe, '4h');
+        expect(daily.primaryTimeframe, '1d');
+
+        expect(fourHour.minimumMatchedCases, 10);
+        expect(daily.minimumMatchedCases, 10);
+
+        expect(fourHour.effectiveSampleFloor, 10);
+        expect(daily.effectiveSampleFloor, 10);
+
+        expect(fourHour.effectiveSampleFull, 32);
+        expect(daily.effectiveSampleFull, 32);
+
+        expect(fourHour.matchSimilarityFloor, 0.60);
+        expect(daily.matchSimilarityFloor, 0.60);
+
+        expect(fourHour.balancedExpectedMovePercent, 3.3);
+        expect(daily.balancedExpectedMovePercent, 4.0);
+
+        expect(HistoricalSetupValidation.maximumConfidenceImpactPoints, 8);
+
+        const explanation = HistoricalSetupValidationExplainability.definition;
+
+        expect(explanation.semanticRole, MetricSemanticRole.confidenceRiskOnly);
+
+        expect(explanation.allowsDirectionalInfluence, isFalse);
+
+        expect(
+          explanation.recommendationImpact,
+          contains('final confidence only'),
+        );
+
+        expect(explanation.boundedImpact, contains('±8 points'));
+
+        expect(
+          StrategyAnalysisPolicyCatalog.swing.isRecommendationActive,
+          isFalse,
+        );
       },
     );
 
