@@ -26,7 +26,7 @@ Current active development release:
 
 Status:
 
-**Production implementation active — Batches 1-4 completed and validated.**
+**Production implementation active — Batches 1-5 completed and validated.**
 
 Detailed v0.11.0 evidence, capability and acceptance contract:
 
@@ -608,7 +608,7 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-4 implemented and regression-validated.**
+**Batches 1-5 implemented and regression-validated.**
 
 Completed production foundations:
 
@@ -616,6 +616,7 @@ Completed production foundations:
 2. Swing timeframe/context orchestration.
 3. Trend and Momentum Swing calibration.
 4. Participation, Price Structure and Volatility Swing calibration.
+5. Market Context, Sentiment, Stock DNA and Event Risk Swing calibration.
 
 Current implementation-ready Swing evidence families:
 
@@ -633,23 +634,38 @@ Current implementation-ready Swing evidence families:
   * Support & Resistance.
 * Volatility / Entry Quality:
   * Price Extension — confidence/risk/entry-quality only for Swing; zero directional influence.
+* Market Context:
+  * Market & Sector Context / Relative Strength.
+  * Market Breadth — shares the same capped family; no second independent market vote.
+* Sentiment:
+  * News Sentiment — freshness/materiality/de-duplication gated.
+
+Current contextual/confidence-only capabilities:
+
+* Stock DNA:
+  * Requires valid daily historical baseline for Swing.
+  * Adjusts existing evidence weight only.
+  * Cannot create or flip direction.
+* Event Risk:
+  * Earnings relevance up to 14 days.
+  * High-impact macro relevance up to 7 days.
+  * Confidence-only, no positive bonus, hard maximum -12 points.
 
 Current analysis-window VWAP remains excluded from Swing.
 
-Batch 4 functional validation baseline:
+Batch 5 functional validation baseline:
 
 * Flutter analyzer: clean.
-* Provider regression suite: 113 passing tests.
-* Full automated suite: 404 passing tests.
+* Provider regression suite: 133 passing tests.
+* Full automated suite: 467 passing tests.
 
 Swing recommendation generation remains intentionally inactive until
-the remaining context calibration, historical validation,
-recommendation orchestration, attribution, UI activation and
-release-validation work is complete.
+historical validation, recommendation orchestration, attribution,
+UI activation and release-validation work are complete.
 
 Current next implementation batch:
 
-**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
+**Batch 6 — Swing Historical Setup Validation.**
 
 Permanent Swing acceptance constraints:
 

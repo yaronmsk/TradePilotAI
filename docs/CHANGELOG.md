@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-4 Complete
+Development — Batches 1-5 Complete
 
 Date
 
@@ -44,44 +44,43 @@ No production recommendation behavior has changed in this checkpoint.
 
 ### Implementation Progress — 2026-08-27
 
-Batches 1-4 are implemented and regression-validated.
+Batches 1-5 are implemented and regression-validated.
 
 Completed:
 - Strategy-aware evidence policy and collection gates.
 - Swing timeframe/context orchestration.
-- Trend family calibration:
-  - Candle Trend.
-  - EMA Structure.
-  - Multi-Timeframe Trend.
-- Momentum family calibration:
-  - RSI.
-  - MACD Momentum.
-- Participation family calibration:
-  - Relative Volume.
-  - Volume Confirmation.
-- Price Structure calibration:
-  - Support & Resistance.
-- Volatility / Entry Quality calibration:
-  - Price Extension.
+- Trend and Momentum family calibration.
+- Participation, Price Structure and Volatility/Entry Quality calibration.
+- Market & Sector Context / Relative Strength calibration.
+- Market Breadth calibration inside the shared Market Context family.
+- News Sentiment freshness/materiality/source-diversity/de-duplication calibration.
+- Stock DNA strategy-aware contextual adjustment.
+- Swing Event Risk horizon and confidence-only enforcement.
 - Current analysis-window VWAP remains excluded from Swing.
 - Trader regression protection and strategy-readiness invariants.
 
-Batch 4 semantic boundaries:
-- Relative Volume and Volume Confirmation share one Participation family.
-- 4H Relative Volume refuses fabricated same-session-position normalization.
-- Support/resistance proximity alone is not directional evidence.
-- Price Extension has exactly zero Swing directional influence and affects confidence, entry quality and risk only.
+Batch 5 semantic boundaries:
+- Market Context and Market Breadth cannot become two independent market votes.
+- News Sentiment requires sufficient freshness, materiality and de-duplicated independent-story coverage before it may create Swing direction.
+- Repeated headline count cannot multiply Swing News Sentiment weight after the minimum coverage gate is satisfied.
+- Stock DNA requires the daily historical baseline for Swing and changes existing evidence weight only.
+- Stock DNA cannot create or flip direction, create another evidence vote, or change evidence score/reliability.
+- Event Risk remains outside directional evidence and directional attribution.
+- Swing Event Risk considers earnings up to 14 days and high-impact macro events up to 7 days.
+- Event Risk can never add confidence and remains hard-capped at -12 confidence points.
+- Event Risk cannot change direction score or evidence-derived confidence.
+- External market/news/event development context remains explicitly synthetic.
 
-Functional validation at Batch 4 implementation completion:
+Functional validation at Batch 5 implementation completion:
 - Flutter analyzer: clean.
-- Provider regression suite: 113 passing tests.
-- Full automated suite: 404 passing tests.
+- Provider regression suite: 133 passing tests.
+- Full automated suite: 467 passing tests.
 
 Swing recommendation generation remains intentionally inactive.
 
 Next planned implementation work:
 
-**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
+**Batch 6 — Swing Historical Setup Validation.**
 
 ### Release Boundary
 

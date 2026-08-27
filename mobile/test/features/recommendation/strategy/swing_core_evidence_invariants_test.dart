@@ -1,4 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/features/recommendation/models/analysis_context_explainability_catalog.dart';
+import 'package:mobile/features/recommendation/models/analysis_context_metric.dart';
+import 'package:mobile/features/recommendation/models/stock_behavior_explainability_catalog.dart';
+import 'package:mobile/features/recommendation/models/strategy_summary.dart';
+import 'package:mobile/features/recommendation/strategy/event_risk_strategy_policy.dart';
+import 'package:mobile/features/recommendation/strategy/stock_dna_strategy_policy.dart';
 import 'package:mobile/features/recommendation/models/evidence_explainability_catalog.dart';
 import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_kind.dart';
@@ -145,7 +151,7 @@ void main() {
       expect(swing.isRecommendationActive, isFalse);
     });
 
-    test('all eligible Swing evidence is calibrated after Batch 5C', () {
+    test('all eligible Swing evidence is calibrated after Batch 5', () {
       final swing = StrategyAnalysisPolicyCatalog.swing;
 
       expect(
@@ -301,6 +307,76 @@ void main() {
         expect(
           breadthExplanation.recommendationImpact,
           contains('without becoming an independent second market vote'),
+        );
+
+        expect(swing.isRecommendationActive, isFalse);
+      },
+    );
+
+    test(
+      'Batch 5 preserves evidence context and confidence-only boundaries',
+      () {
+        final swing = StrategyAnalysisPolicyCatalog.swing;
+
+        final marketContext = swing.policyFor(EvidenceKind.marketContext);
+        final marketBreadth = swing.policyFor(EvidenceKind.marketBreadth);
+        final news = swing.policyFor(EvidenceKind.newsSentiment);
+
+        expect(marketContext, isNotNull);
+        expect(marketBreadth, isNotNull);
+        expect(news, isNotNull);
+
+        expect(marketContext!.implementationReady, isTrue);
+        expect(marketBreadth!.implementationReady, isTrue);
+        expect(news!.implementationReady, isTrue);
+
+        expect(marketContext.family, EvidenceFamily.marketContext);
+        expect(marketBreadth.family, EvidenceFamily.marketContext);
+        expect(news.family, EvidenceFamily.sentiment);
+
+        expect(marketContext.affectsDirection, isTrue);
+        expect(marketBreadth.affectsDirection, isTrue);
+        expect(news.affectsDirection, isTrue);
+
+        const stockDna = StockDnaStrategyPolicy.swing;
+
+        expect(stockDna.requiresHistoricalBaseline, isTrue);
+        expect(stockDna.minimumDynamicWeight, 0.75);
+        expect(stockDna.maximumDynamicWeight, 1.20);
+
+        for (final metric in StockBehaviorMetric.values) {
+          final explanation = StockBehaviorExplainabilityCatalog.forMetric(
+            metric,
+          );
+
+          expect(
+            explanation.allowsDirectionalInfluence,
+            isFalse,
+            reason:
+                '$metric must remain contextual and cannot '
+                'manufacture BUY/SELL direction.',
+          );
+        }
+
+        const eventRisk = EventRiskStrategyPolicy.swing;
+
+        expect(eventRisk.maximumRelevantEarningsHours, 336);
+        expect(eventRisk.maximumRelevantMacroHours, 168);
+        expect(EventRiskStrategyPolicy.maximumPenaltyPoints, 12);
+
+        final eventExplanation = AnalysisContextExplainabilityCatalog.forMetric(
+          AnalysisContextMetric.eventRisk,
+          strategy: StrategyType.swing,
+        );
+
+        expect(eventExplanation.allowsDirectionalInfluence, isFalse);
+        expect(
+          eventExplanation.boundedImpact,
+          contains('-12 confidence points'),
+        );
+        expect(
+          eventExplanation.recommendationImpact,
+          contains('never adds confidence'),
         );
 
         expect(swing.isRecommendationActive, isFalse);

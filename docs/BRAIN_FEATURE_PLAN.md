@@ -116,7 +116,7 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-4 implemented and validated.**
+**Active development / Batches 1-5 implemented and validated.**
 
 Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
 
@@ -198,8 +198,7 @@ Every existing evidence provider and capability requires an explicit decision co
 
 ### Current v0.11 implementation checkpoint
 
-Completed through Batch 4:
-
+Completed through Batch 5:
 - Strategy-aware evidence policy and execution gates.
 - Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
 - Trend family:
@@ -216,20 +215,31 @@ Completed through Batch 4:
   - Support & Resistance.
 - Volatility / Entry Quality:
   - Price Extension — zero Swing directional influence.
+- Market Context family:
+  - Market & Sector Context / Relative Strength.
+  - Market Breadth — de-duplicated with Market Context.
+- Sentiment family:
+  - News Sentiment — Swing freshness/materiality/de-duplication gates.
+- Stock DNA:
+  - strategy-aware daily-history contextual adjustment;
+  - weight-only, no standalone direction.
+- Event Risk:
+  - strategy-specific 14-day earnings / 7-day macro relevance;
+  - confidence-only, no bonus and maximum -12 points.
 - Current analysis-window VWAP remains excluded from Swing.
 - Family de-duplication boundaries remain intact.
 - Trader regression behavior remains protected.
 - Swing recommendation activation remains intentionally blocked.
 
-Batch 4 functional validation baseline:
+Batch 5 functional validation baseline:
 
 - Flutter analyzer clean.
-- 113 provider tests passing.
-- 404 total automated tests passing.
+- 133 provider tests passing.
+- 467 total automated tests passing.
 
 Next implementation batch:
 
-**Batch 5 — Market Context, Sentiment, Stock DNA and Event Risk.**
+**Batch 6 — Swing Historical Setup Validation.**
 
 ### Swing UI / explainability rules
 

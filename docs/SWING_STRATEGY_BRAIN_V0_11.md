@@ -1,6 +1,6 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-4 complete
+Status: Implementation in progress — Batches 0-5 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
@@ -1041,13 +1041,32 @@ Functional completion validation before this documentation checkpoint:
 ### Batch 5
 Market Context, Sentiment, Stock DNA and Event Risk.
 
-Audit:
-- Market & Sector Context.
-- Market Breadth.
-- Relative Strength.
-- News Sentiment.
-- Stock DNA/contextual adjustment.
-- Swing Event Risk horizon.
+Status:
+
+**Completed and regression-validated on 2026-08-27.**
+
+Implemented:
+- Market & Sector Context / Relative Strength — Swing uses strategy-specific confirmation/regime weighting, stock-relative leadership remains dominant, conflicting stock-vs-market context is discounted rather than forced, and missing sector data is not duplicated as fake independent evidence.
+- Market Breadth — Swing recalculates breadth from advancers, medium-term participation and sector participation; elevated volatility reduces influence without manufacturing bearish direction.
+- News Sentiment — Swing uses freshness, materiality, source diversity and explicit de-duplicated independent-story coverage; repeated headline count cannot multiply evidence after the minimum coverage gate is met.
+- Stock DNA — strategy-aware contextual adjustment requires the daily historical baseline for Swing, is bounded to a 0.75-1.20 dynamic-weight range and changes existing evidence weight only.
+- Event Risk — Swing uses strategy-specific scheduled-event relevance windows: earnings up to 14 days and high-impact macro events up to 7 days.
+
+Invariant boundary:
+- Market Context and Market Breadth remain de-duplicated inside one Market Context family.
+- News Sentiment remains directional/evaluative only when freshness, materiality and independent-story quality gates are satisfied.
+- Stock DNA is contextual only: it cannot create an evidence provider, create or flip BUY/SELL direction, or change evidence score/reliability.
+- Event Risk remains outside directional evidence and direction attribution.
+- Event Risk can only reduce final confidence, never award a positive bonus, and is hard-capped at -12 confidence points.
+- Event Risk cannot change direction score or evidence-derived confidence.
+- Current external market/news/event development data remains explicitly synthetic.
+- Trader behavior remains protected by regression tests.
+- Swing recommendation generation remains inactive until later orchestration batches are complete.
+
+Functional completion validation before this documentation checkpoint:
+- Flutter analyzer: clean.
+- Provider suite: 133 passing tests.
+- Full automated suite: 467 passing tests.
 
 ### Batch 6
 Swing historical validation.
