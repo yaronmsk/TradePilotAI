@@ -1,5 +1,6 @@
 import '../context/stock_behavior_profile.dart';
 import 'historical_validation_scoring_breakdown.dart';
+import 'historical_validation_strategy_policy.dart';
 
 class HistoricalValidationScoringPolicy {
   const HistoricalValidationScoringPolicy({
@@ -36,6 +37,8 @@ class HistoricalValidationScoringPolicy {
     required double effectiveSampleSize,
     required double averageSimilarity,
     required StockBehaviorProfile stockBehaviorProfile,
+    HistoricalValidationStrategyPolicy strategyPolicy =
+        HistoricalValidationStrategyPolicy.trader,
   }) {
     final edgeVsControlScore =
         ((alignedOutcomeRate - controlAlignedOutcomeRate) / 0.25).clamp(
@@ -48,12 +51,9 @@ class HistoricalValidationScoringPolicy {
       1.0,
     );
 
-    final expectedMoveScale = switch (stockBehaviorProfile.behaviorType) {
-      StockBehaviorType.steady => 0.8,
-      StockBehaviorType.balanced => 1.3,
-      StockBehaviorType.volatile => 2.1,
-      StockBehaviorType.unknown => 1.2,
-    };
+    final expectedMoveScale = strategyPolicy.expectedMoveScaleFor(
+      stockBehaviorProfile.behaviorType,
+    );
 
     final outcomeMagnitudeScore =
         (medianDirectionalReturnPercent / expectedMoveScale).clamp(-1.0, 1.0);
@@ -85,9 +85,11 @@ class HistoricalValidationScoringPolicy {
 
     final effectiveSampleReliability = effectiveSampleReliabilityFor(
       effectiveSampleSize,
+      strategyPolicy: strategyPolicy,
     );
     final matchQualityReliability = matchQualityReliabilityFor(
       averageSimilarity,
+      strategyPolicy: strategyPolicy,
     );
 
     // Reliability is a gate, not a fifth historical vote. The weakest link
@@ -95,6 +97,7 @@ class HistoricalValidationScoringPolicy {
     final appliedReliability = appliedReliabilityFor(
       effectiveSampleSize: effectiveSampleSize,
       averageSimilarity: averageSimilarity,
+      strategyPolicy: strategyPolicy,
     );
 
     return HistoricalValidationScoringBreakdown(
@@ -114,22 +117,58 @@ class HistoricalValidationScoringPolicy {
     );
   }
 
-  double effectiveSampleReliabilityFor(double effectiveSampleSize) {
-    return ((effectiveSampleSize - 8) / 22).clamp(0.0, 1.0);
+  double effectiveSampleReliabilityFor(
+    double effectiveSampleSize, {
+    HistoricalValidationStrategyPolicy strategyPolicy =
+        HistoricalValidationStrategyPolicy.trader,
+  }) {
+    final span =
+        strategyPolicy.effectiveSampleFull -
+        strategyPolicy.effectiveSampleFloor;
+
+    if (span <= 0) {
+      return 0;
+    }
+
+    return ((effectiveSampleSize - strategyPolicy.effectiveSampleFloor) / span)
+        .clamp(0.0, 1.0)
+        .toDouble();
   }
 
-  double matchQualityReliabilityFor(double averageSimilarity) {
-    return ((averageSimilarity - 0.58) / 0.24).clamp(0.0, 1.0);
+  double matchQualityReliabilityFor(
+    double averageSimilarity, {
+    HistoricalValidationStrategyPolicy strategyPolicy =
+        HistoricalValidationStrategyPolicy.trader,
+  }) {
+    final span =
+        strategyPolicy.matchSimilarityFull -
+        strategyPolicy.matchSimilarityFloor;
+
+    if (span <= 0) {
+      return 0;
+    }
+
+    return ((averageSimilarity - strategyPolicy.matchSimilarityFloor) / span)
+        .clamp(0.0, 1.0)
+        .toDouble();
   }
 
   double appliedReliabilityFor({
     required double effectiveSampleSize,
     required double averageSimilarity,
+    HistoricalValidationStrategyPolicy strategyPolicy =
+        HistoricalValidationStrategyPolicy.trader,
   }) {
     final sampleReliability = effectiveSampleReliabilityFor(
       effectiveSampleSize,
+      strategyPolicy: strategyPolicy,
     );
-    final matchReliability = matchQualityReliabilityFor(averageSimilarity);
+
+    final matchReliability = matchQualityReliabilityFor(
+      averageSimilarity,
+      strategyPolicy: strategyPolicy,
+    );
+
     return sampleReliability < matchReliability
         ? sampleReliability
         : matchReliability;

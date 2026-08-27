@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/recommendation/context/stock_behavior_profile.dart';
 import 'package:mobile/features/recommendation/history/historical_validation_scoring_policy.dart';
+import 'package:mobile/features/recommendation/history/historical_validation_strategy_policy.dart';
 
 void main() {
   const policy = HistoricalValidationScoringPolicy();
@@ -141,4 +142,135 @@ void main() {
       expect(impact, greaterThanOrEqualTo(-8));
     },
   );
+
+  test('Trader keeps the exact pre-Swing outcome magnitude scale', () {
+    final result = policy.evaluate(
+      alignedOutcomeRate: 0.65,
+      controlAlignedOutcomeRate: 0.50,
+      medianDirectionalReturnPercent: 1.3,
+      medianFavorableExcursionPercent: 1.8,
+      medianAdverseExcursionPercent: -0.5,
+      effectiveSampleSize: 30,
+      averageSimilarity: 0.82,
+      stockBehaviorProfile: profile,
+      strategyPolicy: HistoricalValidationStrategyPolicy.trader,
+    );
+
+    expect(result.outcomeMagnitudeScore, 1);
+    expect(result.effectiveSampleReliability, 1);
+    expect(result.matchQualityReliability, 1);
+  });
+
+  test('Swing 1D scales outcome magnitude to its ten-day horizon', () {
+    final traderResult = policy.evaluate(
+      alignedOutcomeRate: 0.65,
+      controlAlignedOutcomeRate: 0.50,
+      medianDirectionalReturnPercent: 2.0,
+      medianFavorableExcursionPercent: 2.8,
+      medianAdverseExcursionPercent: -0.8,
+      effectiveSampleSize: 32,
+      averageSimilarity: 0.84,
+      stockBehaviorProfile: profile,
+      strategyPolicy: HistoricalValidationStrategyPolicy.trader,
+    );
+
+    final swingResult = policy.evaluate(
+      alignedOutcomeRate: 0.65,
+      controlAlignedOutcomeRate: 0.50,
+      medianDirectionalReturnPercent: 2.0,
+      medianFavorableExcursionPercent: 2.8,
+      medianAdverseExcursionPercent: -0.8,
+      effectiveSampleSize: 32,
+      averageSimilarity: 0.84,
+      stockBehaviorProfile: profile,
+      strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+    );
+
+    expect(traderResult.outcomeMagnitudeScore, 1);
+    expect(swingResult.outcomeMagnitudeScore, closeTo(0.5, 0.0001));
+  });
+
+  test('Swing 4H and 1D use different expected movement scales', () {
+    final fourHour = policy.evaluate(
+      alignedOutcomeRate: 0.65,
+      controlAlignedOutcomeRate: 0.50,
+      medianDirectionalReturnPercent: 2.0,
+      medianFavorableExcursionPercent: 2.8,
+      medianAdverseExcursionPercent: -0.8,
+      effectiveSampleSize: 32,
+      averageSimilarity: 0.84,
+      stockBehaviorProfile: profile,
+      strategyPolicy: HistoricalValidationStrategyPolicy.swingFourHour,
+    );
+
+    final daily = policy.evaluate(
+      alignedOutcomeRate: 0.65,
+      controlAlignedOutcomeRate: 0.50,
+      medianDirectionalReturnPercent: 2.0,
+      medianFavorableExcursionPercent: 2.8,
+      medianAdverseExcursionPercent: -0.8,
+      effectiveSampleSize: 32,
+      averageSimilarity: 0.84,
+      stockBehaviorProfile: profile,
+      strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+    );
+
+    expect(fourHour.outcomeMagnitudeScore, closeTo(2.0 / 3.3, 0.0001));
+
+    expect(daily.outcomeMagnitudeScore, closeTo(0.5, 0.0001));
+
+    expect(
+      fourHour.outcomeMagnitudeScore,
+      greaterThan(daily.outcomeMagnitudeScore),
+    );
+  });
+
+  test(
+    'Swing requires a larger effective sample before reliability begins',
+    () {
+      final traderReliability = policy.effectiveSampleReliabilityFor(
+        9,
+        strategyPolicy: HistoricalValidationStrategyPolicy.trader,
+      );
+
+      final swingReliability = policy.effectiveSampleReliabilityFor(
+        9,
+        strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+      );
+
+      expect(traderReliability, greaterThan(0));
+      expect(swingReliability, 0);
+
+      expect(
+        policy.effectiveSampleReliabilityFor(
+          32,
+          strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+        ),
+        1,
+      );
+    },
+  );
+
+  test('Swing uses a stricter match-quality reliability floor', () {
+    final traderReliability = policy.matchQualityReliabilityFor(
+      0.59,
+      strategyPolicy: HistoricalValidationStrategyPolicy.trader,
+    );
+
+    final swingReliability = policy.matchQualityReliabilityFor(
+      0.59,
+      strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+    );
+
+    expect(traderReliability, greaterThan(0));
+    expect(swingReliability, 0);
+
+    expect(
+      policy.matchQualityReliabilityFor(
+        0.84,
+        strategyPolicy: HistoricalValidationStrategyPolicy.swingDaily,
+      ),
+      1,
+    );
+  });
 }

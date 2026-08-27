@@ -9,6 +9,7 @@ import 'historical_setup_matcher.dart';
 import 'historical_setup_provider.dart';
 import 'historical_setup_validation.dart';
 import 'historical_validation_scoring_policy.dart';
+import 'historical_validation_strategy_policy.dart';
 import 'setup_fingerprint_builder.dart';
 
 class HistoricalSetupValidationService {
@@ -52,6 +53,11 @@ class HistoricalSetupValidationService {
       primaryTimeframe: recommendation.timeframe,
     );
 
+    final validationPolicy = HistoricalValidationStrategyPolicy.forContext(
+      strategy: strategy,
+      primaryTimeframe: recommendation.timeframe,
+    );
+
     final dataset = await provider.loadDataset(
       symbol: symbol,
       strategy: strategy,
@@ -77,7 +83,7 @@ class HistoricalSetupValidationService {
       stockBehaviorProfile.behaviorType,
     );
 
-    if (matches.length < 8) {
+    if (matches.length < validationPolicy.minimumMatchedCases) {
       return HistoricalSetupValidation(
         status: HistoricalValidationStatus.insufficientData,
         reliability: HistoricalValidationReliability.unavailable,
@@ -120,6 +126,7 @@ class HistoricalSetupValidationService {
     final reliability = _reliabilityFor(
       effectiveSampleSize: effectiveSampleSize,
       averageSimilarity: averageSimilarity,
+      strategyPolicy: validationPolicy,
     );
 
     if (directionSign == 0) {
@@ -233,6 +240,7 @@ class HistoricalSetupValidationService {
       effectiveSampleSize: effectiveSampleSize,
       averageSimilarity: averageSimilarity,
       stockBehaviorProfile: stockBehaviorProfile,
+      strategyPolicy: validationPolicy,
     );
 
     final confidenceImpact = scoringPolicy.confidenceImpact(
@@ -384,10 +392,12 @@ class HistoricalSetupValidationService {
   HistoricalValidationReliability _reliabilityFor({
     required double effectiveSampleSize,
     required double averageSimilarity,
+    required HistoricalValidationStrategyPolicy strategyPolicy,
   }) {
     final appliedReliability = scoringPolicy.appliedReliabilityFor(
       effectiveSampleSize: effectiveSampleSize,
       averageSimilarity: averageSimilarity,
+      strategyPolicy: strategyPolicy,
     );
 
     if (appliedReliability <= 0) {

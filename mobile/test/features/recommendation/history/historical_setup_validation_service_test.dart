@@ -28,7 +28,7 @@ void main() {
     sampleSize: 48,
   );
 
-  Recommendation bullishRecommendation() {
+  Recommendation bullishRecommendation({String timeframe = '5m'}) {
     const familySummary = EvidenceFamilySummary(
       family: EvidenceFamily.trend,
       direction: EvidenceDirection.bullish,
@@ -74,7 +74,7 @@ void main() {
       type: RecommendationType.buy,
       evidenceScore: scoring.confidence,
       oneLineExplanation: 'Bullish test setup.',
-      timeframe: '5m',
+      timeframe: timeframe,
       candleCount: 48,
       analysisTime: DateTime.utc(2026, 8, 20),
       evidenceReport: EvidenceReport.fromResults(
@@ -356,6 +356,94 @@ void main() {
       expect(result.status, HistoricalValidationStatus.available);
       expect(result.comparisonCases, 16);
       expect(result.controlAlignedOutcomeRate, closeTo(0.50, 0.001));
+    },
+  );
+
+  test(
+    'Swing requires at least ten matched cases while Trader legacy gate remains eight',
+    () async {
+      const returns = <double>[1.0, 0.9, 1.1, 0.8, 1.2, 0.7, 1.0, 0.9, -0.4];
+
+      const controls = <double>[1, -1, 1, -1, 1, -1, 1, -1, 1, -1, 1, -1];
+
+      final service = HistoricalSetupValidationService(
+        provider: const _FixedOutcomeProvider(
+          caseReturns: returns,
+          controlReturns: controls,
+        ),
+      );
+
+      final trader = await service.validate(
+        symbol: 'AAPL',
+        strategy: StrategyType.trader,
+        recommendation: bullishRecommendation(),
+        stockBehaviorProfile: profile,
+      );
+
+      final swing = await service.validate(
+        symbol: 'AAPL',
+        strategy: StrategyType.swing,
+        recommendation: bullishRecommendation(timeframe: '1d'),
+        stockBehaviorProfile: profile,
+      );
+
+      expect(trader.status, isNot(HistoricalValidationStatus.insufficientData));
+
+      expect(swing.status, HistoricalValidationStatus.insufficientData);
+
+      expect(swing.matchedCases, 9);
+      expect(swing.confidenceImpactPoints, 0);
+      expect(swing.canInfluenceConfidence, isFalse);
+    },
+  );
+
+  test(
+    'Swing historical validation still cannot exceed the eight-point confidence boundary',
+    () async {
+      final service = HistoricalSetupValidationService(
+        provider: _FixedOutcomeProvider(
+          caseReturns: List<double>.filled(40, 8),
+          controlReturns: const [
+            1,
+            -1,
+            -1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1,
+            1,
+            -1,
+            -1,
+            -1,
+          ],
+        ),
+      );
+
+      final result = await service.validate(
+        symbol: 'AAPL',
+        strategy: StrategyType.swing,
+        recommendation: bullishRecommendation(timeframe: '1d'),
+        stockBehaviorProfile: profile,
+      );
+
+      expect(
+        result.confidenceImpactPoints,
+        lessThanOrEqualTo(
+          HistoricalSetupValidation.maximumConfidenceImpactPoints,
+        ),
+      );
+
+      expect(
+        result.confidenceImpactPoints,
+        greaterThanOrEqualTo(
+          -HistoricalSetupValidation.maximumConfidenceImpactPoints,
+        ),
+      );
     },
   );
 }
