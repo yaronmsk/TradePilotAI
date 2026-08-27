@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../context/stock_behavior_profile.dart';
+import '../models/stock_behavior_explainability_catalog.dart';
+import 'metric_explainability_dialog.dart';
 
 class StockBehaviorCard extends StatelessWidget {
   const StockBehaviorCard({required this.profile, super.key});
@@ -51,20 +53,24 @@ class StockBehaviorCard extends StatelessWidget {
               runSpacing: 14,
               children: [
                 _Metric(
+                  metric: StockBehaviorMetric.stockType,
                   label: 'Stock Type',
                   value: _behaviorLabel(profile.behaviorType),
                 ),
                 _Metric(
+                  metric: StockBehaviorMetric.volatilityNow,
                   label: 'Volatility Now',
                   value: _volatilityValue(profile),
                 ),
                 _Metric(
+                  metric: StockBehaviorMetric.typicalDailyRange,
                   label: hasHistory ? 'Typical Daily Range' : 'Current ATR',
                   value: hasHistory
                       ? '${profile.typicalDailyAtrPercent.toStringAsFixed(2)}%'
                       : '${profile.atrPercent.toStringAsFixed(2)}%',
                 ),
                 _Metric(
+                  metric: StockBehaviorMetric.volumePattern,
                   label: hasHistory ? 'Volume Pattern' : 'Relative Volume',
                   value: hasHistory
                       ? _volumePattern(profile.volumeVariability)
@@ -121,7 +127,7 @@ class StockBehaviorCard extends StatelessWidget {
           title: const Text('What is Stock DNA?'),
           content: const Text(
             'Stock DNA is TradePilot\'s long-term behavior baseline. It uses daily price and volume history to understand whether a stock is normally steady or volatile, how unusual current volatility is for that same stock, and how consistent its volume usually is.\n\n'
-            'Stock DNA does not create a Buy or Sell signal by itself. It changes how much trust the recommendation brain gives to other evidence. For example, an RSI extreme carries less standalone weight in an inherently volatile stock than in a historically steady stock.',
+            'Stock DNA does not create a Buy or Sell signal by itself. It changes how much trust the recommendation brain gives to other evidence. For Swing, these adjustments require a valid daily historical baseline and are deliberately bounded so Stock DNA cannot dominate the recommendation. For example, an RSI extreme carries less standalone weight in an inherently volatile stock than in a historically steady stock.',
           ),
           actions: [
             TextButton(
@@ -288,8 +294,13 @@ class StockBehaviorCard extends StatelessWidget {
 }
 
 class _Metric extends StatelessWidget {
-  const _Metric({required this.label, required this.value});
+  const _Metric({
+    required this.metric,
+    required this.label,
+    required this.value,
+  });
 
+  final StockBehaviorMetric metric;
   final String label;
   final String value;
 
@@ -300,7 +311,36 @@ class _Metric extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: Theme.of(context).textTheme.bodySmall),
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Flexible(
+                child: Text(
+                  label,
+                  style: Theme.of(context).textTheme.bodySmall,
+                ),
+              ),
+              const SizedBox(width: 2),
+              IconButton(
+                tooltip: 'About $label',
+                onPressed: () => MetricExplainabilityDialog.show(
+                  context,
+                  title: label,
+                  explainability: StockBehaviorExplainabilityCatalog.forMetric(
+                    metric,
+                  ),
+                ),
+                icon: const Icon(Icons.info_outline),
+                iconSize: 16,
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints.tightFor(
+                  width: 24,
+                  height: 24,
+                ),
+                visualDensity: VisualDensity.compact,
+              ),
+            ],
+          ),
           const SizedBox(height: 2),
           Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
         ],

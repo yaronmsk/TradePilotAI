@@ -1,5 +1,7 @@
 import '../models/evidence_definition.dart';
 import '../models/evidence_result.dart';
+import '../models/strategy_summary.dart';
+import '../strategy/stock_dna_strategy_policy.dart';
 import 'stock_behavior_profile.dart';
 
 class ContextualEvidenceAdjuster {
@@ -8,17 +10,28 @@ class ContextualEvidenceAdjuster {
   List<EvidenceResult> adjust({
     required List<EvidenceResult> results,
     required StockBehaviorProfile profile,
+    StrategyType strategy = StrategyType.trader,
   }) {
-    if (!profile.hasSufficientData) {
+    final policy = StockDnaStrategyPolicy.forStrategy(strategy);
+
+    if (policy == null || !profile.hasSufficientData) {
+      return List<EvidenceResult>.unmodifiable(results);
+    }
+
+    if (policy.requiresHistoricalBaseline && !profile.hasHistoricalBaseline) {
       return List<EvidenceResult>.unmodifiable(results);
     }
 
     return List<EvidenceResult>.unmodifiable(
-      results.map((result) => _adjustEvidence(result, profile)),
+      results.map(
+        (result) => strategy == StrategyType.trader
+            ? _adjustTraderEvidence(result, profile)
+            : _adjustSwingEvidence(result, profile, policy),
+      ),
     );
   }
 
-  EvidenceResult _adjustEvidence(
+  EvidenceResult _adjustTraderEvidence(
     EvidenceResult evidence,
     StockBehaviorProfile profile,
   ) {
@@ -212,6 +225,160 @@ class ContextualEvidenceAdjuster {
       dynamicWeight: adjustedWeight,
       explanation:
           '${evidence.explanation} Context adjustment: ${reasons.join(' ')}',
+    );
+  }
+
+  EvidenceResult _adjustSwingEvidence(
+    EvidenceResult evidence,
+    StockBehaviorProfile profile,
+    StockDnaStrategyPolicy policy,
+  ) {
+    if (!evidence.isAvailable) {
+      return evidence;
+    }
+
+    double multiplier = 1;
+    final reasons = <String>[];
+
+    final persistentDailyTrend =
+        profile.historicalTrendEfficiency20 >= policy.persistentTrend20 &&
+        profile.historicalTrendEfficiency60 >= policy.persistentTrend60;
+
+    final weakDailyTrend =
+        profile.historicalTrendEfficiency20 <= policy.weakTrend20 &&
+        profile.historicalTrendEfficiency60 <= policy.weakTrend60;
+
+    final unusuallyVolatile =
+        profile.volatilityPercentile >= policy.highVolatilityPercentile;
+
+    switch (evidence.definition.kind) {
+      case EvidenceKind.candleTrend:
+      case EvidenceKind.emaStructure:
+      case EvidenceKind.multiTimeframeTrend:
+        if (persistentDailyTrend) {
+          multiplier *= 1.10;
+          reasons.add(
+            'The one-year daily Stock DNA shows persistent trend behavior, so existing Swing trend evidence receives modestly more trust.',
+          );
+        } else if (weakDailyTrend) {
+          multiplier *= 0.90;
+          reasons.add(
+            'The daily Stock DNA shows historically weak trend persistence, so existing Swing trend evidence receives less trust.',
+          );
+        }
+
+        if (unusuallyVolatile && profile.trendEfficiency < 0.55) {
+          multiplier *= 0.90;
+          reasons.add(
+            'Current volatility is unusually high versus this stock\'s own history while the active move is noisy, so trend conviction is reduced.',
+          );
+        }
+        break;
+
+      case EvidenceKind.rsi:
+        if (profile.behaviorType == StockBehaviorType.volatile) {
+          multiplier *= 0.88;
+          reasons.add(
+            'This stock is historically volatile, so a Swing RSI reading receives less standalone trust.',
+          );
+        } else if (profile.behaviorType == StockBehaviorType.steady) {
+          multiplier *= 1.05;
+          reasons.add(
+            'This stock is historically steady, so an unusual oscillator condition can receive slightly more contextual trust.',
+          );
+        }
+
+        if (persistentDailyTrend) {
+          multiplier *= 0.90;
+          reasons.add(
+            'Persistent daily trend behavior further reduces reversal interpretation because oscillator extremes can remain elevated during strong Swing trends.',
+          );
+        }
+
+        if (unusuallyVolatile) {
+          multiplier *= 0.92;
+          reasons.add(
+            'Realized volatility is unusually high versus this stock\'s own history, so RSI influence is reduced.',
+          );
+        }
+        break;
+
+      case EvidenceKind.macdMomentum:
+        if (persistentDailyTrend) {
+          multiplier *= 1.08;
+          reasons.add(
+            'Persistent daily trend behavior gives existing Swing MACD momentum modestly more contextual trust.',
+          );
+        } else if (weakDailyTrend && profile.trendEfficiency < 0.50) {
+          multiplier *= 0.92;
+          reasons.add(
+            'Historically weak trend persistence and a noisy current move reduce MACD contextual trust.',
+          );
+        }
+        break;
+
+      case EvidenceKind.relativeVolume:
+      case EvidenceKind.volumeConfirmation:
+        if (profile.volumeVariability <= policy.stableVolumeVariability) {
+          multiplier *= 1.08;
+          reasons.add(
+            'Daily volume is normally stable for this stock, so existing Participation evidence is modestly more informative.',
+          );
+        } else if (profile.volumeVariability >=
+            policy.erraticVolumeVariability) {
+          multiplier *= 0.90;
+          reasons.add(
+            'Daily volume is historically erratic, so existing Participation evidence receives less contextual weight.',
+          );
+        }
+        break;
+
+      case EvidenceKind.supportResistance:
+        if (unusuallyVolatile && profile.trendEfficiency < 0.55) {
+          multiplier *= 0.90;
+          reasons.add(
+            'Unusually high stock-specific volatility with noisy price action makes local structure easier to probe, so existing level evidence is discounted.',
+          );
+        }
+        break;
+
+      case EvidenceKind.priceExtension:
+        if (profile.behaviorType == StockBehaviorType.steady) {
+          multiplier *= 1.08;
+          reasons.add(
+            'Large ATR-normalized stretches are less routine for this historically steady stock, so extension context receives slightly more weight.',
+          );
+        } else if (profile.behaviorType == StockBehaviorType.volatile ||
+            unusuallyVolatile) {
+          multiplier *= 0.92;
+          reasons.add(
+            'Large stretches are more routine for this volatile stock, so extension context receives slightly less weight.',
+          );
+        }
+        break;
+
+      case EvidenceKind.vwapPosition:
+      case EvidenceKind.marketContext:
+      case EvidenceKind.marketBreadth:
+      case EvidenceKind.newsSentiment:
+      case EvidenceKind.generic:
+        break;
+    }
+
+    final adjustedWeight = (evidence.dynamicWeight * multiplier)
+        .clamp(policy.minimumDynamicWeight, policy.maximumDynamicWeight)
+        .toDouble();
+
+    if (reasons.isEmpty || adjustedWeight == evidence.dynamicWeight) {
+      return evidence;
+    }
+
+    return evidence.copyWith(
+      dynamicWeight: adjustedWeight,
+      explanation:
+          '${evidence.explanation} Swing Stock DNA context adjustment: '
+          '${reasons.join(' ')} '
+          'Stock DNA changes evidence weight only; it does not create or flip direction.',
     );
   }
 }

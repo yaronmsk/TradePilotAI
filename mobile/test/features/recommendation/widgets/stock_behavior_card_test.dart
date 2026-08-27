@@ -64,4 +64,46 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets('every visible Stock DNA metric has its own info path', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: StockBehaviorCard(profile: profile),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byTooltip('About Stock Type'), findsOneWidget);
+    expect(find.byTooltip('About Volatility Now'), findsOneWidget);
+    expect(find.byTooltip('About Typical Daily Range'), findsOneWidget);
+    expect(find.byTooltip('About Volume Pattern'), findsOneWidget);
+  });
+
+  testWidgets('Stock Type info explains its non-directional role', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: SingleChildScrollView(
+            child: StockBehaviorCard(profile: profile),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('About Stock Type'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('About Stock Type'), findsOneWidget);
+    expect(
+      find.textContaining('does not create or flip Buy/Sell direction'),
+      findsOneWidget,
+    );
+  });
 }

@@ -109,21 +109,18 @@ class RecommendationService {
       historicalDailyCandles: historicalDailyCandles,
     );
 
-    final adjusted = contextualEvidenceAdjuster.adjust(
-      results: rawResults,
+    final contextResults = analysisContext == null
+        ? const <EvidenceResult>[]
+        : _collectContextEvidence(
+            analysisContext: analysisContext,
+            strategy: strategy,
+          );
+
+    return contextualEvidenceAdjuster.adjust(
+      results: <EvidenceResult>[...rawResults, ...contextResults],
       profile: profile,
-    );
-
-    if (analysisContext == null) {
-      return adjusted;
-    }
-
-    final contextResults = _collectContextEvidence(
-      analysisContext: analysisContext,
       strategy: strategy,
     );
-
-    return List<EvidenceResult>.unmodifiable([...adjusted, ...contextResults]);
   }
 
   Recommendation applyHistoricalValidation({
@@ -171,11 +168,6 @@ class RecommendationService {
 
     final rawResults = collectEvidence(snapshot, strategy: strategy);
 
-    final adjustedBaseResults = contextualEvidenceAdjuster.adjust(
-      results: rawResults,
-      profile: resolvedProfile,
-    );
-
     final contextResults = analysisContext == null
         ? const <EvidenceResult>[]
         : _collectContextEvidence(
@@ -183,10 +175,11 @@ class RecommendationService {
             strategy: strategy,
           );
 
-    final evidenceResults = <EvidenceResult>[
-      ...adjustedBaseResults,
-      ...contextResults,
-    ];
+    final evidenceResults = contextualEvidenceAdjuster.adjust(
+      results: <EvidenceResult>[...rawResults, ...contextResults],
+      profile: resolvedProfile,
+      strategy: strategy,
+    );
 
     final evidenceReport = EvidenceReport.fromResults(
       results: evidenceResults,
