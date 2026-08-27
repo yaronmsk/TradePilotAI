@@ -13,10 +13,12 @@ void main() {
     VolatilityRegime volatility = VolatilityRegime.elevated,
     MarketBackdrop backdrop = MarketBackdrop.supportive,
     double trend = 70,
+    StrategyType strategy = StrategyType.trader,
+    String primaryTimeframe = '5m',
   }) {
     return HistoricalSetupFingerprint(
-      strategy: StrategyType.trader,
-      primaryTimeframe: '5m',
+      strategy: strategy,
+      primaryTimeframe: primaryTimeframe,
       stockBehaviorType: behavior,
       volatilityRegime: volatility,
       marketBackdrop: backdrop,
@@ -80,6 +82,48 @@ void main() {
         selected.single.fingerprint.directionScoreFor(EvidenceFamily.trend),
         -90,
       );
+    },
+  );
+
+  test(
+    'same-stock control baseline cannot pool strategies or Swing timeframes',
+    () {
+      const selector = HistoricalComparisonSelector();
+
+      final current = fingerprint(
+        strategy: StrategyType.swing,
+        primaryTimeframe: '1d',
+      );
+
+      final selected = selector.select(
+        currentSymbol: 'NVDA',
+        current: current,
+        observations: [
+          observation(fingerprint: current, day: 1),
+          observation(
+            fingerprint: fingerprint(
+              strategy: StrategyType.trader,
+              primaryTimeframe: '1d',
+            ),
+            day: 2,
+          ),
+          observation(
+            fingerprint: fingerprint(
+              strategy: StrategyType.swing,
+              primaryTimeframe: '4h',
+            ),
+            day: 3,
+          ),
+          observation(symbol: 'TSLA', fingerprint: current, day: 4),
+        ],
+      );
+
+      expect(selected, hasLength(1));
+      expect(selected.single.symbol, 'NVDA');
+
+      expect(selected.single.fingerprint.strategy, StrategyType.swing);
+
+      expect(selected.single.fingerprint.primaryTimeframe, '1d');
     },
   );
 }

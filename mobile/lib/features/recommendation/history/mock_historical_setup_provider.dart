@@ -7,6 +7,7 @@ import '../models/strategy_summary.dart';
 import 'historical_setup_case.dart';
 import 'historical_setup_fingerprint.dart';
 import 'historical_setup_provider.dart';
+import 'historical_validation_strategy_policy.dart';
 
 class MockHistoricalSetupProvider implements HistoricalSetupProvider {
   const MockHistoricalSetupProvider({
@@ -26,9 +27,31 @@ class MockHistoricalSetupProvider implements HistoricalSetupProvider {
     required int forwardBars,
   }) async {
     final normalizedSymbol = symbol.trim().toUpperCase();
+
+    if (currentFingerprint.strategy != strategy ||
+        currentFingerprint.primaryTimeframe != primaryTimeframe) {
+      throw ArgumentError(
+        'Historical dataset request strategy/timeframe must match '
+        'the supplied fingerprint.',
+      );
+    }
+
+    if (forwardBars <= 0) {
+      throw ArgumentError.value(
+        forwardBars,
+        'forwardBars',
+        'Historical outcome horizon must be greater than zero.',
+      );
+    }
+
     final directionSign = _currentDirectionSign(currentFingerprint);
     final alignmentBias = _alignmentBiasForSymbol(normalizedSymbol);
-    final magnitudeBase = _moveMagnitudeFor(currentFingerprint);
+    final magnitudeBase = _moveMagnitudeFor(
+      currentFingerprint,
+      strategy: strategy,
+      primaryTimeframe: primaryTimeframe,
+      forwardBars: forwardBars,
+    );
     final peers = _peerSymbols(
       normalizedSymbol,
       currentFingerprint.stockBehaviorType,
@@ -356,8 +379,13 @@ class MockHistoricalSetupProvider implements HistoricalSetupProvider {
     };
   }
 
-  double _moveMagnitudeFor(HistoricalSetupFingerprint fingerprint) {
-    final behaviorMagnitude = switch (fingerprint.stockBehaviorType) {
+  double _moveMagnitudeFor(
+    HistoricalSetupFingerprint fingerprint, {
+    required StrategyType strategy,
+    required String primaryTimeframe,
+    required int forwardBars,
+  }) {
+    final legacyBehaviorMagnitude = switch (fingerprint.stockBehaviorType) {
       StockBehaviorType.steady => 0.75,
       StockBehaviorType.balanced => 1.25,
       StockBehaviorType.volatile => 2.10,
@@ -371,7 +399,37 @@ class MockHistoricalSetupProvider implements HistoricalSetupProvider {
       VolatilityRegime.unknown => 1.0,
     };
 
-    return behaviorMagnitude * volatilityMultiplier;
+    // Preserve the existing Trader development simulation exactly. Batch 6B
+    // only corrects the previously ignored Swing outcome horizon.
+    if (strategy != StrategyType.swing) {
+      return legacyBehaviorMagnitude * volatilityMultiplier;
+    }
+
+    final policy = HistoricalValidationStrategyPolicy.forContext(
+      strategy: strategy,
+      primaryTimeframe: primaryTimeframe,
+    );
+
+    final referenceMagnitude = policy.expectedMoveScaleFor(
+      fingerprint.stockBehaviorType,
+    );
+
+    final referenceBars = switch (primaryTimeframe) {
+      '4h' => 15,
+      '1d' => 10,
+      _ => forwardBars,
+    };
+
+    // Synthetic development outcomes use a bounded square-root-of-time
+    // heuristic around the approved Swing reference horizon. This makes
+    // forwardBars materially affect the generated outcome without claiming
+    // statistical optimization or linear price growth with time.
+    final horizonMultiplier = math
+        .sqrt(forwardBars / math.max(1, referenceBars))
+        .clamp(0.50, 1.50)
+        .toDouble();
+
+    return referenceMagnitude * volatilityMultiplier * horizonMultiplier;
   }
 
   List<String> _peerSymbols(String symbol, StockBehaviorType behaviorType) {

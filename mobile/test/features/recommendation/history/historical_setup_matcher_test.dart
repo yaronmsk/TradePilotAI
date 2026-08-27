@@ -16,10 +16,12 @@ void main() {
     MarketBackdrop backdrop = MarketBackdrop.supportive,
     RelativeStrengthState relativeStrength =
         RelativeStrengthState.outperforming,
+    StrategyType strategy = StrategyType.trader,
+    String primaryTimeframe = '5m',
   }) {
     return HistoricalSetupFingerprint(
-      strategy: StrategyType.trader,
-      primaryTimeframe: '5m',
+      strategy: strategy,
+      primaryTimeframe: primaryTimeframe,
       stockBehaviorType: behavior,
       volatilityRegime: volatility,
       marketBackdrop: backdrop,
@@ -131,4 +133,40 @@ void main() {
     expect(aapl.similarity, closeTo(msft.similarity, 0.001));
     expect(aapl.weight, greaterThan(msft.weight));
   });
+
+  test(
+    'strategy and primary timeframe are hard setup-match eligibility gates',
+    () {
+      const matcher = HistoricalSetupMatcher(minimumSimilarity: 0);
+
+      final current = fingerprint(
+        strategy: StrategyType.swing,
+        primaryTimeframe: '1d',
+      );
+
+      final matching = setupCase(current, symbol: 'AAPL');
+
+      final traderDaily = setupCase(
+        fingerprint(strategy: StrategyType.trader, primaryTimeframe: '1d'),
+        symbol: 'MSFT',
+      );
+
+      final swingFourHour = setupCase(
+        fingerprint(strategy: StrategyType.swing, primaryTimeframe: '4h'),
+        symbol: 'GOOG',
+      );
+
+      final matches = matcher.match(
+        currentSymbol: 'AAPL',
+        current: current,
+        candidates: [traderDaily, swingFourHour, matching],
+      );
+
+      expect(matches, hasLength(1));
+
+      expect(matches.single.setupCase.fingerprint.strategy, StrategyType.swing);
+
+      expect(matches.single.setupCase.fingerprint.primaryTimeframe, '1d');
+    },
+  );
 }
