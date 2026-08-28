@@ -100,6 +100,84 @@ class ScoringResult {
 
   double get confidence => score;
 
+  /// Sum of signed post-family-cap direction attribution.
+  ///
+  /// For a ConsensusEngine result this reconciles to [directionScore].
+  double get attributedDirectionScore => familyContributions.fold<double>(
+    0,
+    (sum, contribution) => sum + contribution.directionImpactPoints,
+  );
+
+  /// Sum of signed provider attribution after providers have already shared
+  /// their capped family influence.
+  double get providerAttributedDirectionScore =>
+      providerContributions.fold<double>(
+        0,
+        (sum, contribution) => sum + contribution.directionImpactPoints,
+      );
+
+  /// Absolute current-case family direction basis.
+  ///
+  /// This is the denominator used for family-level direction attribution.
+  /// It reflects effective post-cap influence, not configured/raw weights.
+  double get directionAttributionBasis => familyContributions.fold<double>(
+    0,
+    (sum, contribution) => sum + contribution.directionImpactPoints.abs(),
+  );
+
+  /// Family shares reconcile to 100% whenever directional evidence exists.
+  /// Zero means there is no active directional basis.
+  double get directionAttributionShareTotal => familyContributions.fold<double>(
+    0,
+    (sum, contribution) => sum + contribution.directionShare,
+  );
+
+  double get directionReconciliationError =>
+      (directionScore ?? 0) - attributedDirectionScore;
+
+  double get providerDirectionReconciliationError =>
+      attributedDirectionScore - providerAttributedDirectionScore;
+
+  double confidenceAdjustmentPointsFor(ConfidenceModifierSource source) {
+    return confidenceModifiers
+        .where((modifier) => modifier.source == source)
+        .fold<double>(0, (sum, modifier) => sum + modifier.impactPoints);
+  }
+
+  /// Internal evidence-engine adjustment from raw evidence strength to
+  /// evidence-derived confidence.
+  double get evidenceQualityAdjustmentPoints =>
+      confidenceAdjustmentPointsFor(ConfidenceModifierSource.evidenceQuality);
+
+  /// Confidence-only Event Risk impact. This value has no directional role.
+  double get eventRiskAdjustmentPoints =>
+      confidenceAdjustmentPointsFor(ConfidenceModifierSource.eventRisk);
+
+  /// Confidence-only Historical Validation impact. This value has no
+  /// directional role.
+  double get historicalValidationAdjustmentPoints =>
+      confidenceAdjustmentPointsFor(
+        ConfidenceModifierSource.historicalValidation,
+      );
+
+  double get externalConfidenceAdjustmentPoints =>
+      eventRiskAdjustmentPoints + historicalValidationAdjustmentPoints;
+
+  /// Reconstructs evidence confidence from the raw evidence-strength baseline
+  /// and evidence-quality modifiers.
+  double get reconciledEvidenceConfidence =>
+      baseEvidenceStrength + evidenceQualityAdjustmentPoints;
+
+  /// Final confidence reconstructed from evidence confidence plus bounded
+  /// external confidence-only adjustments.
+  double get reconciledFinalConfidence =>
+      evidenceConfidence + externalConfidenceAdjustmentPoints;
+
+  double get evidenceConfidenceReconciliationError =>
+      evidenceConfidence - reconciledEvidenceConfidence;
+
+  double get finalConfidenceReconciliationError =>
+      confidence - reconciledFinalConfidence;
   ScoringResult copyWith({
     double? score,
     double? coverage,

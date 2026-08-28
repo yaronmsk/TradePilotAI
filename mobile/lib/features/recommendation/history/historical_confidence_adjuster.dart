@@ -34,6 +34,7 @@ class HistoricalConfidenceAdjuster {
           factor: factor,
           before: before,
           after: after,
+          source: ConfidenceModifierSource.historicalValidation,
         ),
       ],
     );

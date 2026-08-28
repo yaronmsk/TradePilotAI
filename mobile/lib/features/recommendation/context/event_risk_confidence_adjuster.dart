@@ -56,6 +56,7 @@ class EventRiskConfidenceAdjuster {
           factor: factor,
           before: before,
           after: after,
+          source: ConfidenceModifierSource.eventRisk,
         ),
       ],
     );

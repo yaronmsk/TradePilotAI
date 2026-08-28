@@ -1,6 +1,12 @@
 import 'evidence_family.dart';
 import 'evidence_result.dart';
 
+enum ConfidenceModifierSource {
+  evidenceQuality,
+  eventRisk,
+  historicalValidation,
+}
+
 /// Exact, post-de-duplication attribution for one evidence provider.
 ///
 /// Direction impact is expressed in signed points on the final -100..+100
@@ -26,9 +32,17 @@ class EvidenceContribution {
   /// All provider direction-impact points sum to the final direction score.
   final double directionImpactPoints;
 
-  /// Share of absolute provider-level directional influence inside this family,
-  /// from 0 to 1. This is intentionally family-relative because correlated
-  /// providers are capped together before they influence the final result.
+  /// Diagnostic share of absolute provider-level directional mass inside this
+  /// family, from 0 to 1.
+  ///
+  /// IMPORTANT: this is NOT a percentage of the recommendation and must not be
+  /// presented as such. Opposing providers inside one family can partially
+  /// cancel each other, so their absolute shares may look large even when the
+  /// family's net directional contribution is small.
+  ///
+  /// User-facing direction attribution should therefore lead with the capped
+  /// family contribution and use signed provider impact only as supporting
+  /// detail.
   final double directionShareWithinFamily;
 
   /// Portion of evidence-derived confidence attributable to this provider
@@ -82,6 +96,7 @@ class ConfidenceModifierImpact {
     required this.factor,
     required this.before,
     required this.after,
+    this.source = ConfidenceModifierSource.evidenceQuality,
   });
 
   final String label;
@@ -92,6 +107,13 @@ class ConfidenceModifierImpact {
 
   final double before;
   final double after;
+
+  /// Identifies which layer changed confidence.
+  ///
+  /// Evidence-quality modifiers belong to the evidence engine itself.
+  /// Event Risk and Historical Validation are external bounded adjustments
+  /// and must never be reassigned to indicator/provider attribution.
+  final ConfidenceModifierSource source;
 
   double get impactPoints => after - before;
 }
