@@ -5,6 +5,7 @@ import '../../market/models/market_snapshot.dart';
 import '../context/recommendation_analysis_context.dart';
 import '../history/historical_setup_validation.dart';
 import '../models/recommendation_state.dart';
+import '../models/strategy_summary.dart';
 import '../services/recommendation_service.dart';
 
 class RecommendationController extends ChangeNotifier {
@@ -20,6 +21,7 @@ class RecommendationController extends ChangeNotifier {
     MarketSnapshot snapshot, {
     List<MarketCandle> historicalDailyCandles = const [],
     RecommendationAnalysisContext? analysisContext,
+    StrategyType strategy = StrategyType.trader,
   }) {
     _state = _state.copyWith(
       status: RecommendationStatus.analyzing,
@@ -37,6 +39,7 @@ class RecommendationController extends ChangeNotifier {
         profile: profile,
         historicalDailyCandles: historicalDailyCandles,
         analysisContext: analysisContext,
+        strategy: strategy,
       );
 
       _state = RecommendationState(
@@ -55,7 +58,10 @@ class RecommendationController extends ChangeNotifier {
     notifyListeners();
   }
 
-  void applyHistoricalValidation(HistoricalSetupValidation validation) {
+  void applyHistoricalValidation(
+    HistoricalSetupValidation validation, {
+    StrategyType strategy = StrategyType.trader,
+  }) {
     final recommendation = _state.recommendation;
 
     if (recommendation == null) {
@@ -66,6 +72,7 @@ class RecommendationController extends ChangeNotifier {
       final adjusted = _service.applyHistoricalValidation(
         recommendation: recommendation,
         validation: validation,
+        strategy: strategy,
       );
 
       _state = _state.copyWith(
