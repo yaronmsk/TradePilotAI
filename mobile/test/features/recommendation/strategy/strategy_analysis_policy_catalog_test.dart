@@ -50,11 +50,16 @@ void main() {
       );
     });
 
-    test('Swing scope is approved but recommendation is not active yet', () {
+    test('Swing recommendation backend is active after Batch 7A', () {
       final policy = StrategyAnalysisPolicyCatalog.swing;
 
-      expect(policy.status, StrategyAnalysisPolicyStatus.scopeApproved);
-      expect(policy.isRecommendationActive, isFalse);
+      expect(policy.status, StrategyAnalysisPolicyStatus.active);
+      expect(policy.isRecommendationActive, isTrue);
+
+      expect(
+        policy.implementationReadyEvidenceKinds.toSet(),
+        policy.eligibleEvidenceKinds.toSet(),
+      );
     });
 
     test('calibrated Swing evidence is implementation-ready', () {

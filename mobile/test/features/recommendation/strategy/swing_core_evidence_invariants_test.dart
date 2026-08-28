@@ -42,7 +42,7 @@ void main() {
         isTrue,
       );
 
-      expect(swing.isRecommendationActive, isFalse);
+      expect(swing.isRecommendationActive, isTrue);
     });
 
     test('core evidence preserves intended family de-duplication', () {
@@ -152,7 +152,7 @@ void main() {
         );
       }
 
-      expect(swing.isRecommendationActive, isFalse);
+      expect(swing.isRecommendationActive, isTrue);
     });
 
     test('all eligible Swing evidence is calibrated after Batch 5', () {
@@ -163,7 +163,7 @@ void main() {
         swing.eligibleEvidenceKinds.toSet(),
       );
 
-      expect(swing.isRecommendationActive, isFalse);
+      expect(swing.isRecommendationActive, isTrue);
     });
 
     test('Relative Volume is ready but remains data-quality conditional', () {
@@ -313,7 +313,7 @@ void main() {
           contains('without becoming an independent second market vote'),
         );
 
-        expect(swing.isRecommendationActive, isFalse);
+        expect(swing.isRecommendationActive, isTrue);
       },
     );
 
@@ -383,7 +383,7 @@ void main() {
           contains('never adds confidence'),
         );
 
-        expect(swing.isRecommendationActive, isFalse);
+        expect(swing.isRecommendationActive, isTrue);
       },
     );
 
@@ -431,7 +431,7 @@ void main() {
 
         expect(
           StrategyAnalysisPolicyCatalog.swing.isRecommendationActive,
-          isFalse,
+          isTrue,
         );
       },
     );

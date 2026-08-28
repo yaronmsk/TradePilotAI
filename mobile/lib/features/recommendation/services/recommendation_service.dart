@@ -126,6 +126,7 @@ class RecommendationService {
   Recommendation applyHistoricalValidation({
     required Recommendation recommendation,
     required HistoricalSetupValidation validation,
+    StrategyType strategy = StrategyType.trader,
   }) {
     final adjustedScoring = historicalConfidenceAdjuster.apply(
       scoringResult: recommendation.consensus,
@@ -139,6 +140,7 @@ class RecommendationService {
       candleCount: recommendation.candleCount,
       analysisTime: recommendation.analysisTime ?? DateTime.now(),
       historicalValidation: validation,
+      strategy: strategy,
     );
   }
 
@@ -202,6 +204,7 @@ class RecommendationService {
       timeframe: snapshot.timeframe,
       candleCount: snapshot.candleCount,
       analysisTime: snapshot.timestamp,
+      strategy: strategy,
     );
   }
 

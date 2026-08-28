@@ -5,6 +5,7 @@ import 'package:mobile/features/recommendation/context/recommendation_analysis_c
 import 'package:mobile/features/recommendation/models/evidence_definition.dart';
 import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_result.dart';
+import 'package:mobile/features/recommendation/models/recommendation.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/ema_structure_evidence_provider.dart';
@@ -586,18 +587,19 @@ void main() {
       );
     });
 
-    test('production Swing recommendation cannot run before activation', () {
+    test('production Swing recommendation can run after Batch 7A', () {
       const service = RecommendationService(providers: []);
 
+      final recommendation = service.analyze(
+        createSnapshot(),
+        strategy: StrategyType.swing,
+      );
+
+      expect(recommendation.type, RecommendationType.wait);
+
       expect(
-        () => service.analyze(createSnapshot(), strategy: StrategyType.swing),
-        throwsA(
-          isA<StateError>().having(
-            (error) => error.message,
-            'message',
-            contains('Swing recommendation is not active yet'),
-          ),
-        ),
+        StrategyAnalysisPolicyCatalog.swing.isRecommendationActive,
+        isTrue,
       );
     });
 

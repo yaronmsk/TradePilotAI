@@ -2,6 +2,8 @@ import '../history/historical_setup_validation.dart';
 import '../models/evidence_report.dart';
 import '../models/recommendation.dart';
 import '../models/scoring_result.dart';
+import '../models/strategy_summary.dart';
+import '../strategy/recommendation_strategy_policy.dart';
 
 class RecommendationEngine {
   const RecommendationEngine();
@@ -12,10 +14,19 @@ class RecommendationEngine {
     required String timeframe,
     required int candleCount,
     required DateTime analysisTime,
+    StrategyType strategy = StrategyType.trader,
     HistoricalSetupValidation historicalValidation =
         const HistoricalSetupValidation.unavailable(),
   }) {
-    if (!scoringResult.hasSufficientCoverage) {
+    final policy = RecommendationStrategyPolicy.forStrategy(strategy);
+
+    if (policy == null) {
+      throw StateError(
+        '${strategy.title} recommendation policy is not active yet.',
+      );
+    }
+
+    if (scoringResult.coverage < policy.minimumProviderCoverage) {
       return _build(
         type: RecommendationType.wait,
         scoringResult: scoringResult,
@@ -30,9 +41,31 @@ class RecommendationEngine {
     }
 
     final directionScore = _resolveDirectionScore(scoringResult);
+
     final confidence = scoringResult.confidence;
 
-    if (directionScore >= 65 && confidence >= 80) {
+    final hasActionBreadth =
+        scoringResult.independentFamilyCount >=
+        policy.minimumIndependentFamiliesForAction;
+
+    if (policy.holdOnMaterialConflict &&
+        scoringResult.conflict >= policy.materialConflictThreshold) {
+      return _build(
+        type: RecommendationType.hold,
+        scoringResult: scoringResult,
+        evidenceReport: evidenceReport,
+        timeframe: timeframe,
+        candleCount: candleCount,
+        analysisTime: analysisTime,
+        historicalValidation: historicalValidation,
+        explanation:
+            'Independent evidence families are materially conflicted, so the current Swing setup does not have a sufficiently clear directional edge.',
+      );
+    }
+
+    if (directionScore >= policy.strongDirectionThreshold &&
+        confidence >= policy.strongActionConfidence &&
+        hasActionBreadth) {
       return _build(
         type: RecommendationType.strongBuy,
         scoringResult: scoringResult,
@@ -46,7 +79,9 @@ class RecommendationEngine {
       );
     }
 
-    if (directionScore >= 30 && confidence >= 55) {
+    if (directionScore >= policy.actionDirectionThreshold &&
+        confidence >= policy.minimumActionConfidence &&
+        hasActionBreadth) {
       return _build(
         type: RecommendationType.buy,
         scoringResult: scoringResult,
@@ -60,7 +95,9 @@ class RecommendationEngine {
       );
     }
 
-    if (directionScore <= -65 && confidence >= 80) {
+    if (directionScore <= -policy.strongDirectionThreshold &&
+        confidence >= policy.strongActionConfidence &&
+        hasActionBreadth) {
       return _build(
         type: RecommendationType.strongSell,
         scoringResult: scoringResult,
@@ -74,7 +111,9 @@ class RecommendationEngine {
       );
     }
 
-    if (directionScore <= -30 && confidence >= 55) {
+    if (directionScore <= -policy.actionDirectionThreshold &&
+        confidence >= policy.minimumActionConfidence &&
+        hasActionBreadth) {
       return _build(
         type: RecommendationType.sell,
         scoringResult: scoringResult,
@@ -88,7 +127,7 @@ class RecommendationEngine {
       );
     }
 
-    if (directionScore.abs() <= 20) {
+    if (directionScore.abs() <= policy.holdDirectionThreshold) {
       return _build(
         type: RecommendationType.hold,
         scoringResult: scoringResult,
@@ -103,6 +142,10 @@ class RecommendationEngine {
       );
     }
 
+    final breadthExplanation = hasActionBreadth
+        ? ''
+        : ' Independent-family confirmation is still too limited for an actionable recommendation.';
+
     return _build(
       type: RecommendationType.wait,
       scoringResult: scoringResult,
@@ -112,7 +155,7 @@ class RecommendationEngine {
       analysisTime: analysisTime,
       historicalValidation: historicalValidation,
       explanation:
-          'A directional bias exists, but confidence or cross-family agreement is not yet strong enough to act on it.',
+          'A directional bias exists, but confidence or cross-family agreement is not yet strong enough to act on it.$breadthExplanation',
     );
   }
 

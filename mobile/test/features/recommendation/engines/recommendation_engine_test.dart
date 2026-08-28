@@ -3,6 +3,7 @@ import 'package:mobile/features/recommendation/engines/recommendation_engine.dar
 import 'package:mobile/features/recommendation/models/evidence_report.dart';
 import 'package:mobile/features/recommendation/models/recommendation.dart';
 import 'package:mobile/features/recommendation/models/scoring_result.dart';
+import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 
 void main() {
   const engine = RecommendationEngine();
@@ -17,6 +18,7 @@ void main() {
   Recommendation createRecommendation({
     required ScoringResult scoringResult,
     EvidenceReport? evidenceReport,
+    StrategyType strategy = StrategyType.trader,
   }) {
     return engine.create(
       scoringResult: scoringResult,
@@ -24,6 +26,7 @@ void main() {
       timeframe: '5m',
       candleCount: 48,
       analysisTime: DateTime(2026, 8, 3, 10),
+      strategy: strategy,
     );
   }
 
@@ -179,6 +182,188 @@ void main() {
       expect(recommendation.analysisTime, DateTime(2026, 8, 3, 10));
       expect(recommendation.consensus.agreement, 0.8);
       expect(recommendation.consensus.conflict, 0.2);
+    });
+
+    test('Swing does not inherit the Trader Buy threshold', () {
+      const scoring = ScoringResult(
+        score: 58,
+        coverage: 1,
+        bullishWeight: 1,
+        bearishWeight: 0,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: 32,
+        independentFamilyCount: 4,
+      );
+
+      final trader = createRecommendation(scoringResult: scoring);
+
+      final swing = createRecommendation(
+        scoringResult: scoring,
+        strategy: StrategyType.swing,
+      );
+
+      expect(trader.type, RecommendationType.buy);
+      expect(swing.type, RecommendationType.wait);
+    });
+
+    test('Swing Buy and Sell thresholds preserve parity', () {
+      const bullish = ScoringResult(
+        score: 65,
+        coverage: 1,
+        bullishWeight: 1,
+        bearishWeight: 0,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: 45,
+        independentFamilyCount: 4,
+      );
+
+      const bearish = ScoringResult(
+        score: 65,
+        coverage: 1,
+        bullishWeight: 0,
+        bearishWeight: 1,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: -45,
+        independentFamilyCount: 4,
+      );
+
+      expect(
+        createRecommendation(
+          scoringResult: bullish,
+          strategy: StrategyType.swing,
+        ).type,
+        RecommendationType.buy,
+      );
+
+      expect(
+        createRecommendation(
+          scoringResult: bearish,
+          strategy: StrategyType.swing,
+        ).type,
+        RecommendationType.sell,
+      );
+    });
+
+    test('Swing Strong Buy and Strong Sell preserve parity', () {
+      const bullish = ScoringResult(
+        score: 85,
+        coverage: 1,
+        bullishWeight: 1,
+        bearishWeight: 0,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: 75,
+        independentFamilyCount: 4,
+      );
+
+      const bearish = ScoringResult(
+        score: 85,
+        coverage: 1,
+        bullishWeight: 0,
+        bearishWeight: 1,
+        neutralWeight: 0,
+        warnings: [],
+        directionScore: -75,
+        independentFamilyCount: 4,
+      );
+
+      expect(
+        createRecommendation(
+          scoringResult: bullish,
+          strategy: StrategyType.swing,
+        ).type,
+        RecommendationType.strongBuy,
+      );
+
+      expect(
+        createRecommendation(
+          scoringResult: bearish,
+          strategy: StrategyType.swing,
+        ).type,
+        RecommendationType.strongSell,
+      );
+    });
+
+    test('material Swing cross-family conflict resolves to Hold', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 72,
+          coverage: 1,
+          bullishWeight: 0.7,
+          bearishWeight: 0.3,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 40,
+          conflict: 0.60,
+          independentFamilyCount: 5,
+        ),
+        strategy: StrategyType.swing,
+      );
+
+      expect(recommendation.type, RecommendationType.hold);
+      expect(recommendation.oneLineExplanation, contains('conflicted'));
+    });
+
+    test('Swing requires at least three independent families for action', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 75,
+          coverage: 1,
+          bullishWeight: 1,
+          bearishWeight: 0,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 55,
+          independentFamilyCount: 2,
+        ),
+        strategy: StrategyType.swing,
+      );
+
+      expect(recommendation.type, RecommendationType.wait);
+      expect(
+        recommendation.oneLineExplanation,
+        contains('Independent-family confirmation'),
+      );
+    });
+
+    test('Swing requires at least sixty-five percent provider coverage', () {
+      final recommendation = createRecommendation(
+        scoringResult: const ScoringResult(
+          score: 80,
+          coverage: 0.62,
+          bullishWeight: 1,
+          bearishWeight: 0,
+          neutralWeight: 0,
+          warnings: [],
+          directionScore: 70,
+          independentFamilyCount: 5,
+        ),
+        strategy: StrategyType.swing,
+      );
+
+      expect(recommendation.type, RecommendationType.wait);
+    });
+
+    test('Investor recommendation decision remains unavailable', () {
+      expect(
+        () => createRecommendation(
+          scoringResult: const ScoringResult(
+            score: 90,
+            coverage: 1,
+            bullishWeight: 1,
+            bearishWeight: 0,
+            neutralWeight: 0,
+            warnings: [],
+            directionScore: 90,
+            independentFamilyCount: 5,
+          ),
+          strategy: StrategyType.investor,
+        ),
+        throwsStateError,
+      );
     });
   });
 }

@@ -33,7 +33,7 @@ class StrategyAnalysisPolicyCatalog {
 
   static final StrategyAnalysisPolicy swing = StrategyAnalysisPolicy(
     strategy: StrategyType.swing,
-    status: StrategyAnalysisPolicyStatus.scopeApproved,
+    status: StrategyAnalysisPolicyStatus.active,
     evidencePolicies: Map.unmodifiable({
       EvidenceKind.candleTrend: _entry(
         strategy: StrategyType.swing,
