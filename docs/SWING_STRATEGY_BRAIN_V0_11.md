@@ -1,10 +1,10 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-6 complete
+Status: Implementation in progress — Batches 0-7 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
-Last implementation checkpoint: 2026-08-27
+Last implementation checkpoint: 2026-08-28
 
 ## 1. Purpose
 
@@ -1121,11 +1121,54 @@ Functional completion validation before this documentation checkpoint:
 ### Batch 7
 Swing recommendation orchestration and strategy policy.
 
-Implement:
-- Swing recommendation generation.
-- Recommendation thresholds.
-- BUY/SELL parity.
-- Conflict/Hold behavior.
+Status:
+
+**Completed and regression-validated on 2026-08-28.**
+
+Implemented:
+- `RecommendationEngine` now selects an explicit strategy-specific recommendation policy.
+- Trader retains its established recommendation thresholds.
+- Swing does not inherit Trader decision thresholds.
+- Swing recommendation backend is active.
+- Investor recommendation generation remains unavailable until v0.12.
+- Recommendation execution carries `StrategyType` through the controller and service layers.
+- Dashboard orchestration can calculate Trader and Swing independently.
+- Trader and Swing recommendation states are cached independently so running one strategy does not overwrite the other.
+- Swing orchestration uses its selected strategy timeframe plan.
+- Default Swing orchestration uses 1D primary -> 1W confirmation -> 1M regime.
+- Alternate Swing orchestration uses 4H primary -> 1D confirmation -> 1W regime.
+- Historical Setup Validation receives the same active strategy used by recommendation generation.
+
+Deterministic v0.11 Swing decision policy:
+- Minimum provider coverage: 65%.
+- BUY / SELL direction threshold: ±35.
+- Strong BUY / SELL direction threshold: ±70.
+- HOLD neutral band: ±25.
+- Minimum actionable confidence: 60.
+- Strong-action confidence: 80.
+- Minimum independent evidence families for action: 3.
+- Material conflict threshold: 55%; material conflict resolves to HOLD.
+- BUY and SELL use symmetric absolute thresholds.
+
+These thresholds are deterministic v0.11 policy assumptions and are not presented as historically optimized trading parameters.
+
+Invariant boundary:
+- Trader recommendation thresholds remain regression-protected.
+- Swing cannot silently fall back to Trader thresholds.
+- BUY and SELL decision treatment remains symmetric.
+- Material cross-family conflict cannot produce an actionable Swing recommendation.
+- Limited independent-family breadth cannot produce an actionable Swing recommendation.
+- Investor remains deferred and cannot run through the Swing/Trader recommendation path.
+- Trader and Swing recommendation states remain independently retrievable after both are analyzed.
+- Switching Swing between 1D and 4H recalculates the correct strategy context and historical outcome horizon.
+- Backend activation does not yet activate the visible Swing UI.
+- Strategy Summary continues to show Swing as Coming Soon until attribution/explainability and UI acceptance work are complete.
+
+Functional completion validation before this documentation checkpoint:
+- Flutter analyzer: clean.
+- Dashboard subsystem suite: 5 passing tests.
+- Recommendation subsystem suite: 428 passing tests.
+- Full automated suite: 501 passing tests.
 
 ### Batch 8
 Attribution and explainability.

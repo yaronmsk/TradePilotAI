@@ -3,7 +3,7 @@
 **Document ID:** TP-012
 **Version:** 2.0
 **Status:** Active
-**Last Updated:** 2026-08-27
+**Last Updated:** 2026-08-28
 **Primary Branch:** `develop`
 
 ---
@@ -26,7 +26,7 @@ Current active development release:
 
 Status:
 
-**Production implementation active — Batches 1-5 completed and validated.**
+**Production implementation active — Batches 1-7 completed and validated.**
 
 Detailed v0.11.0 evidence, capability and acceptance contract:
 
@@ -558,7 +558,7 @@ v0.10.1 was validated on 2026-08-23 with:
 * Same-time-of-day historical RVOL requires real matching intraday sessions and remains deferred.
 * Stock DNA does not yet use sector/peer percentiles.
 * True session VWAP remains deferred until authoritative session-aware intraday data is available.
-* Swing recommendation brain is not implemented.
+* Swing recommendation backend is implemented; attribution/explainability and visible UI activation remain in progress.
 * Investor fundamental brain is not implemented.
 * AI Analyst/Mentor is not connected.
 * Synthetic historical outcomes cannot be interpreted as real strategy performance.
@@ -608,7 +608,7 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-6 implemented and regression-validated.**
+**Batches 1-7 implemented and regression-validated.**
 
 Completed production foundations:
 
@@ -618,63 +618,57 @@ Completed production foundations:
 4. Participation, Price Structure and Volatility Swing calibration.
 5. Market Context, Sentiment, Stock DNA and Event Risk Swing calibration.
 6. Swing Historical Setup Validation calibration and dataset/horizon integrity.
+7. Swing recommendation decision policy and multi-strategy backend orchestration.
 
-Current implementation-ready Swing evidence families:
+Batch 7 recommendation policy:
+* Trader retains its established recommendation thresholds.
+* Swing uses its own deterministic decision thresholds.
+* Minimum Swing provider coverage: 65%.
+* Swing BUY / SELL threshold: ±35 direction with at least 60 confidence.
+* Swing Strong BUY / SELL threshold: ±70 direction with at least 80 confidence.
+* Swing HOLD neutral band: ±25.
+* Swing requires at least 3 independent evidence families for action.
+* Material conflict of 55% or more resolves Swing to HOLD.
+* BUY/SELL thresholds remain symmetric.
+* Investor recommendation policy remains deferred to v0.12.
 
-* Trend:
-  * Candle Trend.
-  * EMA Structure.
-  * Multi-Timeframe Trend.
-* Momentum:
-  * RSI.
-  * MACD Momentum.
-* Participation:
-  * Relative Volume.
-  * Volume Confirmation.
-* Price Structure:
-  * Support & Resistance.
-* Volatility / Entry Quality:
-  * Price Extension — confidence/risk/entry-quality only for Swing; zero directional influence.
-* Market Context:
-  * Market & Sector Context / Relative Strength.
-  * Market Breadth — shares the same capped family; no second independent market vote.
-* Sentiment:
-  * News Sentiment — freshness/materiality/de-duplication gated.
+Batch 7 orchestration:
+* RecommendationController carries StrategyType through recommendation creation and Historical Setup Validation.
+* DashboardController can run Trader and Swing independently.
+* Trader and Swing RecommendationState values are retained separately.
+* Running Swing does not overwrite the cached Trader recommendation.
+* Swing 1D uses 1D -> 1W -> 1M context.
+* Swing 4H uses 4H -> 1D -> 1W context.
+* Historical validation follows the active strategy/timeframe horizon.
+* Investor cannot run through active recommendation orchestration.
 
-Current contextual/confidence-only capabilities:
-
-* Stock DNA:
-  * Requires valid daily historical baseline for Swing.
-  * Adjusts existing evidence weight only.
-  * Cannot create or flip direction.
+Existing confidence-only boundaries remain unchanged:
 * Event Risk:
-  * Earnings relevance up to 14 days.
-  * High-impact macro relevance up to 7 days.
-  * Confidence-only, no positive bonus, hard maximum -12 points.
+  * confidence/risk-only;
+  * no positive bonus;
+  * maximum -12 confidence points.
 * Historical Setup Validation:
-  * Strategy and primary timeframe are hard matching gates.
-  * 4H and 1D Swing use separate outcome/scoring calibration.
-  * 4H forward horizon: 15 x 4H bars.
-  * 1D forward horizon: 10 trading days.
-  * Minimum 10 matched cases for Swing.
-  * Confidence-only, hard maximum ±8 final-confidence points.
-  * Cannot change direction or evidence-derived confidence.
+  * confidence-only;
+  * maximum ±8 final-confidence points;
+  * cannot change direction or evidence-derived confidence.
 
 Current analysis-window VWAP remains excluded from Swing.
 
-Batch 6 functional validation baseline:
+Batch 7 functional validation baseline:
 
 * Flutter analyzer: clean.
-* Historical subsystem suite: 44 passing tests.
-* Full automated suite: 486 passing tests.
+* Dashboard subsystem suite: 5 passing tests.
+* Recommendation subsystem suite: 428 passing tests.
+* Full automated suite: 501 passing tests.
 
-Swing recommendation generation remains intentionally inactive until
-recommendation orchestration, attribution, UI activation and
-release-validation work are complete.
+The Swing recommendation backend is active, but visible Swing UI activation
+remains intentionally blocked. Strategy Summary should continue to display
+Swing as Coming Soon until attribution/explainability and UI acceptance work
+are completed.
 
 Current next implementation batch:
 
-**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
+**Batch 8 — Swing Attribution & Explainability.**
 
 Permanent Swing acceptance constraints:
 

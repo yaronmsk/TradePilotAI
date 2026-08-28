@@ -116,7 +116,7 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-6 implemented and validated.**
+**Active development / Batches 1-7 implemented and validated.**
 
 Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
 
@@ -198,55 +198,53 @@ Every existing evidence provider and capability requires an explicit decision co
 
 ### Current v0.11 implementation checkpoint
 
-Completed through Batch 6:
+Completed through Batch 7:
 - Strategy-aware evidence policy and execution gates.
 - Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
-- Trend family:
-  - Candle Trend.
-  - EMA Structure.
-  - Multi-Timeframe Trend.
-- Momentum family:
-  - RSI.
-  - MACD Momentum.
-- Participation family:
-  - Relative Volume.
-  - Volume Confirmation.
-- Price Structure family:
-  - Support & Resistance.
-- Volatility / Entry Quality:
-  - Price Extension — zero Swing directional influence.
-- Market Context family:
-  - Market & Sector Context / Relative Strength.
-  - Market Breadth — de-duplicated with Market Context.
-- Sentiment family:
-  - News Sentiment — Swing freshness/materiality/de-duplication gates.
-- Stock DNA:
-  - strategy-aware daily-history contextual adjustment;
-  - weight-only, no standalone direction.
-- Event Risk:
-  - strategy-specific 14-day earnings / 7-day macro relevance;
-  - confidence-only, no bonus and maximum -12 points.
-- Historical Setup Validation:
-  - strategy/timeframe-isolated matching and same-stock baseline;
-  - 15 x 4H-bar or 10-trading-day Swing outcome horizons;
-  - strategy/timeframe-aware expected-movement scaling;
-  - stricter Swing sample and match-quality reliability gates;
-  - confidence-only and bounded to ±8 points.
-- Synthetic historical outcomes respect the requested Swing forward horizon.
+- Strategy-calibrated Trend, Momentum, Participation, Price Structure, Volatility/Entry Quality, Market Context and Sentiment evidence.
+- Stock DNA contextual adjustment.
+- Event Risk confidence-only adjustment.
+- Historical Setup Validation strategy/timeframe calibration.
+- Swing-specific recommendation decision policy.
+- Swing recommendation backend activation.
+- Strategy-aware recommendation-controller execution.
+- Independent Trader and Swing dashboard recommendation-state orchestration.
+- Investor recommendation generation remains deferred.
 - Current analysis-window VWAP remains excluded from Swing.
 - Family de-duplication boundaries remain intact.
 - Trader regression behavior remains protected.
-- Swing recommendation activation remains intentionally blocked.
 
-Batch 6 functional validation baseline:
+Batch 7 Swing recommendation policy:
+- minimum provider coverage: 65%;
+- BUY / SELL direction threshold: ±35;
+- Strong BUY / SELL threshold: ±70;
+- HOLD neutral band: ±25;
+- minimum actionable confidence: 60;
+- strong-action confidence: 80;
+- minimum independent families for action: 3;
+- material conflict threshold: 55%, resolving to HOLD.
+- BUY/SELL thresholds are symmetric.
+- These values are deterministic v0.11 policy assumptions, not historically optimized claims.
 
+Batch 7 orchestration:
+- Trader and Swing can be analyzed independently.
+- Trader and Swing RecommendationState values coexist without overwriting each other.
+- Swing selected timeframe controls its complete strategy context.
+- Historical validation receives the active strategy and therefore the correct Swing outcome horizon.
+- Investor cannot run through recommendation orchestration.
+
+Batch 7 functional validation baseline:
 - Flutter analyzer clean.
-- 44 historical subsystem tests passing.
-- 486 total automated tests passing.
+- 5 dashboard subsystem tests passing.
+- 428 recommendation subsystem tests passing.
+- 501 total automated tests passing.
+
+The Swing backend is active, but Strategy Summary remains visually blocked
+until attribution/explainability and UI activation work are validated.
 
 Next implementation batch:
 
-**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
+**Batch 8 — Swing Attribution & Explainability.**
 
 ### Swing UI / explainability rules
 

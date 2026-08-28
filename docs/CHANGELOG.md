@@ -13,7 +13,7 @@ Status:
 Approved
 
 Last Updated:
-2026-08-27
+2026-08-28
 
 Owner:
 TradePilot AI
@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-6 Complete
+Development — Batches 1-7 Complete
 
 Date
 
@@ -42,9 +42,9 @@ This checkpoint defines architecture, evidence applicability, explainability, at
 
 No production recommendation behavior has changed in this checkpoint.
 
-### Implementation Progress — 2026-08-27
+### Implementation Progress — 2026-08-28
 
-Batches 1-6 are implemented and regression-validated.
+Batches 1-7 are implemented and regression-validated.
 
 Completed:
 - Strategy-aware evidence policy and collection gates.
@@ -53,41 +53,48 @@ Completed:
 - Participation, Price Structure and Volatility/Entry Quality calibration.
 - Market & Sector Context / Relative Strength calibration.
 - Market Breadth calibration inside the shared Market Context family.
-- News Sentiment freshness/materiality/source-diversity/de-duplication calibration.
+- News Sentiment Swing calibration.
 - Stock DNA strategy-aware contextual adjustment.
-- Swing Event Risk horizon and confidence-only enforcement.
-- Swing Historical Setup Validation scoring calibration.
-- Historical dataset/horizon integrity enforcement.
+- Swing Event Risk confidence-only enforcement.
+- Swing Historical Setup Validation calibration and horizon integrity.
+- Swing-specific recommendation decision policy.
+- Swing recommendation backend activation.
+- Strategy-aware controller/service recommendation execution.
+- Independent Trader and Swing dashboard recommendation-state orchestration.
 - Current analysis-window VWAP remains excluded from Swing.
 - Trader regression protection and strategy-readiness invariants.
 
-Batch 6 Historical Validation boundaries:
-- Historical fingerprints and matches remain strategy- and primary-timeframe-specific.
-- Trader and Swing historical observations cannot pool as equivalent matches.
-- Swing 4H and Swing 1D observations cannot pool as equivalent matches.
-- The same-stock comparison baseline preserves the same strategy/timeframe separation.
-- Swing 4H uses a 15 x 4H-bar forward outcome window.
-- Swing 1D uses a 10-trading-day forward outcome window.
-- Swing uses separate 4H and 1D expected-movement scales.
-- Swing requires at least 10 matched cases.
-- Swing effective-sample reliability uses 10 as its floor and 32 as its full-reliability reference.
-- Swing match-quality reliability uses 0.60 as its floor and 0.84 as its full-reliability reference.
-- Synthetic development outcomes now respect requested Swing `forwardBars`.
-- Historical Setup Validation remains outside directional evidence.
-- Historical Setup Validation changes final confidence only and remains hard-capped at ±8 points.
-- Historical Setup Validation cannot change direction or evidence-derived confidence.
-- Synthetic historical results remain development data, not real-world performance evidence.
+Batch 7 recommendation boundaries:
+- Trader retains its established recommendation policy.
+- Swing uses independent deterministic recommendation thresholds rather than Trader thresholds.
+- Swing requires 65% provider coverage.
+- Swing BUY / SELL requires ±35 direction and at least 60 confidence.
+- Swing Strong BUY / SELL requires ±70 direction and at least 80 confidence.
+- Swing neutral/HOLD band is ±25.
+- At least 3 independent families are required for actionable Swing direction.
+- Material conflict at 55% or above resolves to HOLD.
+- BUY and SELL use symmetric absolute thresholds.
+- Investor recommendation policy remains unavailable.
 
-Functional validation at Batch 6 implementation completion:
+Batch 7 orchestration boundaries:
+- StrategyType is preserved through recommendation generation and historical validation.
+- Trader and Swing analyses are retained independently.
+- Running Swing cannot overwrite the cached Trader recommendation state.
+- Swing 1D uses 1D -> 1W -> 1M context.
+- Swing 4H uses 4H -> 1D -> 1W context.
+- Historical validation follows the selected strategy/timeframe horizon.
+- Investor cannot execute through the active recommendation pipeline.
+- Backend activation does not yet activate Swing in the visible Strategy Summary.
+
+Functional validation at Batch 7 implementation completion:
 - Flutter analyzer: clean.
-- Historical subsystem suite: 44 passing tests.
-- Full automated suite: 486 passing tests.
-
-Swing recommendation generation remains intentionally inactive.
+- Dashboard subsystem suite: 5 passing tests.
+- Recommendation subsystem suite: 428 passing tests.
+- Full automated suite: 501 passing tests.
 
 Next planned implementation work:
 
-**Batch 7 — Swing Recommendation Orchestration & Strategy Policy.**
+**Batch 8 — Swing Attribution & Explainability.**
 
 ### Release Boundary
 

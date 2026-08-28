@@ -13,6 +13,7 @@ import 'package:mobile/features/recommendation/models/evidence_explainability_ca
 import 'package:mobile/features/recommendation/models/evidence_family.dart';
 import 'package:mobile/features/recommendation/models/evidence_kind.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_analysis_policy_catalog.dart';
+import 'package:mobile/features/recommendation/strategy/recommendation_strategy_policy.dart';
 import 'package:mobile/features/recommendation/strategy/strategy_evidence_policy.dart';
 
 void main() {
@@ -435,6 +436,55 @@ void main() {
         );
       },
     );
+
+    test('Batch 7 keeps Swing recommendation policy strategy-specific', () {
+      const trader = RecommendationStrategyPolicy.trader;
+      const swing = RecommendationStrategyPolicy.swing;
+
+      expect(
+        StrategyAnalysisPolicyCatalog.swing.isRecommendationActive,
+        isTrue,
+      );
+
+      expect(
+        swing.minimumProviderCoverage,
+        greaterThan(trader.minimumProviderCoverage),
+      );
+
+      expect(
+        swing.actionDirectionThreshold,
+        greaterThan(trader.actionDirectionThreshold),
+      );
+
+      expect(
+        swing.strongDirectionThreshold,
+        greaterThan(trader.strongDirectionThreshold),
+      );
+
+      expect(
+        swing.minimumActionConfidence,
+        greaterThan(trader.minimumActionConfidence),
+      );
+
+      expect(swing.minimumIndependentFamiliesForAction, 3);
+      expect(swing.holdOnMaterialConflict, isTrue);
+      expect(swing.materialConflictThreshold, 0.55);
+
+      // One absolute directional threshold is intentionally shared by
+      // bullish and bearish decisions, preserving BUY/SELL parity.
+      expect(swing.actionDirectionThreshold, 35);
+      expect(swing.strongDirectionThreshold, 70);
+
+      expect(
+        RecommendationStrategyPolicy.forStrategy(StrategyType.investor),
+        isNull,
+      );
+
+      expect(
+        StrategyAnalysisPolicyCatalog.investor.isRecommendationActive,
+        isFalse,
+      );
+    });
 
     test('current analysis-window VWAP stays excluded from Swing', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(
