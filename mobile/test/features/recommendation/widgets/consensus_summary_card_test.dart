@@ -83,6 +83,20 @@ void main() {
           before: 83.6,
           after: 82,
         ),
+        ConfidenceModifierImpact(
+          label: 'Upcoming earnings',
+          factor: 76 / 82,
+          before: 82,
+          after: 76,
+          source: ConfidenceModifierSource.eventRisk,
+        ),
+        ConfidenceModifierImpact(
+          label: 'Context-matched history',
+          factor: 82 / 76,
+          before: 76,
+          after: 82,
+          source: ConfidenceModifierSource.historicalValidation,
+        ),
       ],
       providerContributions: const [
         trendProvider,
@@ -217,11 +231,15 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Candle Trend'), findsOneWidget);
-    expect(find.textContaining('Direction: +38.0 pts'), findsOneWidget);
+    expect(find.textContaining('Direction impact: +38.0 pts'), findsOneWidget);
     expect(
-      find.textContaining('41% of evidence-derived confidence'),
+      find.textContaining('Evidence confidence: 34.0 pts'),
       findsOneWidget,
     );
+
+    expect(find.textContaining('% of Trend calculation'), findsNothing);
+
+    expect(find.byTooltip('About Provider direction impact'), findsOneWidget);
   });
 
   testWidgets('explains confidence calculation and attribution semantics', (
@@ -259,8 +277,41 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Evidence-strength baseline'), findsOneWidget);
-    expect(find.text('Signal alignment'), findsOneWidget);
+    expect(find.text('Evidence-quality adjustments'), findsOneWidget);
+    expect(find.text('Evidence-derived confidence'), findsOneWidget);
+    expect(find.text('Event Risk adjustment'), findsOneWidget);
+    expect(find.text('Historical Validation adjustment'), findsOneWidget);
     expect(find.text('Final confidence'), findsOneWidget);
+
+    final eventRiskRow = find.widgetWithText(Row, 'Event Risk adjustment');
+
+    expect(eventRiskRow, findsOneWidget);
+
+    expect(
+      find.descendant(of: eventRiskRow, matching: find.text('-6.0 pts')),
+      findsOneWidget,
+    );
+    final historicalValidationRow = find.widgetWithText(
+      Row,
+      'Historical Validation adjustment',
+    );
+
+    expect(historicalValidationRow, findsOneWidget);
+
+    expect(
+      find.descendant(
+        of: historicalValidationRow,
+        matching: find.text('+6.0 pts'),
+      ),
+      findsOneWidget,
+    );
+
+    expect(find.byTooltip('About Event Risk adjustment'), findsOneWidget);
+
+    expect(
+      find.byTooltip('About Historical Validation adjustment'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('keeps technical metrics behind explainability controls', (
@@ -302,4 +353,46 @@ void main() {
     expect(find.text('Internal agreement'), findsOneWidget);
     expect(find.text('Conflict level'), findsOneWidget);
   });
+
+  testWidgets(
+    'provides individual info paths for family direction and confidence attribution',
+    (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SingleChildScrollView(
+              child: ConsensusSummaryCard(
+                strategyRecommendation: buildRecommendation(),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byTooltip('About Direction influence'), findsNWidgets(3));
+
+      expect(
+        find.byTooltip('About Evidence confidence share'),
+        findsNWidgets(3),
+      );
+
+      final directionInfo = find.byTooltip('About Direction influence').first;
+
+      await tester.ensureVisible(directionInfo);
+      await tester.pumpAndSettle();
+
+      await tester.tap(directionInfo);
+      await tester.pumpAndSettle();
+
+      expect(find.text('About Direction influence'), findsOneWidget);
+
+      expect(
+        find.textContaining('post-cap directional evidence basis'),
+        findsOneWidget,
+      );
+
+      await tester.tap(find.text('Close'));
+      await tester.pumpAndSettle();
+    },
+  );
 }

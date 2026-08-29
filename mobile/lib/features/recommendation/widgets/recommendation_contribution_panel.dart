@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../models/evidence_contribution.dart';
 import '../models/evidence_family.dart';
+import '../models/metric_explainability.dart';
+import '../models/recommendation_attribution_explainability.dart';
 import '../models/scoring_result.dart';
+import 'metric_explainability_dialog.dart';
 
 class RecommendationContributionPanel extends StatelessWidget {
   const RecommendationContributionPanel({required this.consensus, super.key});
@@ -40,11 +43,11 @@ class RecommendationContributionPanel extends StatelessWidget {
           ],
         ),
         Text(
-          'Direction influence shows what share of the final directional '
-          'decision came from each independent evidence group. Confidence '
-          'share shows how much of the evidence-derived confidence came from '
-          'that group after coverage, alignment, and reliability adjustments. '
-          'Historical validation is reconciled separately.',
+          'Direction influence is calculated at the independent-family '
+          'level after correlated indicators are grouped and capped. Active '
+          'family direction shares account for 100% of the current directional '
+          'basis. Evidence confidence is separate, while Event Risk and '
+          'Historical Validation appear as bounded confidence-only adjustments.',
           style: Theme.of(context).textTheme.bodySmall,
         ),
         const SizedBox(height: 10),
@@ -70,17 +73,18 @@ class RecommendationContributionPanel extends StatelessWidget {
         title: const Text('Evidence Contribution'),
         content: const Text(
           'TradePilot first groups correlated indicators into independent '
-          'evidence groups. This prevents indicators such as Candle Trend, '
-          'EMA Structure, and Multi-Timeframe Trend from each receiving a '
-          'full independent vote.\n\n'
-          'Direction influence percentages are calculated after that '
-          'de-duplication step. Supporting and opposing groups together '
-          'account for 100% of the family-level directional influence.\n\n'
-          'Confidence share distributes evidence-derived confidence across the '
-          'evidence groups that built its evidence-strength base. Coverage, '
-          'alignment, and reliability adjustments are applied before that '
-          'attribution. Historical setup validation is shown separately so it '
-          'cannot be mistaken for another indicator vote. Confidence is not a '
+          'evidence families so related indicators do not each receive a full '
+          'independent vote. Family caps are applied before attribution.\n\n'
+          'Direction influence percentages are family-level percentages of '
+          'the current post-cap directional basis. Supporting and opposing '
+          'families together account for 100% when directional evidence '
+          'exists.\n\n'
+          'Provider details use signed direction points rather than provider '
+          'recommendation percentages, because providers inside one family '
+          'can oppose and partially cancel each other.\n\n'
+          'Evidence confidence is attributed separately from direction. Event '
+          'Risk and Historical Validation are shown as bounded point '
+          'adjustments and never become indicator votes. Confidence is not a '
           'guaranteed probability of profit.',
         ),
         actions: [
@@ -126,17 +130,26 @@ class _FamilyContributionTile extends StatelessWidget {
         ),
         subtitle: Padding(
           padding: const EdgeInsets.only(top: 4),
-          child: Wrap(
-            spacing: 12,
-            runSpacing: 4,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                '${_directionRelationship()} '
-                '${(contribution.directionShare * 100).toStringAsFixed(0)}%',
+              _AttributionMetricLine(
+                text:
+                    '${_directionRelationship()} '
+                    '${(contribution.directionShare * 100).toStringAsFixed(0)}%',
+                tooltip: 'About Direction influence',
+                title: 'Direction influence',
+                explainability:
+                    RecommendationAttributionExplainability.directionInfluence,
               ),
-              Text(
-                'Evidence confidence share '
-                '${(contribution.confidenceShare * 100).toStringAsFixed(0)}%',
+              _AttributionMetricLine(
+                text:
+                    'Evidence confidence share '
+                    '${(contribution.confidenceShare * 100).toStringAsFixed(0)}%',
+                tooltip: 'About Evidence confidence share',
+                title: 'Evidence confidence share',
+                explainability: RecommendationAttributionExplainability
+                    .evidenceConfidenceShare,
               ),
             ],
           ),
@@ -148,9 +161,17 @@ class _FamilyContributionTile extends StatelessWidget {
             child: Text(
               'Exact group impact: '
               '${_signed(contribution.directionImpactPoints)} direction pts · '
-              '${contribution.confidenceContributionPoints.toStringAsFixed(1)} evidence-confidence pts',
+              '${contribution.confidenceContributionPoints.toStringAsFixed(1)} '
+              'evidence-confidence pts',
               style: Theme.of(context).textTheme.bodySmall,
             ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Provider detail below uses signed points only. Provider-level '
+            'direction percentages are intentionally not shown because '
+            'correlated providers share this family cap.',
+            style: Theme.of(context).textTheme.bodySmall,
           ),
           const SizedBox(height: 8),
           ...providers.map(
@@ -208,18 +229,23 @@ class _ProviderContributionRow extends StatelessWidget {
             style: const TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
-          Text(
-            'Direction: ${_signed(provider.directionImpactPoints)} pts · '
-            '${(provider.directionShareWithinFamily * 100).toStringAsFixed(0)}% '
-            'of ${_familyLabel(provider.family)} calculation',
-            style: Theme.of(context).textTheme.bodySmall,
+          _AttributionMetricLine(
+            text:
+                'Direction impact: '
+                '${_signed(provider.directionImpactPoints)} pts',
+            tooltip: 'About Provider direction impact',
+            title: 'Provider direction impact',
+            explainability:
+                RecommendationAttributionExplainability.providerDirectionImpact,
           ),
-          const SizedBox(height: 2),
-          Text(
-            'Evidence confidence: '
-            '${provider.confidenceContributionPoints.toStringAsFixed(1)} pts · '
-            '${(provider.confidenceShare * 100).toStringAsFixed(0)}% of evidence-derived confidence',
-            style: Theme.of(context).textTheme.bodySmall,
+          _AttributionMetricLine(
+            text:
+                'Evidence confidence: '
+                '${provider.confidenceContributionPoints.toStringAsFixed(1)} pts',
+            tooltip: 'About Provider confidence contribution',
+            title: 'Provider confidence contribution',
+            explainability: RecommendationAttributionExplainability
+                .providerConfidenceContribution,
           ),
         ],
       ),
@@ -232,6 +258,46 @@ class _ProviderContributionRow extends StatelessWidget {
   }
 }
 
+class _AttributionMetricLine extends StatelessWidget {
+  const _AttributionMetricLine({
+    required this.text,
+    required this.tooltip,
+    required this.title,
+    required this.explainability,
+  });
+
+  final String text;
+  final String tooltip;
+  final String title;
+  final MetricExplainability explainability;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(
+          child: Text(text, style: Theme.of(context).textTheme.bodySmall),
+        ),
+        IconButton(
+          tooltip: tooltip,
+          visualDensity: VisualDensity.compact,
+          padding: EdgeInsets.zero,
+          constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+          icon: const Icon(Icons.info_outline, size: 17),
+          onPressed: () {
+            MetricExplainabilityDialog.show(
+              context,
+              title: title,
+              explainability: explainability,
+            );
+          },
+        ),
+      ],
+    );
+  }
+}
+
 class _ConfidenceCalculation extends StatelessWidget {
   const _ConfidenceCalculation({required this.consensus});
 
@@ -239,49 +305,74 @@ class _ConfidenceCalculation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final evidenceModifiers = consensus.confidenceModifiers
-        .where((modifier) => modifier.label != 'Historical setup validation')
-        .toList(growable: false);
-    final externalModifiers = consensus.confidenceModifiers
-        .where((modifier) => modifier.label == 'Historical setup validation')
-        .toList(growable: false);
+    final hasEventRisk = consensus.confidenceModifiers.any(
+      (modifier) => modifier.source == ConfidenceModifierSource.eventRisk,
+    );
+
+    final hasHistoricalValidation = consensus.confidenceModifiers.any(
+      (modifier) =>
+          modifier.source == ConfidenceModifierSource.historicalValidation,
+    );
 
     return ExpansionTile(
       tilePadding: EdgeInsets.zero,
       childrenPadding: const EdgeInsets.only(bottom: 8),
       title: const Text('Confidence calculation'),
       subtitle: const Text(
-        'See how evidence strength becomes evidence confidence, then how external validation adjusts the final score.',
+        'Evidence confidence is shown separately from Event Risk and '
+        'Historical Validation so confidence-only adjustments cannot be '
+        'mistaken for directional evidence.',
       ),
       children: [
         _CalculationRow(
           label: 'Evidence-strength baseline',
           value: '${consensus.baseEvidenceStrength.toStringAsFixed(1)}%',
+          infoTitle: 'Evidence-strength baseline',
+          explainability:
+              RecommendationAttributionExplainability.evidenceStrengthBaseline,
         ),
-        ...evidenceModifiers.map(
-          (modifier) => _CalculationRow(
-            label: modifier.label,
-            value: '${_signedImpact(modifier.impactPoints)} pts',
-          ),
+        _CalculationRow(
+          label: 'Evidence-quality adjustments',
+          value:
+              '${_signedImpact(consensus.evidenceQualityAdjustmentPoints)} pts',
+          infoTitle: 'Evidence-quality adjustments',
+          explainability:
+              RecommendationAttributionExplainability.evidenceQualityAdjustment,
         ),
-        if (externalModifiers.isNotEmpty) ...[
+        _CalculationRow(
+          label: 'Evidence-derived confidence',
+          value: '${consensus.evidenceConfidence.toStringAsFixed(1)}%',
+          infoTitle: 'Evidence-derived confidence',
+          explainability:
+              RecommendationAttributionExplainability.evidenceDerivedConfidence,
+        ),
+        if (hasEventRisk) ...[
           const Divider(),
           _CalculationRow(
-            label: 'Evidence-derived confidence',
-            value: '${consensus.evidenceConfidence.toStringAsFixed(1)}%',
-          ),
-          ...externalModifiers.map(
-            (modifier) => _CalculationRow(
-              label: modifier.label,
-              value: '${_signedImpact(modifier.impactPoints)} pts',
-            ),
+            label: 'Event Risk adjustment',
+            value: '${_signedImpact(consensus.eventRiskAdjustmentPoints)} pts',
+            infoTitle: 'Event Risk adjustment',
+            explainability:
+                RecommendationAttributionExplainability.eventRiskAdjustment,
           ),
         ],
+        if (hasHistoricalValidation)
+          _CalculationRow(
+            label: 'Historical Validation adjustment',
+            value:
+                '${_signedImpact(consensus.historicalValidationAdjustmentPoints)} pts',
+            infoTitle: 'Historical Validation adjustment',
+            explainability: RecommendationAttributionExplainability
+                .historicalValidationAdjustment,
+          ),
         const Divider(),
         _CalculationRow(
           label: 'Final confidence',
           value: '${consensus.confidence.toStringAsFixed(1)}%',
           emphasize: true,
+          infoTitle: 'Final confidence',
+          explainability:
+              RecommendationAttributionExplainability.finalConfidence,
         ),
       ],
     );
@@ -298,11 +389,15 @@ class _CalculationRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.emphasize = false,
+    this.infoTitle,
+    this.explainability,
   });
 
   final String label;
   final String value;
   final bool emphasize;
+  final String? infoTitle;
+  final MetricExplainability? explainability;
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +414,23 @@ class _CalculationRow extends StatelessWidget {
           Expanded(child: Text(label, style: style)),
           const SizedBox(width: 12),
           Text(value, style: style),
+          if (explainability != null && infoTitle != null) ...[
+            const SizedBox(width: 4),
+            IconButton(
+              tooltip: 'About $infoTitle',
+              visualDensity: VisualDensity.compact,
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(minWidth: 28, minHeight: 28),
+              icon: const Icon(Icons.info_outline, size: 17),
+              onPressed: () {
+                MetricExplainabilityDialog.show(
+                  context,
+                  title: infoTitle!,
+                  explainability: explainability!,
+                );
+              },
+            ),
+          ],
         ],
       ),
     );
