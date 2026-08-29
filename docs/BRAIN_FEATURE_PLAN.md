@@ -116,9 +116,9 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-7 implemented and validated.**
+**Active development / Batches 1-8 implemented and validated.**
 
-Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation has been implemented and validated.
+Swing remains Coming Soon in the UI until the validated backend recommendation and attribution contract are integrated into the visible Strategy Summary in Batch 9.
 
 Detailed evidence, capability and acceptance contract:
 
@@ -198,7 +198,7 @@ Every existing evidence provider and capability requires an explicit decision co
 
 ### Current v0.11 implementation checkpoint
 
-Completed through Batch 7:
+Completed through Batch 8:
 - Strategy-aware evidence policy and execution gates.
 - Swing 1D -> 1W -> 1M and 4H -> 1D -> 1W timeframe orchestration.
 - Strategy-calibrated Trend, Momentum, Participation, Price Structure, Volatility/Entry Quality, Market Context and Sentiment evidence.
@@ -209,42 +209,42 @@ Completed through Batch 7:
 - Swing recommendation backend activation.
 - Strategy-aware recommendation-controller execution.
 - Independent Trader and Swing dashboard recommendation-state orchestration.
+- Family-level post-cap direction attribution.
+- Provider-to-family signed direction reconciliation.
+- Separate evidence-confidence attribution.
+- Explicit semantic confidence-modifier sources.
+- Separate Event Risk and Historical Validation confidence-only point adjustments.
+- User-facing attribution MetricExplainability catalog.
+- Individual info paths for family direction, family confidence, provider direction, provider confidence and confidence-calculation components.
+- Provider recommendation percentages intentionally suppressed where mathematically misleading.
 - Investor recommendation generation remains deferred.
 - Current analysis-window VWAP remains excluded from Swing.
 - Family de-duplication boundaries remain intact.
 - Trader regression behavior remains protected.
 
-Batch 7 Swing recommendation policy:
-- minimum provider coverage: 65%;
-- BUY / SELL direction threshold: ±35;
-- Strong BUY / SELL threshold: ±70;
-- HOLD neutral band: ±25;
-- minimum actionable confidence: 60;
-- strong-action confidence: 80;
-- minimum independent families for action: 3;
-- material conflict threshold: 55%, resolving to HOLD.
-- BUY/SELL thresholds are symmetric.
-- These values are deterministic v0.11 policy assumptions, not historically optimized claims.
+Batch 8 attribution invariants:
+- active family direction shares reconcile to 100%;
+- family attribution uses actual effective post-cap current-case contribution;
+- provider signed impacts reconcile to the capped family result;
+- configured/raw provider weights are not presented as recommendation attribution;
+- provider internal absolute shares are not presented as recommendation percentages;
+- evidence confidence remains separate from direction;
+- Event Risk remains zero-direction and maximum -12 confidence points;
+- Historical Validation remains zero-direction and maximum ±8 confidence points;
+- final confidence reconciles from evidence-derived confidence plus bounded external adjustments;
+- every displayed attribution value has an individual info path.
 
-Batch 7 orchestration:
-- Trader and Swing can be analyzed independently.
-- Trader and Swing RecommendationState values coexist without overwriting each other.
-- Swing selected timeframe controls its complete strategy context.
-- Historical validation receives the active strategy and therefore the correct Swing outcome horizon.
-- Investor cannot run through recommendation orchestration.
-
-Batch 7 functional validation baseline:
+Batch 8 functional validation baseline:
 - Flutter analyzer clean.
-- 5 dashboard subsystem tests passing.
-- 428 recommendation subsystem tests passing.
-- 501 total automated tests passing.
+- 439 recommendation subsystem tests passing.
+- 512 total automated tests passing.
 
-The Swing backend is active, but Strategy Summary remains visually blocked
-until attribution/explainability and UI activation work are validated.
+The Swing backend and attribution contract are ready for presentation-layer
+integration, but Strategy Summary remains visually blocked until Batch 9.
 
 Next implementation batch:
 
-**Batch 8 — Swing Attribution & Explainability.**
+**Batch 9 — Swing UI Activation & Decision Helpers.**
 
 ### Swing UI / explainability rules
 

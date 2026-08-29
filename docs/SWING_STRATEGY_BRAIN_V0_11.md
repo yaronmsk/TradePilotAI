@@ -1,10 +1,10 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-7 complete
+Status: Implementation in progress — Batches 0-8 complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
-Last implementation checkpoint: 2026-08-28
+Last implementation checkpoint: 2026-08-29
 
 ## 1. Purpose
 
@@ -1171,13 +1171,53 @@ Functional completion validation before this documentation checkpoint:
 - Full automated suite: 501 passing tests.
 
 ### Batch 8
-Attribution and explainability.
+Swing attribution and explainability.
 
-Implement:
-- Direction basis reconciles to 100%.
-- Provider-to-family reconciliation.
-- Separate confidence attribution.
-- Individual info paths.
+Status:
+
+**Completed and regression-validated on 2026-08-29.**
+
+Implemented:
+- Existing Consensus Engine attribution remains the mathematical source of truth.
+- Family-level directional attribution uses actual post-family-cap effective contribution.
+- Active family direction shares reconcile to 100% of the current directional basis when directional evidence exists.
+- Signed provider direction impacts reconcile back to their capped family contribution.
+- Provider-level absolute family shares are explicitly treated as diagnostic internal values rather than percentages of the recommendation.
+- User-facing provider detail therefore shows signed direction points instead of misleading recommendation percentages.
+- Direction and confidence attribution remain separate.
+- Evidence-derived confidence remains distinct from external confidence-only modifiers.
+- Confidence modifiers now carry explicit semantic source classification:
+  - evidence quality;
+  - Event Risk;
+  - Historical Validation.
+- Event Risk is presented separately as a bounded confidence-only point adjustment.
+- Historical Setup Validation is presented separately as a bounded confidence-only point adjustment.
+- Final confidence can be reconciled from evidence-derived confidence plus the allowed external point adjustments.
+- Recommendation attribution has reusable MetricExplainability definitions.
+- Family direction influence, family confidence share, provider direction impact, provider confidence contribution, evidence-strength baseline, evidence-quality adjustment, evidence-derived confidence, Event Risk, Historical Validation and final confidence each have an individual info path.
+- Attribution presentation uses human-readable supportive/opposing semantics.
+- No Batch 8 change alters evidence direction, family caps, recommendation thresholds or scoring weights.
+
+Permanent attribution boundaries:
+- Configured/raw weights are not displayed as current recommendation attribution.
+- Family-level direction percentages use actual effective current-case post-cap influence.
+- Correlated providers cannot bypass family aggregation or family caps.
+- Provider signed direction points reconcile to family signed direction points.
+- Provider internal absolute shares must not be described as percentages of the recommendation.
+- Evidence confidence does not become direction attribution.
+- Event Risk has exactly zero directional influence and remains limited to a maximum 12-point penalty.
+- Historical Setup Validation has exactly zero directional influence and remains limited to ±8 final-confidence points.
+- Confidence values are not probabilities of profit.
+- BUY/SELL attribution remains direction-neutral and symmetric.
+- Synthetic historical validation must not be described as real performance evidence.
+
+Functional completion validation before this documentation checkpoint:
+- Flutter analyzer: clean.
+- Recommendation subsystem suite: 439 passing tests.
+- Full automated suite: 512 passing tests.
+
+The Swing backend and attribution contract are now ready for UI integration.
+Visible Swing activation remains intentionally deferred to Batch 9.
 
 ### Batch 9
 Swing UI activation and decision helpers.

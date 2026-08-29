@@ -558,7 +558,7 @@ v0.10.1 was validated on 2026-08-23 with:
 * Same-time-of-day historical RVOL requires real matching intraday sessions and remains deferred.
 * Stock DNA does not yet use sector/peer percentiles.
 * True session VWAP remains deferred until authoritative session-aware intraday data is available.
-* Swing recommendation backend is implemented; attribution/explainability and visible UI activation remain in progress.
+* Swing recommendation backend and attribution/explainability contract are implemented; visible UI activation remains in progress.
 * Investor fundamental brain is not implemented.
 * AI Analyst/Mentor is not connected.
 * Synthetic historical outcomes cannot be interpreted as real strategy performance.
@@ -608,7 +608,7 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-7 implemented and regression-validated.**
+**Batches 1-8 implemented and regression-validated.**
 
 Completed production foundations:
 
@@ -619,56 +619,41 @@ Completed production foundations:
 5. Market Context, Sentiment, Stock DNA and Event Risk Swing calibration.
 6. Swing Historical Setup Validation calibration and dataset/horizon integrity.
 7. Swing recommendation decision policy and multi-strategy backend orchestration.
+8. Recommendation attribution integrity, reconciliation and user-facing explainability.
 
-Batch 7 recommendation policy:
-* Trader retains its established recommendation thresholds.
-* Swing uses its own deterministic decision thresholds.
-* Minimum Swing provider coverage: 65%.
-* Swing BUY / SELL threshold: ±35 direction with at least 60 confidence.
-* Swing Strong BUY / SELL threshold: ±70 direction with at least 80 confidence.
-* Swing HOLD neutral band: ±25.
-* Swing requires at least 3 independent evidence families for action.
-* Material conflict of 55% or more resolves Swing to HOLD.
-* BUY/SELL thresholds remain symmetric.
-* Investor recommendation policy remains deferred to v0.12.
+Batch 8 attribution contract:
+* Family direction attribution is calculated after evidence-family aggregation and caps.
+* Active family direction shares reconcile to 100% of the current directional basis.
+* Provider signed direction impacts reconcile to capped family contribution.
+* Provider internal shares are not presented as percentages of the recommendation.
+* Family-level percentages are the primary user-facing direction attribution.
+* Provider detail uses signed direction points.
+* Direction attribution and confidence attribution remain separate.
+* Confidence-modifier sources are explicitly classified as evidence quality, Event Risk or Historical Validation.
+* Evidence-derived confidence remains separate from Event Risk and Historical Validation.
+* Final confidence reconciles from evidence-derived confidence plus allowed bounded external point adjustments.
+* Event Risk remains confidence-only with zero direction and maximum -12 points.
+* Historical Setup Validation remains confidence-only with zero direction and maximum ±8 points.
+* Every displayed attribution metric has an individual MetricExplainability info path.
+* Attribution explainability includes calculation, role, impact and limitations.
+* Confidence is explicitly not presented as a probability of profit.
 
-Batch 7 orchestration:
-* RecommendationController carries StrategyType through recommendation creation and Historical Setup Validation.
-* DashboardController can run Trader and Swing independently.
-* Trader and Swing RecommendationState values are retained separately.
-* Running Swing does not overwrite the cached Trader recommendation.
-* Swing 1D uses 1D -> 1W -> 1M context.
-* Swing 4H uses 4H -> 1D -> 1W context.
-* Historical validation follows the active strategy/timeframe horizon.
-* Investor cannot run through active recommendation orchestration.
-
-Existing confidence-only boundaries remain unchanged:
-* Event Risk:
-  * confidence/risk-only;
-  * no positive bonus;
-  * maximum -12 confidence points.
-* Historical Setup Validation:
-  * confidence-only;
-  * maximum ±8 final-confidence points;
-  * cannot change direction or evidence-derived confidence.
-
-Current analysis-window VWAP remains excluded from Swing.
-
-Batch 7 functional validation baseline:
+Batch 8 functional validation baseline:
 
 * Flutter analyzer: clean.
-* Dashboard subsystem suite: 5 passing tests.
-* Recommendation subsystem suite: 428 passing tests.
-* Full automated suite: 501 passing tests.
+* Recommendation subsystem suite: 439 passing tests.
+* Full automated suite: 512 passing tests.
 
-The Swing recommendation backend is active, but visible Swing UI activation
-remains intentionally blocked. Strategy Summary should continue to display
-Swing as Coming Soon until attribution/explainability and UI acceptance work
-are completed.
+The Swing backend, recommendation policy, orchestration and attribution contract
+are implemented and validated.
+
+Visible Swing activation remains intentionally blocked until Batch 9 completes
+Strategy Summary activation, Swing presentation integration and decision-helper
+acceptance.
 
 Current next implementation batch:
 
-**Batch 8 — Swing Attribution & Explainability.**
+**Batch 9 — Swing UI Activation & Decision Helpers.**
 
 Permanent Swing acceptance constraints:
 

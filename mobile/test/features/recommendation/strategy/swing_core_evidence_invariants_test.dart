@@ -3,6 +3,7 @@ import 'package:mobile/features/recommendation/history/historical_setup_validati
 import 'package:mobile/features/recommendation/history/historical_setup_validation_explainability.dart';
 import 'package:mobile/features/recommendation/history/historical_validation_strategy_policy.dart';
 import 'package:mobile/features/recommendation/models/metric_explainability.dart';
+import 'package:mobile/features/recommendation/models/recommendation_attribution_explainability.dart';
 import 'package:mobile/features/recommendation/models/analysis_context_explainability_catalog.dart';
 import 'package:mobile/features/recommendation/models/analysis_context_metric.dart';
 import 'package:mobile/features/recommendation/models/stock_behavior_explainability_catalog.dart';
@@ -485,6 +486,93 @@ void main() {
         isFalse,
       );
     });
+
+    test(
+      'Batch 8 keeps attribution mathematically and semantically separated',
+      () {
+        final direction =
+            RecommendationAttributionExplainability.directionInfluence;
+        final providerDirection =
+            RecommendationAttributionExplainability.providerDirectionImpact;
+
+        expect(direction.isComplete, isTrue);
+        expect(direction.allowsDirectionalInfluence, isTrue);
+        expect(providerDirection.isComplete, isTrue);
+        expect(providerDirection.allowsDirectionalInfluence, isTrue);
+
+        expect(direction.calculation, contains('family cap'));
+
+        expect(direction.calculation, contains('100%'));
+
+        expect(
+          providerDirection.limitations,
+          contains(
+            'Provider-level percentages are intentionally not presented',
+          ),
+        );
+
+        expect(
+          providerDirection.recommendationImpact,
+          contains('cannot bypass the family cap'),
+        );
+
+        final confidenceOnly = [
+          RecommendationAttributionExplainability.evidenceConfidenceShare,
+          RecommendationAttributionExplainability
+              .providerConfidenceContribution,
+          RecommendationAttributionExplainability.evidenceStrengthBaseline,
+          RecommendationAttributionExplainability.evidenceQualityAdjustment,
+          RecommendationAttributionExplainability.evidenceDerivedConfidence,
+          RecommendationAttributionExplainability.eventRiskAdjustment,
+          RecommendationAttributionExplainability
+              .historicalValidationAdjustment,
+          RecommendationAttributionExplainability.finalConfidence,
+        ];
+
+        for (final definition in confidenceOnly) {
+          expect(definition.isComplete, isTrue);
+          expect(definition.allowsDirectionalInfluence, isFalse);
+        }
+
+        expect(
+          RecommendationAttributionExplainability
+              .eventRiskAdjustment
+              .boundedImpact,
+          contains('12-point'),
+        );
+
+        expect(
+          RecommendationAttributionExplainability
+              .eventRiskAdjustment
+              .boundedImpact,
+          contains('Directional influence is exactly zero'),
+        );
+
+        expect(
+          RecommendationAttributionExplainability
+              .historicalValidationAdjustment
+              .boundedImpact,
+          contains('±8'),
+        );
+
+        expect(
+          RecommendationAttributionExplainability
+              .historicalValidationAdjustment
+              .boundedImpact,
+          contains('zero directional influence'),
+        );
+
+        expect(
+          StrategyAnalysisPolicyCatalog.swing.isRecommendationActive,
+          isTrue,
+        );
+
+        expect(
+          StrategyAnalysisPolicyCatalog.investor.isRecommendationActive,
+          isFalse,
+        );
+      },
+    );
 
     test('current analysis-window VWAP stays excluded from Swing', () {
       final policy = StrategyAnalysisPolicyCatalog.swing.policyFor(

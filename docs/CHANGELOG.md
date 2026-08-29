@@ -13,7 +13,7 @@ Status:
 Approved
 
 Last Updated:
-2026-08-28
+2026-08-29
 
 Owner:
 TradePilot AI
@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-7 Complete
+Development — Batches 1-8 Complete
 
 Date
 
@@ -42,59 +42,51 @@ This checkpoint defines architecture, evidence applicability, explainability, at
 
 No production recommendation behavior has changed in this checkpoint.
 
-### Implementation Progress — 2026-08-28
+### Implementation Progress — 2026-08-29
 
-Batches 1-7 are implemented and regression-validated.
+Batches 1-8 are implemented and regression-validated.
 
 Completed:
 - Strategy-aware evidence policy and collection gates.
 - Swing timeframe/context orchestration.
-- Trend and Momentum family calibration.
-- Participation, Price Structure and Volatility/Entry Quality calibration.
-- Market & Sector Context / Relative Strength calibration.
-- Market Breadth calibration inside the shared Market Context family.
-- News Sentiment Swing calibration.
-- Stock DNA strategy-aware contextual adjustment.
+- Swing-calibrated evidence families and contextual capabilities.
 - Swing Event Risk confidence-only enforcement.
 - Swing Historical Setup Validation calibration and horizon integrity.
 - Swing-specific recommendation decision policy.
 - Swing recommendation backend activation.
 - Strategy-aware controller/service recommendation execution.
 - Independent Trader and Swing dashboard recommendation-state orchestration.
+- Attribution integrity and mathematical reconciliation.
+- User-facing attribution and confidence explainability.
 - Current analysis-window VWAP remains excluded from Swing.
 - Trader regression protection and strategy-readiness invariants.
 
-Batch 7 recommendation boundaries:
-- Trader retains its established recommendation policy.
-- Swing uses independent deterministic recommendation thresholds rather than Trader thresholds.
-- Swing requires 65% provider coverage.
-- Swing BUY / SELL requires ±35 direction and at least 60 confidence.
-- Swing Strong BUY / SELL requires ±70 direction and at least 80 confidence.
-- Swing neutral/HOLD band is ±25.
-- At least 3 independent families are required for actionable Swing direction.
-- Material conflict at 55% or above resolves to HOLD.
-- BUY and SELL use symmetric absolute thresholds.
-- Investor recommendation policy remains unavailable.
+Batch 8 attribution boundaries:
+- Direction attribution is calculated from effective post-family-cap current-case contribution.
+- Active family direction shares reconcile to 100% whenever directional evidence exists.
+- Signed provider direction impacts reconcile to their capped family contribution.
+- Provider internal absolute shares are diagnostic only and are not shown as percentages of the recommendation.
+- User-facing provider detail uses signed direction points.
+- Evidence confidence remains separate from directional attribution.
+- Confidence-modifier sources are explicitly classified.
+- Evidence-quality adjustments remain internal confidence inputs.
+- Event Risk is displayed separately as a confidence-only point adjustment with zero direction and maximum -12 points.
+- Historical Setup Validation is displayed separately as a confidence-only point adjustment with zero direction and maximum ±8 points.
+- Final confidence reconciles from evidence-derived confidence plus allowed external confidence adjustments.
+- Attribution metrics use reusable MetricExplainability definitions and individual info controls.
+- Confidence is not presented as a probability of profit.
+- No Batch 8 change modifies scoring weights, evidence direction, family caps or Swing recommendation thresholds.
 
-Batch 7 orchestration boundaries:
-- StrategyType is preserved through recommendation generation and historical validation.
-- Trader and Swing analyses are retained independently.
-- Running Swing cannot overwrite the cached Trader recommendation state.
-- Swing 1D uses 1D -> 1W -> 1M context.
-- Swing 4H uses 4H -> 1D -> 1W context.
-- Historical validation follows the selected strategy/timeframe horizon.
-- Investor cannot execute through the active recommendation pipeline.
-- Backend activation does not yet activate Swing in the visible Strategy Summary.
-
-Functional validation at Batch 7 implementation completion:
+Functional validation at Batch 8 implementation completion:
 - Flutter analyzer: clean.
-- Dashboard subsystem suite: 5 passing tests.
-- Recommendation subsystem suite: 428 passing tests.
-- Full automated suite: 501 passing tests.
+- Recommendation subsystem suite: 439 passing tests.
+- Full automated suite: 512 passing tests.
+
+Visible Swing activation remains intentionally deferred until Batch 9.
 
 Next planned implementation work:
 
-**Batch 8 — Swing Attribution & Explainability.**
+**Batch 9 — Swing UI Activation & Decision Helpers.**
 
 ### Release Boundary
 
