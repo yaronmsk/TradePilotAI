@@ -73,13 +73,13 @@ Current active development release:
 
 Status:
 
-**Scope approved / production implementation not yet started.**
+**Production implementation active — Batches 1–8 complete; Batch 9A Swing UI activation implemented and validated.**
 
 Detailed evidence, capability and acceptance contract:
 
 `docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
-Swing remains **Coming Soon** in the UI until TradePilot AI produces and validates a real strategy-specific Swing recommendation.
+Swing now has a validated strategy-specific backend and is activated in the visible Strategy Summary through Batch 9A. Decision-helper completion and final v0.11.0 validation remain in progress.
 
 Swing must not be implemented as Trader logic running on slower candles.
 
@@ -237,7 +237,7 @@ Confirmation/backdrop intervals adapt automatically.
 
 v0.11.0 active development.
 
-Still displayed as Coming Soon until a real strategy-specific Swing recommendation is implemented and validated.
+Visible Strategy Summary activation is now implemented in Batch 9A. Swing can be selected and runs its existing strategy-specific backend; remaining Batch 9 work is limited to decision-helper completion and final validation.
 
 Approved default timeframe plan:
 
@@ -545,10 +545,10 @@ The approved evidence-by-evidence audit is authoritative during implementation.
 
 Immediate sequence:
 
-1. Complete and commit the v0.11.0 documentation/scope checkpoint.
-2. Confirm the repository is clean on `develop`.
-3. Begin Batch 1 — strategy-aware analysis/evidence policy foundation.
-4. Do not activate Swing in the UI before policy, context and recommendation orchestration are validated.
+1. Complete Batch 9A final regression validation and documentation synchronization.
+2. Keep Investor unavailable; Investor remains deferred to v0.12.0.
+3. Continue Batch 9 with decision helpers derived only from existing evidence, without creating duplicate votes.
+4. Complete full v0.11.0 regression/visual validation before the release checkpoint.
 
 For every existing evidence/capability, determine:
 

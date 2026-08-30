@@ -116,9 +116,9 @@ Current release:
 
 Status:
 
-**Active development / Batches 1-8 implemented and validated.**
+**Active development / Batches 1–8 implemented and validated; Batch 9A Swing UI activation implemented and validated.**
 
-Swing remains Coming Soon in the UI until the validated backend recommendation and attribution contract are integrated into the visible Strategy Summary in Batch 9.
+The validated Swing backend and attribution contract are now integrated into the visible Strategy Summary through Batch 9A. Swing is selectable; Investor remains Coming Soon. Decision helpers and final v0.11.0 acceptance remain pending.
 
 Detailed evidence, capability and acceptance contract:
 
@@ -239,12 +239,27 @@ Batch 8 functional validation baseline:
 - 439 recommendation subsystem tests passing.
 - 512 total automated tests passing.
 
-The Swing backend and attribution contract are ready for presentation-layer
-integration, but Strategy Summary remains visually blocked until Batch 9.
+Batch 9A presentation-layer activation is implemented:
 
-Next implementation batch:
+- Strategy Summary exposes Swing as active even before its first cached analysis result.
+- The pre-analysis Swing state is shown as `Ready to analyze` with no fabricated confidence.
+- Selecting Swing runs the existing Swing-specific analysis path.
+- Selected-strategy Analysis Context, Recommendation, Recommendation Insight, Evidence and Risk render from the strategy-specific cached state.
+- Investor remains unavailable / Coming Soon.
+- No Batch 9A change modifies evidence providers, scoring weights, direction logic, family caps, attribution math, Event Risk or Historical Setup Validation.
+- Decision helpers remain pending and must not create duplicate votes.
 
-**Batch 9 — Swing UI Activation & Decision Helpers.**
+Batch 9A validation so far:
+
+- 8 focused Strategy Summary/dashboard/top-level UI tests passing.
+- 441 recommendation subsystem tests passing.
+- 5 dashboard subsystem tests passing.
+- Flutter analyzer clean.
+- 514 total automated tests passing.
+
+Next implementation work:
+
+**Batch 9 — Decision Helpers & final Swing UI acceptance.**
 
 ### Swing UI / explainability rules
 

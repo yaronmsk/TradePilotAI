@@ -26,7 +26,7 @@ void main() {
     );
   }
 
-  test('builds active Trader plus future Swing and Investor summaries', () {
+  test('builds active Trader, ready Swing and future Investor summaries', () {
     final traderRecommendation = StrategyRecommendation(
       strategy: StrategyType.trader,
       recommendation: createRecommendation(),
@@ -35,11 +35,16 @@ void main() {
     final summaries = service.build(recommendations: [traderRecommendation]);
 
     expect(summaries.length, 3);
+
     expect(summaries[0].type, StrategyType.trader);
     expect(summaries[0].status, StrategyStatus.active);
     expect(summaries[0].confidence, 91);
+
     expect(summaries[1].type, StrategyType.swing);
-    expect(summaries[1].status, StrategyStatus.comingSoon);
+    expect(summaries[1].status, StrategyStatus.active);
+    expect(summaries[1].recommendation, 'Ready to analyze');
+    expect(summaries[1].confidence, isNull);
+
     expect(summaries[2].type, StrategyType.investor);
     expect(summaries[2].status, StrategyStatus.comingSoon);
   });

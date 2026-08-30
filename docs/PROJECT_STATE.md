@@ -558,7 +558,7 @@ v0.10.1 was validated on 2026-08-23 with:
 * Same-time-of-day historical RVOL requires real matching intraday sessions and remains deferred.
 * Stock DNA does not yet use sector/peer percentiles.
 * True session VWAP remains deferred until authoritative session-aware intraday data is available.
-* Swing recommendation backend and attribution/explainability contract are implemented; visible UI activation remains in progress.
+* Swing recommendation backend and attribution/explainability contract are implemented; Batch 9A visible Strategy Summary and selected-strategy presentation activation are implemented and validated.
 * Investor fundamental brain is not implemented.
 * AI Analyst/Mentor is not connected.
 * Synthetic historical outcomes cannot be interpreted as real strategy performance.
@@ -647,13 +647,28 @@ Batch 8 functional validation baseline:
 The Swing backend, recommendation policy, orchestration and attribution contract
 are implemented and validated.
 
-Visible Swing activation remains intentionally blocked until Batch 9 completes
-Strategy Summary activation, Swing presentation integration and decision-helper
-acceptance.
+Batch 9A implementation checkpoint:
 
-Current next implementation batch:
+* Swing is selectable in the visible Strategy Summary.
+* A strategy that is implementation-ready but has no cached result is shown as `Ready to analyze` rather than `Coming Soon`.
+* Selecting Swing runs the existing Swing backend and displays Swing-specific Analysis Context, Recommendation, Recommendation Insight, Evidence and Risk.
+* Trader and Swing continue to use independent cached recommendation states.
+* Investor remains unavailable and `Coming Soon`.
+* Batch 9A does not change scoring weights, evidence direction, family caps, attribution mathematics, Event Risk or Historical Setup Validation behavior.
+* Decision helpers remain outstanding work inside Batch 9 and must not create duplicate evidence votes.
 
-**Batch 9 — Swing UI Activation & Decision Helpers.**
+Batch 9A validation so far:
+
+* Focused Strategy Summary / dashboard / top-level UI gate: 8 passing tests.
+* Recommendation subsystem suite: 441 passing tests.
+* Dashboard subsystem suite: 5 passing tests.
+* Flutter analyzer: clean.
+* `git diff --check`: clean.
+* Full automated suite: 514 passing tests.
+
+Current next implementation work:
+
+**Batch 9 — Decision Helpers & final Swing UI acceptance.**
 
 Permanent Swing acceptance constraints:
 

@@ -91,5 +91,50 @@ void main() {
     expect(find.text('Historical Setup Check'), findsOneWidget);
     expect(find.textContaining('similar cases'), findsOneWidget);
     expect(find.text('Waiting for Analysis'), findsNothing);
+
+    // Batch 9A2: activate Swing through the real dashboard UI.
+    await tester.scrollUntilVisible(
+      find.text('Strategy Summary'),
+      -250,
+      scrollable: dashboardScroll,
+    );
+
+    expect(find.text('Ready to analyze'), findsOneWidget);
+    expect(find.text('Tap to run'), findsOneWidget);
+    expect(find.text('🚧 Coming Soon'), findsOneWidget);
+
+    await tester.tap(find.text('Swing'));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Swing Analysis Context'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Swing Analysis Context'), findsOneWidget);
+    expect(find.text('Primary Analysis Interval'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Swing Recommendation'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Swing Recommendation'), findsOneWidget);
+    expect(find.text('Swing Recommendation Insight'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Swing Evidence'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Swing Evidence'), findsOneWidget);
+    expect(find.text('Waiting for Analysis'), findsNothing);
+
+    await tester.scrollUntilVisible(
+      find.text('Version 0.11'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Version 0.11'), findsOneWidget);
   });
 }

@@ -125,7 +125,7 @@ Days to weeks.
 
 **v0.11.0 active development.**
 
-Swing remains Coming Soon in the UI until a real strategy-specific Swing recommendation is implemented and validated.
+Swing has a validated strategy-specific backend and is now selectable in the visible Strategy Summary through Batch 9A. Investor remains unavailable. Remaining v0.11.0 UI work is decision-helper completion and final validation.
 
 Swing must not be implemented as Trader logic running on slower candles.
 
@@ -374,7 +374,7 @@ Before any existing capability affects a Swing recommendation, the implementatio
 
 ### Strategy-aware policy
 
-v0.11.0 must introduce a strategy-aware analysis/evidence policy before Swing is activated in the UI.
+v0.11.0 introduced the strategy-aware analysis/evidence policy before Swing UI activation. Batch 9A now connects the validated Swing backend to Strategy Summary and the selected-strategy presentation without changing evidence math.
 
 The policy must support per-strategy:
 
@@ -434,7 +434,7 @@ Avoid:
 
 without explanation.
 
-Decision helpers may summarize existing evidence but must not create another independent vote when derived from evidence already counted by the Consensus Engine.
+Decision helpers may summarize existing evidence but must not create another independent vote when derived from evidence already counted by the Consensus Engine. Batch 9A activates Swing presentation only; decision-helper implementation remains a separate Batch 9 step.
 
 ### Swing attribution
 

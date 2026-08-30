@@ -66,6 +66,7 @@ class _StrategyTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final available = strategy.isAvailable;
+    final hasResult = strategy.confidence != null;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Material(
@@ -140,19 +141,25 @@ class _StrategyTile extends StatelessWidget {
                 flex: 2,
                 child: available
                     ? Text(
-                        strategy.recommendation ?? '',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                        strategy.recommendation ?? 'Ready to analyze',
+                        style: TextStyle(
+                          fontWeight: hasResult
+                              ? FontWeight.bold
+                              : FontWeight.w500,
+                        ),
                       )
                     : const Text('🚧 Coming Soon'),
               ),
               SizedBox(
                 width: 90,
-                child: available
+                child: !available
+                    ? const Center(child: Text('—'))
+                    : hasResult
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           LinearProgressIndicator(
-                            value: (strategy.confidence ?? 0) / 100,
+                            value: strategy.confidence! / 100,
                             minHeight: 6,
                             borderRadius: BorderRadius.circular(4),
                           ),
@@ -160,7 +167,9 @@ class _StrategyTile extends StatelessWidget {
                           Text('${strategy.confidence!.toStringAsFixed(0)}%'),
                         ],
                       )
-                    : const Center(child: Text('—')),
+                    : const Center(
+                        child: Text('Tap to run', textAlign: TextAlign.center),
+                      ),
               ),
             ],
           ),

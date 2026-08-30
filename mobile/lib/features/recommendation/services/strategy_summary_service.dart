@@ -1,5 +1,6 @@
 import '../models/strategy_recommendation.dart';
 import '../models/strategy_summary.dart';
+import '../strategy/strategy_analysis_policy_catalog.dart';
 import '../utils/recommendation_formatter.dart';
 
 class StrategySummaryService {
@@ -17,12 +18,27 @@ class StrategySummaryService {
         .map((type) {
           final strategyRecommendation = byStrategy[type];
 
-          if (strategyRecommendation == null) {
+          if (strategyRecommendation != null) {
             return StrategySummary(
               type: type,
               title: type.title,
-              status: StrategyStatus.comingSoon,
-              recommendation: null,
+              status: StrategyStatus.active,
+              recommendation: RecommendationFormatter.label(
+                strategyRecommendation.recommendation.type,
+              ),
+              confidence: strategyRecommendation.confidence,
+              horizon: type.horizon,
+            );
+          }
+
+          final policy = StrategyAnalysisPolicyCatalog.forStrategy(type);
+
+          if (policy.isRecommendationActive) {
+            return StrategySummary(
+              type: type,
+              title: type.title,
+              status: StrategyStatus.active,
+              recommendation: 'Ready to analyze',
               confidence: null,
               horizon: type.horizon,
             );
@@ -31,11 +47,9 @@ class StrategySummaryService {
           return StrategySummary(
             type: type,
             title: type.title,
-            status: StrategyStatus.active,
-            recommendation: RecommendationFormatter.label(
-              strategyRecommendation.recommendation.type,
-            ),
-            confidence: strategyRecommendation.confidence,
+            status: StrategyStatus.comingSoon,
+            recommendation: null,
+            confidence: null,
             horizon: type.horizon,
           );
         })

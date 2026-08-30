@@ -82,11 +82,31 @@ Functional validation at Batch 8 implementation completion:
 - Recommendation subsystem suite: 439 passing tests.
 - Full automated suite: 512 passing tests.
 
-Visible Swing activation remains intentionally deferred until Batch 9.
+### Batch 9A — Swing UI Activation
+
+Implemented:
+
+- Activated Swing in the visible Strategy Summary while keeping Investor unavailable.
+- Added an implementation-ready pre-analysis state: `Ready to analyze`.
+- Made Strategy Summary safe when an active strategy has no confidence result yet.
+- Connected Dashboard presentation to `DashboardController` strategy-specific recommendation caches instead of constructing a Trader-only local recommendation list.
+- Selecting Swing now runs the existing Swing backend and presents Swing-specific Analysis Context, Recommendation, Recommendation Insight, Evidence and Risk.
+- Preserved independent Trader and Swing cached recommendation states.
+- Added top-level UI regression coverage for Trader -> Swing activation.
+- No scoring weights, evidence direction, family caps, attribution math, Event Risk behavior or Historical Setup Validation behavior changed.
+
+Batch 9A validation so far:
+
+- Focused Strategy Summary/dashboard/top-level UI gate: 8 passing tests.
+- Recommendation subsystem suite: 441 passing tests.
+- Dashboard subsystem suite: 5 passing tests.
+- Flutter analyzer: clean.
+- `git diff --check`: clean.
+- Full automated suite: 514 passing tests.
 
 Next planned implementation work:
 
-**Batch 9 — Swing UI Activation & Decision Helpers.**
+**Batch 9 — Decision Helpers & final Swing UI acceptance.**
 
 ### Release Boundary
 

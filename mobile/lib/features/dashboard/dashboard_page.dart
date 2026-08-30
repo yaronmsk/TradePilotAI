@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../recommendation/models/recommendation.dart';
 import '../recommendation/models/strategy_recommendation.dart';
 import '../recommendation/models/strategy_summary.dart';
 import '../recommendation/services/strategy_summary_service.dart';
@@ -48,18 +47,48 @@ class _DashboardPageState extends State<DashboardPage> {
     final wasAdded = watchlistController.state.items.length > previousItemCount;
 
     if (wasAdded) {
-      await dashboardController.selectSymbol(item.symbol);
+      await _selectSymbol(item.symbol);
     }
   }
 
-  void _selectStrategy(StrategyType strategy) {
-    if (_selectedStrategy == strategy) {
+  Future<void> _selectSymbol(String symbol) async {
+    if (_selectedStrategy != StrategyType.trader) {
+      setState(() {
+        _selectedStrategy = StrategyType.trader;
+      });
+    }
+
+    await dashboardController.selectSymbol(symbol);
+  }
+
+  Future<void> _selectStrategy(StrategyType strategy) async {
+    if (dashboardController.isAnalysisReloading) {
+      return;
+    }
+
+    if (_selectedStrategy == strategy &&
+        dashboardController.activeAnalysisStrategy == strategy) {
       return;
     }
 
     setState(() {
       _selectedStrategy = strategy;
     });
+
+    try {
+      // Market snapshot and chart state are shared. Re-running the selected
+      // strategy keeps those visible inputs aligned while the controller
+      // continues to retain independent Trader/Swing recommendation states.
+      await dashboardController.analyzeStrategy(strategy);
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not analyze ${strategy.title}: $error')),
+      );
+    }
   }
 
   @override
@@ -67,8 +96,6 @@ class _DashboardPageState extends State<DashboardPage> {
     final marketController = dashboardController.marketController;
     final historyController = dashboardController.marketHistoryController;
     final watchlistController = dashboardController.watchlistController;
-    final recommendationController =
-        dashboardController.recommendationController;
 
     return Scaffold(
       appBar: AppBar(title: const Text('TradePilot AI')),
@@ -78,7 +105,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             WatchlistCard(
               controller: watchlistController,
-              onSymbolSelected: dashboardController.selectSymbol,
+              onSymbolSelected: _selectSymbol,
               onAddPressed: _openAddStockDialog,
             ),
             MarketStatusCard(
@@ -86,97 +113,105 @@ class _DashboardPageState extends State<DashboardPage> {
               historyController: historyController,
             ),
             AnimatedBuilder(
-              animation: recommendationController,
+              animation: dashboardController,
               builder: (context, _) {
-                final state = recommendationController.state;
-                final recommendation =
-                    state.recommendation ?? Recommendation.empty();
-
-                final strategyRecommendations = <StrategyRecommendation>[
-                  StrategyRecommendation(
-                    strategy: StrategyType.trader,
-                    recommendation: recommendation,
-                  ),
-                ];
+                final strategyRecommendations =
+                    dashboardController.strategyRecommendations;
 
                 final strategies = _strategySummaryService.build(
                   recommendations: strategyRecommendations,
                 );
 
-                final selectedRecommendation = strategyRecommendations
-                    .firstWhere(
-                      (item) => item.strategy == _selectedStrategy,
-                      orElse: () => strategyRecommendations.first,
-                    );
+                final selectedState = dashboardController
+                    .recommendationStateFor(_selectedStrategy);
+                final selectedResult = selectedState.recommendation;
+                final selectedRecommendation = selectedResult == null
+                    ? null
+                    : StrategyRecommendation(
+                        strategy: _selectedStrategy,
+                        recommendation: selectedResult,
+                      );
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     StrategySummaryCard(
                       strategies: strategies,
-                      selectedType: selectedRecommendation.strategy,
-                      onStrategySelected: _selectStrategy,
+                      selectedType: _selectedStrategy,
+                      onStrategySelected: (strategy) {
+                        _selectStrategy(strategy);
+                      },
                     ),
-                    if (state.analysisContext != null)
-                      AnimatedBuilder(
-                        animation: dashboardController,
-                        builder: (context, _) {
-                          final strategy = selectedRecommendation.strategy;
-                          final plan = dashboardController.analysisPlanFor(
-                            strategy,
-                          );
-
-                          return AnalysisContextCard(
-                            strategy: strategy,
-                            analysisContext: state.analysisContext!,
-                            timeframePlan: plan,
-                            availablePrimaryTimeframes: dashboardController
-                                .availablePrimaryTimeframesFor(strategy),
-                            onPrimaryTimeframeSelected: (timeframe) {
-                              dashboardController.selectAnalysisTimeframe(
-                                strategy,
-                                timeframe,
-                              );
-                            },
-                            isReloading:
-                                dashboardController.isAnalysisReloading,
+                    if (dashboardController.isAnalysisReloading) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 12),
+                        child: LinearProgressIndicator(),
+                      ),
+                      const SizedBox(height: 8),
+                    ],
+                    if (selectedState.analysisContext != null)
+                      AnalysisContextCard(
+                        strategy: _selectedStrategy,
+                        analysisContext: selectedState.analysisContext!,
+                        timeframePlan: dashboardController.analysisPlanFor(
+                          _selectedStrategy,
+                        ),
+                        availablePrimaryTimeframes: dashboardController
+                            .availablePrimaryTimeframesFor(_selectedStrategy),
+                        onPrimaryTimeframeSelected: (timeframe) {
+                          dashboardController.selectAnalysisTimeframe(
+                            _selectedStrategy,
+                            timeframe,
                           );
                         },
+                        isReloading: dashboardController.isAnalysisReloading,
                       ),
-                    if (state.stockBehaviorProfile != null)
-                      StockBehaviorCard(profile: state.stockBehaviorProfile!),
-                    RecommendationCard(
-                      strategyRecommendation: selectedRecommendation,
-                    ),
-                    ConsensusSummaryCard(
-                      strategyRecommendation: selectedRecommendation,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      '${selectedRecommendation.title} Evidence',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
+                    if (selectedState.stockBehaviorProfile != null)
+                      StockBehaviorCard(
+                        profile: selectedState.stockBehaviorProfile!,
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    EvidenceList(
-                      results: selectedRecommendation
-                          .recommendation
-                          .evidenceReport
-                          .results,
-                      familySummaries: selectedRecommendation
-                          .recommendation
-                          .consensus
-                          .familySummaries,
-                    ),
-                    RiskCard(strategy: selectedRecommendation.strategy),
+                    if (selectedRecommendation != null) ...[
+                      RecommendationCard(
+                        strategyRecommendation: selectedRecommendation,
+                      ),
+                      ConsensusSummaryCard(
+                        strategyRecommendation: selectedRecommendation,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '${selectedRecommendation.title} Evidence',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      EvidenceList(
+                        results: selectedRecommendation
+                            .recommendation
+                            .evidenceReport
+                            .results,
+                        familySummaries: selectedRecommendation
+                            .recommendation
+                            .consensus
+                            .familySummaries,
+                      ),
+                      RiskCard(strategy: selectedRecommendation.strategy),
+                    ] else if (!dashboardController.isAnalysisReloading)
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Text(
+                          '${_selectedStrategy.title} is ready. '
+                          'Select the strategy above to run its analysis.',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
                   ],
                 );
               },
             ),
             const SizedBox(height: 20),
             const Center(
-              child: Text('Version 0.10', style: TextStyle(color: Colors.grey)),
+              child: Text('Version 0.11', style: TextStyle(color: Colors.grey)),
             ),
             const SizedBox(height: 20),
           ],

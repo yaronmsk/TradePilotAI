@@ -284,10 +284,13 @@ Deferred intentionally:
 - Swing timeframe/context orchestration.
 - Swing-specific Historical Setup Validation horizon.
 - Swing recommendation policy.
-- Human-readable Swing cards and decision helpers.
+- Batch 9A Strategy Summary activation and selected-strategy presentation integration.
+- Human-readable Swing cards; decision helpers remain pending inside Batch 9.
 - Individual info paths for every Swing analytical input.
 - Direction attribution reconciled to 100% of active post-family-cap influence.
 - Confidence attribution kept separate from directional attribution.
+- Trader and Swing presentation resolve from independent cached recommendation states.
+- Investor remains unavailable until v0.12.0.
 
 ### v0.12.0 — Investor Strategy Brain
 - Growth.
