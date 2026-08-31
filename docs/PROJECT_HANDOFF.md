@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.11.0 — Batch 9B Decision Helpers Validated
+**Checkpoint:** v0.11.0 — Release Acceptance Complete
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -57,7 +57,7 @@ Do not initiate a major visual redesign unless the project documentation explici
 
 ## Current Release Checkpoint
 
-Current tagged release:
+Previous tagged baseline release:
 
 **v0.10.1 — Explainability & Bidirectional Audit**
 
@@ -67,19 +67,19 @@ Release commit:
 
 v0.10.1 is complete, tagged and synchronized with GitHub.
 
-Current active development release:
+Current release checkpoint:
 
 **v0.11.0 — Swing Strategy Brain**
 
 Status:
 
-**Production implementation active — Batches 1–8, 9A and 9B implemented and validated; final release acceptance remains.**
+**Release acceptance complete — Batches 1–10 implemented and validated; designated release tag: `v0.11.0`.**
 
 Detailed evidence, capability and acceptance contract:
 
 `docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
-Swing now has a validated strategy-specific backend, visible Strategy Summary activation and presentation-only Decision Helpers. Final v0.11.0 regression/documentation/release acceptance remains in progress.
+Swing now has a validated strategy-specific backend, visible Strategy Summary activation, presentation-only Decision Helpers, typed recommendation-state reasons and human-readable non-action wording. Final v0.11.0 release acceptance passed on 2026-08-31.
 
 Swing must not be implemented as Trader logic running on slower candles.
 
@@ -466,7 +466,7 @@ For meaningful feature work:
 14. Assign the correct semantic version.
 15. Commit and push the checkpoint.
 
-The user prefers complete file contents when manual file replacement is required rather than fragmented patches.
+The user prefers concise surgical/transactional patch scripts when safe. Use complete-file replacements only for substantial restructuring or when a surgical patch would be brittle or unsafe.
 
 Provide exact commands for actions the user must perform.
 
@@ -493,6 +493,39 @@ Do not silently modify a completed release without advancing its version appropr
 
 ---
 
+### Batch 10 — v0.11.0 Release Acceptance
+
+Release acceptance completed on 2026-08-31.
+
+Batch 10A release-state coverage:
+- Audited the production Swing orchestration path with deterministic development data rather than lowering recommendation thresholds.
+- Corrected synthetic Event Risk coverage so Swing mock data can represent both relevant-event and no-relevant-event states.
+- Added an explicit development-only `BULL` fixture to exercise the complete Swing BUY path through the real dashboard/recommendation orchestration.
+- Added a full-dashboard release-action regression fixture.
+- Synthetic fixtures do not bypass recommendation gates and do not alter production scoring weights, family caps, direction thresholds, confidence thresholds, Event Risk policy or Historical Validation policy.
+
+Batch 10B recommendation-state clarity:
+- Internal `WAIT` remains the non-actionable developing-signal state, but the UI now presents it as `Wait for Confirmation`.
+- Internal `HOLD` remains the neutral/conflicted state, but the UI now presents it as `No Clear Direction` so it is not confused with portfolio-position advice.
+- Recommendation outcomes now expose typed decision reasons rather than requiring UI text parsing.
+- WAIT explanations are dynamically derived from the actual failed gate(s), including insufficient evidence coverage, directional strength, confidence and independent-family breadth.
+- HOLD explanations distinguish neutral evidence from material bullish/bearish conflict.
+- No Batch 10B change alters scoring, thresholds, evidence direction, attribution, family caps or recommendation outcomes.
+
+Release metadata:
+- Flutter package version: `0.11.0+1`.
+- Visible application version: `Version 0.11.0`.
+- Designated release tag: `v0.11.0`.
+
+Final release gate:
+- Flutter analyzer: clean.
+- Focused release/UI gate: 22 passing tests.
+- Recommendation subsystem suite: 455 passing tests.
+- Full automated suite: 529 passing tests.
+- `flutter build web`: passed (`build/web` produced successfully).
+- `git diff --check`: clean.
+- Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
+
 ## Current Known Limitations
 
 The project is not yet production-ready.
@@ -505,7 +538,7 @@ Important limitations include:
 * Real market/news/event providers are not connected.
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
-* Swing brain is implemented through Batch 9B; final v0.11.0 release acceptance is still pending.
+* Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
 * Investor fundamental brain is not implemented.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
@@ -547,8 +580,8 @@ Immediate sequence:
 
 1. Keep Investor unavailable; Investor remains deferred to v0.12.0.
 2. Preserve Batch 9B Decision Helpers as presentation-derived summaries only; they must not become evidence votes or alter confidence/direction.
-3. Complete the remaining full v0.11.0 regression and release-acceptance checks.
-4. Synchronize final release documentation, commit the validated checkpoint and prepare the v0.11.0 release checkpoint.
+3. Preserve the accepted v0.11.0 release checkpoint; do not alter its scoring/recommendation behavior without a new semantic version.
+4. Commit, push and tag the accepted v0.11.0 checkpoint, then continue with v0.12.0 Investor Strategy Brain planning/implementation.
 
 For every existing evidence/capability, determine:
 

@@ -1,6 +1,6 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-8, 9A and 9B complete
+Status: Release acceptance complete — Batches 0-10 validated
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
@@ -1260,9 +1260,45 @@ Validation:
 ### Batch 10
 Full regression, visual acceptance, documentation and release.
 
+### Batch 10 — v0.11.0 Release Acceptance
+
+Release acceptance completed on 2026-08-31.
+
+Batch 10A release-state coverage:
+- Audited the production Swing orchestration path with deterministic development data rather than lowering recommendation thresholds.
+- Corrected synthetic Event Risk coverage so Swing mock data can represent both relevant-event and no-relevant-event states.
+- Added an explicit development-only `BULL` fixture to exercise the complete Swing BUY path through the real dashboard/recommendation orchestration.
+- Added a full-dashboard release-action regression fixture.
+- Synthetic fixtures do not bypass recommendation gates and do not alter production scoring weights, family caps, direction thresholds, confidence thresholds, Event Risk policy or Historical Validation policy.
+
+Batch 10B recommendation-state clarity:
+- Internal `WAIT` remains the non-actionable developing-signal state, but the UI now presents it as `Wait for Confirmation`.
+- Internal `HOLD` remains the neutral/conflicted state, but the UI now presents it as `No Clear Direction` so it is not confused with portfolio-position advice.
+- Recommendation outcomes now expose typed decision reasons rather than requiring UI text parsing.
+- WAIT explanations are dynamically derived from the actual failed gate(s), including insufficient evidence coverage, directional strength, confidence and independent-family breadth.
+- HOLD explanations distinguish neutral evidence from material bullish/bearish conflict.
+- No Batch 10B change alters scoring, thresholds, evidence direction, attribution, family caps or recommendation outcomes.
+
+Release metadata:
+- Flutter package version: `0.11.0+1`.
+- Visible application version: `Version 0.11.0`.
+- Designated release tag: `v0.11.0`.
+
+Final release gate:
+- Flutter analyzer: clean.
+- Focused release/UI gate: 22 passing tests.
+- Recommendation subsystem suite: 455 passing tests.
+- Full automated suite: 529 passing tests.
+- `flutter build web`: passed (`build/web` produced successfully).
+- `git diff --check`: clean.
+- Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
+
 ---
 
 ## 13. Acceptance criteria
+
+Release acceptance result: **PASS — validated 2026-08-31.**
+
 
 v0.11.0 is not complete until all of the following are true:
 

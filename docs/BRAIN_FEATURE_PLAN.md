@@ -116,9 +116,9 @@ Current release:
 
 Status:
 
-**Active development / Batches 1–8, Batch 9A Swing UI activation and Batch 9B Decision Helpers implemented and validated.**
+**Release acceptance complete / Batches 1–10 implemented and validated.**
 
-The validated Swing backend and attribution contract are integrated into the visible Strategy Summary. Batch 9B adds presentation-only Swing Decision Helpers; Investor remains Coming Soon. Final v0.11.0 release acceptance remains pending.
+The validated Swing backend and attribution contract are integrated into the visible Strategy Summary. Batch 9B adds presentation-only Swing Decision Helpers; Batch 10 adds release-state coverage and recommendation-state clarity; Investor remains Coming Soon. v0.11.0 release acceptance passed on 2026-08-31.
 
 Detailed evidence, capability and acceptance contract:
 
@@ -275,9 +275,42 @@ Batch 9B validation:
 - 522 total automated tests passing.
 - Manual Chrome visual acceptance passed on 2026-08-31.
 
+### Batch 10 — v0.11.0 Release Acceptance
+
+Release acceptance completed on 2026-08-31.
+
+Batch 10A release-state coverage:
+- Audited the production Swing orchestration path with deterministic development data rather than lowering recommendation thresholds.
+- Corrected synthetic Event Risk coverage so Swing mock data can represent both relevant-event and no-relevant-event states.
+- Added an explicit development-only `BULL` fixture to exercise the complete Swing BUY path through the real dashboard/recommendation orchestration.
+- Added a full-dashboard release-action regression fixture.
+- Synthetic fixtures do not bypass recommendation gates and do not alter production scoring weights, family caps, direction thresholds, confidence thresholds, Event Risk policy or Historical Validation policy.
+
+Batch 10B recommendation-state clarity:
+- Internal `WAIT` remains the non-actionable developing-signal state, but the UI now presents it as `Wait for Confirmation`.
+- Internal `HOLD` remains the neutral/conflicted state, but the UI now presents it as `No Clear Direction` so it is not confused with portfolio-position advice.
+- Recommendation outcomes now expose typed decision reasons rather than requiring UI text parsing.
+- WAIT explanations are dynamically derived from the actual failed gate(s), including insufficient evidence coverage, directional strength, confidence and independent-family breadth.
+- HOLD explanations distinguish neutral evidence from material bullish/bearish conflict.
+- No Batch 10B change alters scoring, thresholds, evidence direction, attribution, family caps or recommendation outcomes.
+
+Release metadata:
+- Flutter package version: `0.11.0+1`.
+- Visible application version: `Version 0.11.0`.
+- Designated release tag: `v0.11.0`.
+
+Final release gate:
+- Flutter analyzer: clean.
+- Focused release/UI gate: 22 passing tests.
+- Recommendation subsystem suite: 455 passing tests.
+- Full automated suite: 529 passing tests.
+- `flutter build web`: passed (`build/web` produced successfully).
+- `git diff --check`: clean.
+- Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
+
 Next implementation work:
 
-**Batch 10 — Full v0.11.0 regression, documentation/release acceptance and release checkpoint.**
+**v0.12.0 — Investor Strategy Brain after the accepted v0.11.0 checkpoint is committed, pushed and tagged.**
 
 ### Swing UI / explainability rules
 

@@ -45,6 +45,9 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.wait);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.insufficientCoverage,
+      ]);
     });
 
     test('returns strong buy for strong bullish consensus', () {
@@ -63,6 +66,9 @@ void main() {
       expect(recommendation.type, RecommendationType.strongBuy);
       expect(recommendation.confidenceScore, 90);
       expect(recommendation.directionScore, 82);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.strongBullishAction,
+      ]);
     });
 
     test('returns buy for moderate bullish consensus', () {
@@ -79,6 +85,9 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.buy);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.bullishAction,
+      ]);
     });
 
     test('returns strong sell for strong bearish consensus', () {
@@ -95,6 +104,9 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.strongSell);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.strongBearishAction,
+      ]);
     });
 
     test('returns sell for moderate bearish consensus', () {
@@ -111,6 +123,9 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.sell);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.bearishAction,
+      ]);
     });
 
     test('returns hold when directional consensus is neutral', () {
@@ -128,7 +143,10 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.hold);
-      expect(recommendation.oneLineExplanation, contains('conflicted'));
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.materialConflict,
+      ]);
+      expect(recommendation.oneLineExplanation, contains('currently conflict'));
     });
 
     test('returns wait when bias exists but confidence is too low', () {
@@ -145,6 +163,13 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.wait);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.insufficientConfidence,
+      ]);
+      expect(
+        recommendation.oneLineExplanation,
+        contains('confidence is still below'),
+      );
     });
 
     test('supports legacy callers that only provide directional weights', () {
@@ -205,6 +230,13 @@ void main() {
 
       expect(trader.type, RecommendationType.buy);
       expect(swing.type, RecommendationType.wait);
+      expect(
+        swing.decisionReasons,
+        containsAll([
+          RecommendationDecisionReason.insufficientDirectionalStrength,
+          RecommendationDecisionReason.insufficientConfidence,
+        ]),
+      );
     });
 
     test('Swing Buy and Sell thresholds preserve parity', () {
@@ -304,7 +336,10 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.hold);
-      expect(recommendation.oneLineExplanation, contains('conflicted'));
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.materialConflict,
+      ]);
+      expect(recommendation.oneLineExplanation, contains('currently conflict'));
     });
 
     test('Swing requires at least three independent families for action', () {
@@ -323,11 +358,46 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.wait);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.insufficientFamilyBreadth,
+      ]);
       expect(
         recommendation.oneLineExplanation,
-        contains('Independent-family confirmation'),
+        contains('too few independent evidence groups'),
       );
     });
+
+    test(
+      'Swing explains directional strength when confidence and breadth are sufficient',
+      () {
+        final recommendation = createRecommendation(
+          scoringResult: const ScoringResult(
+            score: 65,
+            coverage: 1,
+            bullishWeight: 1,
+            bearishWeight: 0,
+            neutralWeight: 0,
+            warnings: [],
+            directionScore: 32,
+            independentFamilyCount: 4,
+          ),
+          strategy: StrategyType.swing,
+        );
+
+        expect(recommendation.type, RecommendationType.wait);
+        expect(recommendation.decisionReasons, [
+          RecommendationDecisionReason.insufficientDirectionalStrength,
+        ]);
+        expect(
+          recommendation.oneLineExplanation,
+          contains('directional edge is not yet strong enough'),
+        );
+        expect(
+          recommendation.oneLineExplanation,
+          isNot(contains('confidence is still below')),
+        );
+      },
+    );
 
     test('Swing requires at least sixty-five percent provider coverage', () {
       final recommendation = createRecommendation(
@@ -345,6 +415,9 @@ void main() {
       );
 
       expect(recommendation.type, RecommendationType.wait);
+      expect(recommendation.decisionReasons, [
+        RecommendationDecisionReason.insufficientCoverage,
+      ]);
     });
 
     test('Investor recommendation decision remains unavailable', () {

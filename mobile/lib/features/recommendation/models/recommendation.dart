@@ -12,6 +12,26 @@ enum RecommendationType {
   unknown,
 }
 
+/// Typed reasons for the recommendation state.
+///
+/// A recommendation can expose more than one reason because a non-actionable
+/// setup may fail multiple gates at the same time (for example confidence and
+/// directional strength). Presentation must use these typed reasons rather
+/// than parsing human-readable explanation text.
+enum RecommendationDecisionReason {
+  insufficientCoverage,
+  materialConflict,
+  neutralEvidence,
+  insufficientConfidence,
+  insufficientDirectionalStrength,
+  insufficientFamilyBreadth,
+  bullishAction,
+  strongBullishAction,
+  bearishAction,
+  strongBearishAction,
+  unknown,
+}
+
 class Recommendation {
   const Recommendation({
     required this.type,
@@ -23,6 +43,7 @@ class Recommendation {
     required this.evidenceReport,
     this.consensus = const ScoringResult.empty(),
     this.historicalValidation = const HistoricalSetupValidation.unavailable(),
+    this.decisionReasons = const [],
   });
 
   final RecommendationType type;
@@ -43,6 +64,10 @@ class Recommendation {
   final EvidenceReport evidenceReport;
   final HistoricalSetupValidation historicalValidation;
 
+  /// Exact typed reasons that explain why this recommendation state was
+  /// selected. Multiple reasons may be present for a WAIT state.
+  final List<RecommendationDecisionReason> decisionReasons;
+
   double get confidenceScore => evidenceScore;
 
   double get directionScore => consensus.directionScore ?? 0;
@@ -57,6 +82,7 @@ class Recommendation {
     DateTime? analysisTime,
     EvidenceReport? evidenceReport,
     HistoricalSetupValidation? historicalValidation,
+    List<RecommendationDecisionReason>? decisionReasons,
   }) {
     return Recommendation(
       type: type ?? this.type,
@@ -68,6 +94,7 @@ class Recommendation {
       analysisTime: analysisTime ?? this.analysisTime,
       evidenceReport: evidenceReport ?? this.evidenceReport,
       historicalValidation: historicalValidation ?? this.historicalValidation,
+      decisionReasons: decisionReasons ?? this.decisionReasons,
     );
   }
 
@@ -79,6 +106,7 @@ class Recommendation {
       timeframe: '5m',
       candleCount: 48,
       analysisTime: null,
+      decisionReasons: const [RecommendationDecisionReason.unknown],
       evidenceReport: EvidenceReport.fromResults(
         results: const [],
         expectedProviderCount: 0,

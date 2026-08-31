@@ -356,6 +356,7 @@ class MockHistoricalSetupProvider implements HistoricalSetupProvider {
 
   double _alignmentBiasForSymbol(String symbol) {
     return switch (symbol) {
+      'BULL' => 0.82,
       'NVDA' => 0.76,
       'MSFT' => 0.67,
       'AAPL' => 0.64,
@@ -369,6 +370,7 @@ class MockHistoricalSetupProvider implements HistoricalSetupProvider {
 
   double _comparisonDriftForSymbol(String symbol) {
     return switch (symbol) {
+      'BULL' => 0.20,
       'NVDA' => 0.20,
       'MSFT' => 0.12,
       'AAPL' => 0.10,

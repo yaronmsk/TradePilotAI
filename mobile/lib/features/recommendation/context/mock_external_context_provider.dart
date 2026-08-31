@@ -101,25 +101,33 @@ class MockExternalContextProvider implements ExternalContextProvider {
     }
 
     final earningsHours = switch (symbol) {
+      'BULL' => 480,
       'NVDA' => 28,
       'PLTR' => 18,
       'GOOG' => 72,
       'AAPL' => 96,
       'MSFT' => 120,
       'TSLA' => 160,
-      _ => 84 + (_stableHash(symbol) % 120),
+      // Generic synthetic symbols intentionally span both near-event and
+      // no-near-event states. The previous 84..203 hour range kept every
+      // generic Swing symbol inside the 14-day earnings relevance window,
+      // which made Event Risk a permanent confidence penalty in development.
+      _ => 84 + (_stableHash(symbol) % 420),
     };
 
     // This remains synthetic development timing. Existing Trader interval
-    // behavior is preserved. Swing's supported 4H/1D intervals both use the
-    // same simulated upcoming macro-event timing here; strategy relevance is
-    // expressed by EventRiskStrategyPolicy, not by manufacturing direction.
+    // behavior is preserved. Swing's supported 4H/1D intervals use the same
+    // symbol-deterministic timing, but generic symbols intentionally span both
+    // near-event and outside-relevance states so release testing is not trapped
+    // under a permanent synthetic macro-risk penalty.
     final macroHours = switch (primaryTimeframe) {
       '1m' => 9,
       '5m' => 18,
       '15m' => 24,
       '30m' => 30,
       '1h' => 36,
+      '4h' => _swingMacroHours(symbol),
+      '1d' => _swingMacroHours(symbol),
       _ => 36,
     };
 
@@ -147,8 +155,22 @@ class MockExternalContextProvider implements ExternalContextProvider {
     );
   }
 
+  int _swingMacroHours(String symbol) {
+    if (symbol == 'BULL') {
+      return 240;
+    }
+
+    // Preserve the named NVDA regression fixture exactly.
+    if (symbol == 'NVDA') {
+      return 36;
+    }
+
+    return 36 + (_stableHash('$symbol|macro') % 240);
+  }
+
   NewsSentimentProfile _newsFor(String symbol) {
     final score = switch (symbol) {
+      'BULL' => 65.0,
       'NVDA' => 52.0,
       'AAPL' => 24.0,
       'MSFT' => 31.0,

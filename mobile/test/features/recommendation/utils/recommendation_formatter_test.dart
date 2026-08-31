@@ -18,10 +18,17 @@ void main() {
       );
     });
 
-    test('formats Hold', () {
+    test('formats No Clear Direction', () {
       expect(
         RecommendationFormatter.display(RecommendationType.hold),
-        '🟡 Hold',
+        '🟡 No Clear Direction',
+      );
+    });
+
+    test('formats Wait for Confirmation', () {
+      expect(
+        RecommendationFormatter.display(RecommendationType.wait),
+        '⏳ Wait for Confirmation',
       );
     });
   });

@@ -74,6 +74,25 @@ class MockMarketDataProvider implements MarketDataProvider {
 
   _MockMarketBehavior _behaviorForSymbol(String symbol, String timeframe) {
     switch (symbol) {
+      case 'BULL':
+        // Explicit development-only bullish fixture used to exercise the
+        // complete Swing BUY presentation path. It does not bypass any
+        // recommendation threshold or scoring rule.
+        return _MockMarketBehavior(
+          startPrice: 100,
+          totalPriceChange: _timeframeMove(
+            timeframe,
+            shortTerm: 16,
+            confirmation: 14,
+            regime: 24,
+          ),
+          volatility: 0.28,
+          closeBias: 0.90,
+          rangePadding: 0.40,
+          baseVolume: 2100000,
+          volumeStep: 50000,
+        );
+
       case 'NVDA':
         return _MockMarketBehavior(
           startPrice: 100,

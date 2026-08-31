@@ -57,6 +57,11 @@ class RecommendationCard extends StatelessWidget {
             style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
+          const Text(
+            'Why this result',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 6),
           Text(recommendation.oneLineExplanation),
           const SizedBox(height: 12),
           const Divider(),

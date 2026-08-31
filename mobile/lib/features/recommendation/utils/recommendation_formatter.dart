@@ -12,7 +12,7 @@ class RecommendationFormatter {
         return 'Buy';
 
       case RecommendationType.hold:
-        return 'Hold';
+        return 'No Clear Direction';
 
       case RecommendationType.sell:
         return 'Sell';
@@ -21,7 +21,7 @@ class RecommendationFormatter {
         return 'Strong Sell';
 
       case RecommendationType.wait:
-        return 'Wait';
+        return 'Wait for Confirmation';
 
       case RecommendationType.unknown:
         return 'Unknown';

@@ -127,6 +127,22 @@ void main() {
     },
   );
 
+  test(
+    'Swing synthetic event simulation includes a no-near-event state',
+    () async {
+      final context = await provider.load(
+        symbol: 'FAA',
+        strategy: StrategyType.swing,
+        primaryTimeframe: '1d',
+        target: target,
+      );
+
+      expect(context.eventRisk.earningsHoursAway, greaterThan(336));
+      expect(context.eventRisk.macroEventHoursAway, greaterThan(168));
+      expect(context.eventRisk.confidencePenaltyPoints, 0);
+    },
+  );
+
   test('Investor Event Risk remains unavailable in v0.11', () async {
     final context = await provider.load(
       symbol: 'NVDA',

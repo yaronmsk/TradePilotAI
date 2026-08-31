@@ -15,14 +15,24 @@ void main() {
       expect(presentation.color, Colors.green);
     });
 
-    test('creates presentation for Hold', () {
+    test('creates presentation for No Clear Direction', () {
       final presentation = RecommendationPresentation.fromType(
         RecommendationType.hold,
       );
 
-      expect(presentation.label, 'Hold');
+      expect(presentation.label, 'No Clear Direction');
       expect(presentation.icon, '🟡');
       expect(presentation.color, Colors.orange);
+    });
+
+    test('creates presentation for Wait for Confirmation', () {
+      final presentation = RecommendationPresentation.fromType(
+        RecommendationType.wait,
+      );
+
+      expect(presentation.label, 'Wait for Confirmation');
+      expect(presentation.icon, '⏳');
+      expect(presentation.color, Colors.blueGrey);
     });
 
     test('creates presentation for Strong Sell', () {

@@ -141,10 +141,10 @@ void main() {
     expect(find.text('Waiting for Analysis'), findsNothing);
 
     await tester.scrollUntilVisible(
-      find.text('Version 0.11'),
+      find.text('Version 0.11.0'),
       250,
       scrollable: dashboardScroll,
     );
-    expect(find.text('Version 0.11'), findsOneWidget);
+    expect(find.text('Version 0.11.0'), findsOneWidget);
   });
 }

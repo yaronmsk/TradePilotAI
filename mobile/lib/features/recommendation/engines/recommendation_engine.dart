@@ -35,8 +35,11 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [
+          RecommendationDecisionReason.insufficientCoverage,
+        ],
         explanation:
-            'There is not enough reliable evidence coverage for a clear recommendation.',
+            'There is not enough reliable evidence yet to make a clear recommendation.',
       );
     }
 
@@ -58,8 +61,9 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [RecommendationDecisionReason.materialConflict],
         explanation:
-            'Independent evidence families are materially conflicted, so the current Swing setup does not have a sufficiently clear directional edge.',
+            'Bullish and bearish evidence currently conflict, so there is no clear recommendation.',
       );
     }
 
@@ -74,8 +78,11 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [
+          RecommendationDecisionReason.strongBullishAction,
+        ],
         explanation:
-            'Independent evidence families strongly align bullish with high confidence.',
+            'Bullish evidence strongly aligns across independent evidence groups with high confidence.',
       );
     }
 
@@ -90,8 +97,9 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [RecommendationDecisionReason.bullishAction],
         explanation:
-            'Bullish evidence leads across the available independent evidence families.',
+            'Bullish evidence leads across enough independent evidence groups with sufficient confidence.',
       );
     }
 
@@ -106,8 +114,11 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [
+          RecommendationDecisionReason.strongBearishAction,
+        ],
         explanation:
-            'Independent evidence families strongly align bearish with high confidence.',
+            'Bearish evidence strongly aligns across independent evidence groups with high confidence.',
       );
     }
 
@@ -122,8 +133,9 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: const [RecommendationDecisionReason.bearishAction],
         explanation:
-            'Bearish evidence leads across the available independent evidence families.',
+            'Bearish evidence leads across enough independent evidence groups with sufficient confidence.',
       );
     }
 
@@ -136,15 +148,26 @@ class RecommendationEngine {
         candleCount: candleCount,
         analysisTime: analysisTime,
         historicalValidation: historicalValidation,
+        decisionReasons: [
+          if (scoringResult.conflict >= 0.60)
+            RecommendationDecisionReason.materialConflict
+          else
+            RecommendationDecisionReason.neutralEvidence,
+        ],
         explanation: scoringResult.conflict >= 0.60
-            ? 'Bullish and bearish evidence families are materially conflicted, leaving no clear directional edge.'
-            : 'The current independent evidence families are broadly neutral.',
+            ? 'Bullish and bearish evidence currently conflict, so there is no clear recommendation.'
+            : 'Current evidence is broadly balanced, with no meaningful bullish or bearish advantage.',
       );
     }
 
-    final breadthExplanation = hasActionBreadth
-        ? ''
-        : ' Independent-family confirmation is still too limited for an actionable recommendation.';
+    final waitReasons = <RecommendationDecisionReason>[
+      if (directionScore.abs() < policy.actionDirectionThreshold)
+        RecommendationDecisionReason.insufficientDirectionalStrength,
+      if (confidence < policy.minimumActionConfidence)
+        RecommendationDecisionReason.insufficientConfidence,
+      if (!hasActionBreadth)
+        RecommendationDecisionReason.insufficientFamilyBreadth,
+    ];
 
     return _build(
       type: RecommendationType.wait,
@@ -154,9 +177,53 @@ class RecommendationEngine {
       candleCount: candleCount,
       analysisTime: analysisTime,
       historicalValidation: historicalValidation,
-      explanation:
-          'A directional bias exists, but confidence or cross-family agreement is not yet strong enough to act on it.$breadthExplanation',
+      decisionReasons: waitReasons,
+      explanation: _waitExplanation(
+        directionScore: directionScore,
+        confidence: confidence,
+        hasActionBreadth: hasActionBreadth,
+        actionDirectionThreshold: policy.actionDirectionThreshold,
+        minimumActionConfidence: policy.minimumActionConfidence,
+      ),
     );
+  }
+
+  String _waitExplanation({
+    required double directionScore,
+    required double confidence,
+    required bool hasActionBreadth,
+    required double actionDirectionThreshold,
+    required double minimumActionConfidence,
+  }) {
+    final isBullish = directionScore >= 0;
+    final directionLabel = isBullish ? 'bullish' : 'bearish';
+    final actionLabel = isBullish ? 'Buy' : 'Sell';
+    final blockers = <String>[
+      if (directionScore.abs() < actionDirectionThreshold)
+        'the directional edge is not yet strong enough',
+      if (confidence < minimumActionConfidence)
+        'confidence is still below the level required for a $actionLabel recommendation',
+      if (!hasActionBreadth)
+        'too few independent evidence groups currently confirm it',
+    ];
+
+    if (blockers.isEmpty) {
+      return 'A $directionLabel direction is forming, but confirmation is not yet strong enough for an actionable recommendation.';
+    }
+
+    return 'A $directionLabel direction is forming, but ${_joinWithAnd(blockers)}.';
+  }
+
+  String _joinWithAnd(List<String> parts) {
+    if (parts.length == 1) {
+      return parts.single;
+    }
+
+    if (parts.length == 2) {
+      return '${parts[0]} and ${parts[1]}';
+    }
+
+    return '${parts.sublist(0, parts.length - 1).join(', ')}, and ${parts.last}';
   }
 
   Recommendation _build({
@@ -167,12 +234,16 @@ class RecommendationEngine {
     required int candleCount,
     required DateTime analysisTime,
     required HistoricalSetupValidation historicalValidation,
+    required List<RecommendationDecisionReason> decisionReasons,
     required String explanation,
   }) {
     return Recommendation(
       type: type,
       evidenceScore: scoringResult.confidence,
       consensus: scoringResult,
+      decisionReasons: List<RecommendationDecisionReason>.unmodifiable(
+        decisionReasons,
+      ),
       oneLineExplanation: explanation,
       timeframe: timeframe,
       candleCount: candleCount,

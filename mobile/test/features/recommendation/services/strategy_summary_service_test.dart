@@ -67,7 +67,7 @@ void main() {
     );
 
     expect(summaries[1].status, StrategyStatus.active);
-    expect(summaries[1].recommendation, 'Hold');
+    expect(summaries[1].recommendation, 'No Clear Direction');
     expect(summaries[1].confidence, 72);
     expect(summaries[2].status, StrategyStatus.comingSoon);
   });

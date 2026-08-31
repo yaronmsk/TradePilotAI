@@ -7,6 +7,7 @@ class MockSecurityContextResolver implements SecurityContextResolver {
   @override
   MarketContextTarget resolve(String symbol) {
     switch (symbol.trim().toUpperCase()) {
+      case 'BULL':
       case 'AAPL':
       case 'MSFT':
       case 'NVDA':
