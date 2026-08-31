@@ -13,7 +13,7 @@ Status:
 Approved
 
 Last Updated:
-2026-08-29
+2026-08-31
 
 Owner:
 TradePilot AI
@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Development — Batches 1-8 Complete
+Development — Batches 1-8, 9A and 9B Complete
 
 Date
 
@@ -95,7 +95,7 @@ Implemented:
 - Added top-level UI regression coverage for Trader -> Swing activation.
 - No scoring weights, evidence direction, family caps, attribution math, Event Risk behavior or Historical Setup Validation behavior changed.
 
-Batch 9A validation so far:
+Batch 9A validation:
 
 - Focused Strategy Summary/dashboard/top-level UI gate: 8 passing tests.
 - Recommendation subsystem suite: 441 passing tests.
@@ -104,9 +104,33 @@ Batch 9A validation so far:
 - `git diff --check`: clean.
 - Full automated suite: 514 passing tests.
 
+### Batch 9B — Swing Decision Helpers
+
+Implemented:
+
+- Added a Swing-only Decision Helper card between Recommendation Insight and Evidence.
+- Added human-readable `Entry Quality`, `Price Stretch` and `Structure Watch` outputs.
+- Derived Price Stretch from existing Swing Price Extension evidence.
+- Derived Structure Watch from existing Swing Support & Resistance evidence.
+- Derived Entry Quality as a presentation summary rather than a proprietary numeric score.
+- Added individual reusable explainability/info paths for every helper.
+- Kept the helper layer strictly downstream of the recommendation engine.
+- Decision Helpers add zero evidence votes, zero direction points and zero confidence points.
+- Trader remains unchanged and Investor remains Coming Soon.
+- No scoring weights, evidence direction, recommendation thresholds, family caps, attribution math, Event Risk or Historical Setup Validation behavior changed.
+
+Batch 9B validation:
+
+- Focused Decision Helper / top-level UI gate: 9 passing tests.
+- Recommendation subsystem suite: 449 passing tests.
+- Flutter analyzer: clean.
+- `git diff --check`: clean.
+- Full automated suite: 522 passing tests.
+- Manual Chrome visual acceptance: passed on 2026-08-31.
+
 Next planned implementation work:
 
-**Batch 9 — Decision Helpers & final Swing UI acceptance.**
+**Batch 10 — Full v0.11.0 regression, documentation/release acceptance and release checkpoint.**
 
 ### Release Boundary
 

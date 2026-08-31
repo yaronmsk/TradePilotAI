@@ -125,7 +125,7 @@ Days to weeks.
 
 **v0.11.0 active development.**
 
-Swing has a validated strategy-specific backend and is now selectable in the visible Strategy Summary through Batch 9A. Investor remains unavailable. Remaining v0.11.0 UI work is decision-helper completion and final validation.
+Swing has a validated strategy-specific backend, is selectable in the visible Strategy Summary, and now includes validated presentation-only Decision Helpers through Batch 9B. Investor remains unavailable. Remaining v0.11.0 work is final release acceptance.
 
 Swing must not be implemented as Trader logic running on slower candles.
 
@@ -434,7 +434,7 @@ Avoid:
 
 without explanation.
 
-Decision helpers may summarize existing evidence but must not create another independent vote when derived from evidence already counted by the Consensus Engine. Batch 9A activates Swing presentation only; decision-helper implementation remains a separate Batch 9 step.
+Decision helpers may summarize existing evidence but must not create another independent vote when derived from evidence already counted by the Consensus Engine. Batch 9B implements Swing `Entry Quality`, `Price Stretch` and `Structure Watch` as presentation-derived summaries only. They consume existing typed recommendation/evidence outputs and add zero direction points, zero confidence points and zero independent votes.
 
 ### Swing attribution
 

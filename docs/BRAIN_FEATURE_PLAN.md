@@ -116,9 +116,9 @@ Current release:
 
 Status:
 
-**Active development / Batches 1–8 implemented and validated; Batch 9A Swing UI activation implemented and validated.**
+**Active development / Batches 1–8, Batch 9A Swing UI activation and Batch 9B Decision Helpers implemented and validated.**
 
-The validated Swing backend and attribution contract are now integrated into the visible Strategy Summary through Batch 9A. Swing is selectable; Investor remains Coming Soon. Decision helpers and final v0.11.0 acceptance remain pending.
+The validated Swing backend and attribution contract are integrated into the visible Strategy Summary. Batch 9B adds presentation-only Swing Decision Helpers; Investor remains Coming Soon. Final v0.11.0 release acceptance remains pending.
 
 Detailed evidence, capability and acceptance contract:
 
@@ -249,7 +249,7 @@ Batch 9A presentation-layer activation is implemented:
 - No Batch 9A change modifies evidence providers, scoring weights, direction logic, family caps, attribution math, Event Risk or Historical Setup Validation.
 - Decision helpers remain pending and must not create duplicate votes.
 
-Batch 9A validation so far:
+Batch 9A validation:
 
 - 8 focused Strategy Summary/dashboard/top-level UI tests passing.
 - 441 recommendation subsystem tests passing.
@@ -257,9 +257,27 @@ Batch 9A validation so far:
 - Flutter analyzer clean.
 - 514 total automated tests passing.
 
+Batch 9B Decision Helpers are implemented:
+
+- Swing-only `Entry Quality`, `Price Stretch` and `Structure Watch`.
+- Helpers are derived from existing typed Recommendation / Price Extension / Support & Resistance outputs.
+- Helpers are presentation-only and cannot feed back into consensus.
+- No helper creates an evidence vote, direction points or confidence points.
+- Each helper has its own reusable `MetricExplainability` info path.
+- Trader remains unchanged and Investor remains unavailable.
+- No scoring weights, evidence direction, family caps, attribution math, Event Risk or Historical Setup Validation behavior changed.
+
+Batch 9B validation:
+
+- 9 focused Decision Helper / top-level UI tests passing.
+- 449 recommendation subsystem tests passing.
+- Flutter analyzer clean.
+- 522 total automated tests passing.
+- Manual Chrome visual acceptance passed on 2026-08-31.
+
 Next implementation work:
 
-**Batch 9 — Decision Helpers & final Swing UI acceptance.**
+**Batch 10 — Full v0.11.0 regression, documentation/release acceptance and release checkpoint.**
 
 ### Swing UI / explainability rules
 

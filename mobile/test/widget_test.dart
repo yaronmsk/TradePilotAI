@@ -123,6 +123,16 @@ void main() {
     expect(find.text('Swing Recommendation Insight'), findsOneWidget);
 
     await tester.scrollUntilVisible(
+      find.text('Swing Decision Helper'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Swing Decision Helper'), findsOneWidget);
+    expect(find.text('Entry Quality'), findsOneWidget);
+    expect(find.text('Price Stretch'), findsOneWidget);
+    expect(find.text('Structure Watch'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
       find.text('Swing Evidence'),
       250,
       scrollable: dashboardScroll,

@@ -3,7 +3,7 @@
 **Document ID:** TP-012
 **Version:** 2.0
 **Status:** Active
-**Last Updated:** 2026-08-28
+**Last Updated:** 2026-08-31
 **Primary Branch:** `develop`
 
 ---
@@ -26,7 +26,7 @@ Current active development release:
 
 Status:
 
-**Production implementation active — Batches 1-7 completed and validated.**
+**Production implementation active — Batches 1–8, 9A and 9B implemented and validated; final v0.11.0 release acceptance remains.**
 
 Detailed v0.11.0 evidence, capability and acceptance contract:
 
@@ -96,7 +96,7 @@ No existing Trader evidence provider is automatically valid for Swing merely bec
 ### Strategy Model
 
 * Trader — implemented and active.
-* Swing — v0.11.0 active development; remains Coming Soon in the UI until a real strategy-specific Swing recommendation is implemented and validated.
+* Swing — v0.11.0 active development; strategy-specific backend, visible activation and presentation-only Decision Helpers are implemented and validated.
 * Investor — planned for v0.12.0.
 * Strategy Summary is the master context selector for detailed analysis.
 * Recommendation, Evidence, Context and Risk belong explicitly to the selected strategy.
@@ -608,7 +608,7 @@ Approved detailed scope:
 
 Current checkpoint:
 
-**Batches 1-8 implemented and regression-validated.**
+**Batches 1–8 plus Batch 9A and Batch 9B implemented and regression-validated.**
 
 Completed production foundations:
 
@@ -657,7 +657,7 @@ Batch 9A implementation checkpoint:
 * Batch 9A does not change scoring weights, evidence direction, family caps, attribution mathematics, Event Risk or Historical Setup Validation behavior.
 * Decision helpers remain outstanding work inside Batch 9 and must not create duplicate evidence votes.
 
-Batch 9A validation so far:
+Batch 9A validation:
 
 * Focused Strategy Summary / dashboard / top-level UI gate: 8 passing tests.
 * Recommendation subsystem suite: 441 passing tests.
@@ -666,9 +666,32 @@ Batch 9A validation so far:
 * `git diff --check`: clean.
 * Full automated suite: 514 passing tests.
 
+Batch 9B implementation checkpoint:
+
+* Added a Swing-only `Swing Decision Helper` presentation layer.
+* Decision Helpers expose three human-readable outputs: `Entry Quality`, `Price Stretch` and `Structure Watch`.
+* `Price Stretch` is derived from existing Swing Price Extension evidence.
+* `Structure Watch` is derived from existing Swing Support & Resistance evidence.
+* `Entry Quality` summarizes existing recommendation/evidence state without creating a proprietary numeric score.
+* Decision Helpers consume already-computed typed evidence and do not feed back into the Consensus Engine.
+* Decision Helpers add exactly zero new evidence votes, zero direction points and zero confidence points.
+* Each helper has an individual `MetricExplainability` info path covering inputs, calculation, role, impact boundary and limitations.
+* Trader does not display the Swing Decision Helper.
+* Investor remains unavailable / Coming Soon.
+* No Batch 9B change modifies evidence providers, scoring weights, recommendation thresholds, family caps, attribution mathematics, Event Risk or Historical Setup Validation behavior.
+
+Batch 9B validation:
+
+* Focused Decision Helper / top-level UI gate: 9 passing tests.
+* Recommendation subsystem suite: 449 passing tests.
+* Flutter analyzer: clean.
+* `git diff --check`: clean.
+* Full automated suite: 522 passing tests.
+* Manual Chrome visual acceptance: passed on 2026-08-31.
+
 Current next implementation work:
 
-**Batch 9 — Decision Helpers & final Swing UI acceptance.**
+**Batch 10 — Full v0.11.0 regression, documentation/release acceptance and release checkpoint.**
 
 Permanent Swing acceptance constraints:
 

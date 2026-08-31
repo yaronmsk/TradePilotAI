@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import '../recommendation/models/strategy_recommendation.dart';
 import '../recommendation/models/strategy_summary.dart';
 import '../recommendation/services/strategy_summary_service.dart';
+import '../recommendation/services/swing_decision_helper_service.dart';
 import '../recommendation/widgets/analysis_context_card.dart';
 import '../recommendation/widgets/consensus_summary_card.dart';
 import '../recommendation/widgets/evidence_list.dart';
 import '../recommendation/widgets/recommendation_card.dart';
 import '../recommendation/widgets/stock_behavior_card.dart';
 import '../recommendation/widgets/strategy_summary_card.dart';
+import '../recommendation/widgets/swing_decision_helper_card.dart';
 import '../watchlist/models/watchlist_item.dart';
 import '../watchlist/widgets/add_stock_dialog.dart';
 import '../watchlist/widgets/watchlist_card.dart';
@@ -29,6 +31,7 @@ class _DashboardPageState extends State<DashboardPage> {
   DashboardController get dashboardController => widget.dashboardController;
 
   static const _strategySummaryService = StrategySummaryService();
+  static const _swingDecisionHelperService = SwingDecisionHelperService();
 
   StrategyType _selectedStrategy = StrategyType.trader;
 
@@ -132,6 +135,10 @@ class _DashboardPageState extends State<DashboardPage> {
                         recommendation: selectedResult,
                       );
 
+                final swingDecisionHelper = selectedRecommendation == null
+                    ? null
+                    : _swingDecisionHelperService.build(selectedRecommendation);
+
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -177,6 +184,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       ConsensusSummaryCard(
                         strategyRecommendation: selectedRecommendation,
                       ),
+                      if (swingDecisionHelper != null)
+                        SwingDecisionHelperCard(summary: swingDecisionHelper),
                       const SizedBox(height: 8),
                       Text(
                         '${selectedRecommendation.title} Evidence',

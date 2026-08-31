@@ -1,10 +1,10 @@
 # TradePilot AI — v0.11.0 Swing Strategy Brain
 
-Status: Implementation in progress — Batches 0-8 complete
+Status: Implementation in progress — Batches 0-8, 9A and 9B complete
 Release: v0.11.0
 Baseline: v0.10.1
 Baseline release commit: c53ad00
-Last implementation checkpoint: 2026-08-29
+Last implementation checkpoint: 2026-08-31
 
 ## 1. Purpose
 
@@ -871,14 +871,13 @@ Do not overload the main card with internal engine terminology.
 
 Decision helpers are allowed only when they simplify real underlying evidence.
 
-Potential helpers include:
+Implemented initial helpers:
 
-- Trend quality.
-- Entry quality.
-- Price stretch.
-- Nearby structure risk.
-- Event risk.
-- Evidence conflict.
+- Entry Quality.
+- Price Stretch.
+- Structure Watch.
+
+Other helper concepts such as Trend Quality, Event Risk and Evidence Conflict remain unnecessary as separate Batch 9B outputs because equivalent information is already exposed through Recommendation Insight, Analysis Context or confidence attribution.
 
 A helper must never become an unexplained proprietary score.
 
@@ -899,6 +898,18 @@ Every helper requires an info path explaining:
 - Limitations.
 
 If a helper is derived from evidence already counted in the Consensus Engine, the helper itself must not create another vote.
+
+Batch 9B implementation boundary:
+
+- `Price Stretch` is derived from existing Swing Price Extension evidence.
+- `Structure Watch` is derived from existing Swing Support & Resistance evidence.
+- `Entry Quality` is a qualitative synthesis of already-computed recommendation/evidence state.
+- Helper logic consumes typed evidence rather than parsing presentation strings.
+- The helper layer is presentation-only and never feeds back into the Consensus Engine.
+- Decision Helpers add exactly zero direction points, zero confidence points and zero evidence-family votes.
+- Every helper has an individual `MetricExplainability` path.
+- Trader does not render the Swing Decision Helper.
+- Investor remains unavailable.
 
 ---
 
@@ -1222,12 +1233,29 @@ Visible Swing activation remains intentionally deferred to Batch 9.
 ### Batch 9
 Swing UI activation and decision helpers.
 
-Implement:
+Status:
+
+**Completed and validated through Batch 9B on 2026-08-31.**
+
+Batch 9A implemented:
 - Strategy Summary activation.
-- Swing Analysis Context.
-- Human-readable evidence.
-- Human-readable decision helpers.
-- Individual info controls.
+- Swing Analysis Context and selected-strategy presentation.
+- Human-readable Swing Recommendation / Recommendation Insight / Evidence.
+- Independent Trader and Swing cached recommendation presentation.
+- Investor remains unavailable.
+
+Batch 9B implemented:
+- Swing-only Decision Helper card.
+- `Entry Quality`, `Price Stretch` and `Structure Watch`.
+- Individual info controls and reusable explainability for every helper.
+- Presentation-derived helper logic with no new evidence vote, direction influence or confidence influence.
+
+Validation:
+- Flutter analyzer: clean.
+- Focused Batch 9B / top-level UI tests: 9 passing.
+- Recommendation subsystem suite: 449 passing tests.
+- Full automated suite: 522 passing tests.
+- Manual Chrome visual acceptance: passed on 2026-08-31.
 
 ### Batch 10
 Full regression, visual acceptance, documentation and release.

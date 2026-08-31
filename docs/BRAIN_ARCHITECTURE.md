@@ -285,11 +285,12 @@ Deferred intentionally:
 - Swing-specific Historical Setup Validation horizon.
 - Swing recommendation policy.
 - Batch 9A Strategy Summary activation and selected-strategy presentation integration.
-- Human-readable Swing cards; decision helpers remain pending inside Batch 9.
+- Human-readable Swing cards and Batch 9B presentation-only Decision Helpers (`Entry Quality`, `Price Stretch`, `Structure Watch`).
 - Individual info paths for every Swing analytical input.
 - Direction attribution reconciled to 100% of active post-family-cap influence.
 - Confidence attribution kept separate from directional attribution.
 - Trader and Swing presentation resolve from independent cached recommendation states.
+- Swing Decision Helpers are downstream presentation summaries only: they consume already-computed typed evidence, do not enter the Consensus Engine and cannot add direction/confidence influence.
 - Investor remains unavailable until v0.12.0.
 
 ### v0.12.0 — Investor Strategy Brain

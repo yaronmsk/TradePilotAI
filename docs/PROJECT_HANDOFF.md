@@ -2,8 +2,8 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.11.0 — Scope Approved
-**Date:** 2026-08-23
+**Checkpoint:** v0.11.0 — Batch 9B Decision Helpers Validated
+**Date:** 2026-08-31
 **Primary Branch:** `develop`
 
 ---
@@ -73,13 +73,13 @@ Current active development release:
 
 Status:
 
-**Production implementation active — Batches 1–8 complete; Batch 9A Swing UI activation implemented and validated.**
+**Production implementation active — Batches 1–8, 9A and 9B implemented and validated; final release acceptance remains.**
 
 Detailed evidence, capability and acceptance contract:
 
 `docs/SWING_STRATEGY_BRAIN_V0_11.md`
 
-Swing now has a validated strategy-specific backend and is activated in the visible Strategy Summary through Batch 9A. Decision-helper completion and final v0.11.0 validation remain in progress.
+Swing now has a validated strategy-specific backend, visible Strategy Summary activation and presentation-only Decision Helpers. Final v0.11.0 regression/documentation/release acceptance remains in progress.
 
 Swing must not be implemented as Trader logic running on slower candles.
 
@@ -505,7 +505,7 @@ Important limitations include:
 * Real market/news/event providers are not connected.
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
-* Swing brain is not implemented.
+* Swing brain is implemented through Batch 9B; final v0.11.0 release acceptance is still pending.
 * Investor fundamental brain is not implemented.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
@@ -545,10 +545,10 @@ The approved evidence-by-evidence audit is authoritative during implementation.
 
 Immediate sequence:
 
-1. Complete Batch 9A final regression validation and documentation synchronization.
-2. Keep Investor unavailable; Investor remains deferred to v0.12.0.
-3. Continue Batch 9 with decision helpers derived only from existing evidence, without creating duplicate votes.
-4. Complete full v0.11.0 regression/visual validation before the release checkpoint.
+1. Keep Investor unavailable; Investor remains deferred to v0.12.0.
+2. Preserve Batch 9B Decision Helpers as presentation-derived summaries only; they must not become evidence votes or alter confidence/direction.
+3. Complete the remaining full v0.11.0 regression and release-acceptance checks.
+4. Synchronize final release documentation, commit the validated checkpoint and prepare the v0.11.0 release checkpoint.
 
 For every existing evidence/capability, determine:
 
