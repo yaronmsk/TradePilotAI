@@ -1,6 +1,6 @@
 # TradePilot AI Brain Feature Plan
 
-Research checkpoint: August 2026
+Research checkpoint: September 2026
 
 ## Product objective
 
@@ -341,6 +341,34 @@ Primary families:
 - Revisions.
 - Competitive/industry context.
 - Long-term market/technical context.
+
+## v0.12 Investor Strategy Brain
+
+Status: **Batch 0 architecture/research scope opened.**
+
+Investor horizon: months to years.
+
+Core proposed families:
+- Growth
+- Profitability & Quality
+- Financial Strength
+- Valuation
+- Revisions
+- Competitive Durability
+- Capital Allocation & Dilution
+
+Context/timing:
+- Long-Term Market Context
+- Global Market & Macro Context
+- Ownership & Positioning
+- Long-Term Technical Context
+- persistent/material information context
+
+The existing `EvidenceFamily.fundamentals` placeholder must be expanded so independent long-term economic questions are not incorrectly de-duplicated into one vote.
+
+Global market context must be measurable through observable regimes and stock-specific sensitivity. `Market Expectations` is a zero-vote helper derived from existing evidence.
+
+Detailed scope: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 ## Solid vs volatile stock logic
 

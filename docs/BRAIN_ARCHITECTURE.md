@@ -1,7 +1,7 @@
 # TradePilot AI Brain Architecture
 
-Version: 0.11.0 Swing Strategy Brain release checkpoint
-Status: Living design — v0.11.0 release acceptance complete
+Version: 0.12.0 Investor Strategy Brain architecture scope
+Status: Living design — v0.12.0 Batch 0 research/scope opened
 
 ## Core rule
 
@@ -553,3 +553,20 @@ Final release gate:
 - `flutter build web`: passed (`build/web` produced successfully).
 - `git diff --check`: clean.
 - Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
+
+
+## v0.12 Investor architecture scope
+
+The single future `fundamentals` family is intentionally insufficient for Investor because it would de-duplicate independent economic questions.
+
+Proposed core families: Growth, Profitability & Quality, Financial Strength, Valuation, Revisions, Competitive Durability, and Capital Allocation & Dilution.
+
+Shared/context concepts: long-horizon Market Context, low/capped long-term Trend, persistent/material Sentiment, and a proposed Ownership & Positioning family.
+
+Actionable Investor recommendations require core-fundamental breadth. Technical, macro, sentiment and positioning context cannot satisfy that gate alone.
+
+Global Market & Macro Context measures observable regimes plus stock-specific sensitivity; it is not an opaque global-sentiment score and cannot create Investor BUY/SELL by itself.
+
+`Market Expectations` / `Expectations Gap` is a downstream zero-vote synthesis of already-counted evidence and therefore adds no direction/confidence influence.
+
+Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.

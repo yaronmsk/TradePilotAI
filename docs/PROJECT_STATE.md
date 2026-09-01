@@ -52,7 +52,11 @@ Approved release sequence:
 
 The current focus is:
 
-**v0.11.0 — Swing Strategy Brain**
+**v0.12.0 — Investor Strategy Brain**
+
+Batch 0 architecture/research scope:
+
+`docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
 
 The current UI remains functional and intentionally provisional.
 
@@ -97,7 +101,7 @@ No existing Trader evidence provider is automatically valid for Swing merely bec
 
 * Trader — implemented and active.
 * Swing — v0.11.0 release acceptance complete; strategy-specific backend, visible activation, Decision Helpers and recommendation-state clarity are implemented and validated.
-* Investor — planned for v0.12.0.
+* Investor — v0.12.0 Batch 0 architecture/research scope opened; production recommendation remains unavailable.
 * Strategy Summary is the master context selector for detailed analysis.
 * Recommendation, Evidence, Context and Risk belong explicitly to the selected strategy.
 * Trader Primary Analysis Interval is selectable:
@@ -598,9 +602,13 @@ v0.10.1 was validated on 2026-08-23 with:
 
 ## 14. Immediate Project Action
 
+Current tagged release:
+
+**v0.11.0 — Swing Strategy Brain** (`665fd8f`, tag `v0.11.0`)
+
 Active development release:
 
-**v0.11.0 — Swing Strategy Brain**
+**v0.12.0 — Investor Strategy Brain**
 
 Approved detailed scope:
 

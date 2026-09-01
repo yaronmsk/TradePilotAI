@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.11.0 — Release Acceptance Complete
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 0 Scope
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -539,7 +539,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor fundamental brain is not implemented.
+* Investor production brain is not implemented; v0.12.0 architecture/research scope is now open.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -566,13 +566,17 @@ When starting a new conversation:
 
 ## Immediate Continuation Point
 
+Current tagged release:
+
+**v0.11.0 — Swing Strategy Brain** (`665fd8f`, tag `v0.11.0`)
+
 Active development release:
 
-**v0.11.0 — Swing Strategy Brain**
+**v0.12.0 — Investor Strategy Brain**
 
-Detailed implementation contract:
+Detailed architecture/research contract:
 
-`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+`docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
 
 The approved evidence-by-evidence audit is authoritative during implementation.
 

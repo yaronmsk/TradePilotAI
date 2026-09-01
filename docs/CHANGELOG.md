@@ -24,6 +24,30 @@ Related Documents:
 
 ---
 
+## v0.12.0 — Investor Strategy Brain
+
+Status
+
+Architecture / Research Scope Opened — Batch 0
+
+Date
+
+2026-09-01
+
+Summary
+
+Opened v0.12.0 as the dedicated months-to-years Investor Strategy Brain.
+
+Batch 0 defines independent fundamental evidence families, core-fundamental breadth, Global Market & Macro Context, stock-specific sensitivity, Ownership & Positioning, point-in-time historical discipline, sector/business-model normalization, and a zero-vote `Market Expectations` synthesis.
+
+No production Investor recommendation behavior changes in Batch 0.
+
+Detailed scope:
+
+`docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
+
+---
+
 ## v0.11.0 — Swing Strategy Brain
 
 Status

@@ -143,7 +143,9 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-Planned for v0.12.0.
+v0.12.0 Batch 0 architecture/research scope is active. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+
+Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
 The same stock may legitimately have different conclusions for all three strategies because strategy horizons, evidence applicability, parameters, context and historical-validation windows differ.
 
@@ -187,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain.
+10. v0.12.0 — Investor Strategy Brain. Active architecture/research scope.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
