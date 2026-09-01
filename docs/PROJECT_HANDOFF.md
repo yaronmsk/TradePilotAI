@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 1 Foundation Validated
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 2 Growth + Profitability/Quality Validated
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -539,7 +539,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor production scoring/recommendation brain is not yet implemented; v0.12.0 Batch 1 foundation is implemented and validated.
+* Investor production recommendation generation is still unavailable; v0.12.0 Batch 2 Growth + Profitability/Quality evidence is implemented and validated.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -663,6 +663,73 @@ Batch 1 validation:
 - Full automated suite: 537 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable and Batch 1 does not activate new Investor UI behavior.
+
+## Batch 2 — Growth + Profitability & Quality
+
+Implemented and validated on 2026-09-01.
+
+Batch 2 introduces the first real Investor analytical evidence while keeping Investor recommendation generation unavailable.
+
+Implemented architecture:
+
+- Added an Investor-specific evidence boundary that consumes point-in-time Investor data and emits the shared `EvidenceResult` shape.
+- Added typed per-metric assessments with:
+  - availability state;
+  - supportive / opposing / neutral direction;
+  - symmetric signed evaluative signal;
+  - reliability;
+  - current/baseline values;
+  - complete individual explainability.
+- Added a reusable Investor family aggregation helper so multiple related metrics become one de-duplicated family assessment rather than multiple independent votes.
+- Kept global `EvidenceKind` unchanged. Batch 2 Investor definitions remain intentionally outside the current Trader/Swing strategy selector until Investor orchestration is ready.
+- Kept `RecommendationStrategyPolicy.forStrategy(Investor)` unavailable and Investor `StrategyAnalysisPolicy` planned.
+
+Growth family implementation:
+
+- Revenue multi-year CAGR.
+- Diluted EPS multi-year CAGR when positive endpoints make CAGR mathematically meaningful.
+- Free Cash Flow multi-year CAGR when positive endpoints make CAGR mathematically meaningful.
+- Revenue is required plus at least one additional valid growth measure.
+- Non-positive CAGR endpoints are withheld rather than converted into misleading percentage growth.
+- Revenue, EPS and FCF are combined into exactly one Growth-family evidence result.
+- Batch 2 normalization is deterministic development policy and is not presented as historically optimized.
+
+Profitability & Quality family implementation:
+
+- Gross Margin Trend.
+- Operating Margin Quality.
+- Free Cash Flow Margin Quality.
+- Return on Invested Capital Quality.
+- Gross Margin is trajectory-first because absolute normal levels differ substantially by industry.
+- Operating Margin, FCF Margin and ROIC combine trajectory with a bounded positive/negative economic level component centered on zero.
+- No universal sector-specific “good margin” or “good ROIC” threshold is claimed in Batch 2.
+- Peer/sector-relative profitability calibration remains deferred until reliable peer distributions are available.
+- The four metrics combine into exactly one Profitability & Quality family evidence result.
+
+Synthetic development fixtures:
+
+- `IVBULL` — improving Growth and improving Profitability & Quality.
+- `IVBEAR` — contracting Growth and deteriorating Profitability & Quality.
+- `IVMIX` — positive Growth with deteriorating Profitability & Quality, proving independent economic-family disagreement is preserved.
+- `IVFLAT` — approximately neutral Growth.
+- All development fundamentals are explicitly marked synthetic and point-in-time metadata is preserved.
+
+De-duplication / architecture proof:
+
+- Three Growth metrics remain one Growth family.
+- Four Profitability/Quality metrics remain one Profitability & Quality family.
+- Feeding both family results into the existing `ConsensusEngine` produces exactly two independent families, not seven metric votes.
+- No Trader/Swing production calculation file was changed by Batch 2.
+
+Batch 2 validation:
+
+- Flutter analyzer: clean.
+- Investor suite: 18 passing tests.
+- Recommendation subsystem suite: 473 passing tests.
+- Full automated suite: 547 passing tests.
+- `git diff --cached --check`: clean.
+- Batch 2 code checkpoint before documentation: 10 new files, 1,255 insertions.
+- No visual acceptance was required because Investor remains unavailable in the UI.
 
 ## Handoff Principle
 
