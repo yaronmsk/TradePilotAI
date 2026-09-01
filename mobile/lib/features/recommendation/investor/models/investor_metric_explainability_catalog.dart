@@ -17,6 +17,12 @@ enum InvestorMetricKind {
   priceToEarningsRelative,
   priceToFreeCashFlowRelative,
   enterpriseValueToOperatingProfitRelative,
+  revenueEstimateRevision,
+  dilutedEpsEstimateRevision,
+  freeCashFlowEstimateRevision,
+  returnOnInvestedCapitalPersistence,
+  operatingMarginPersistence,
+  freeCashFlowPersistence,
 }
 
 extension InvestorMetricKindPresentation on InvestorMetricKind {
@@ -43,6 +49,16 @@ extension InvestorMetricKindPresentation on InvestorMetricKind {
         'Price / Free Cash Flow vs Benchmarks',
       InvestorMetricKind.enterpriseValueToOperatingProfitRelative =>
         'EV / Operating Profit vs Benchmarks',
+      InvestorMetricKind.revenueEstimateRevision => 'Revenue Estimate Revision',
+      InvestorMetricKind.dilutedEpsEstimateRevision => 'EPS Estimate Revision',
+      InvestorMetricKind.freeCashFlowEstimateRevision =>
+        'Free Cash Flow Estimate Revision',
+      InvestorMetricKind.returnOnInvestedCapitalPersistence =>
+        'ROIC Persistence',
+      InvestorMetricKind.operatingMarginPersistence =>
+        'Operating Margin Persistence',
+      InvestorMetricKind.freeCashFlowPersistence =>
+        'Free Cash Flow Persistence',
     };
   }
 }
@@ -350,6 +366,115 @@ class InvestorMetricExplainabilityCatalog {
           'EV/Operating Profit is de-duplicated with P/E and Price/FCF inside the single Valuation family.',
       limitations:
           'Operating profit can be cyclical and accounting-sensitive. Non-positive operating profit invalidates the multiple. Banks, insurers and REITs require specialized valuation methods.',
+    ),
+    InvestorMetricKind.revenueEstimateRevision: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures how analyst consensus revenue for one matching future fiscal period changed across historical estimate vintages.',
+      calculation:
+          'Compares the latest revenue estimate with available 30-day and 90-day historical vintages for the same target period. The 90-day change receives 60% of the metric signal and the 30-day change 40% when both exist.',
+      whyItMatters:
+          'Upward revenue revisions can indicate improving expectations for future business activity; downward revisions can indicate weakening expectations.',
+      supportiveInterpretation:
+          'Material upward like-for-like revenue revisions support the Revisions family.',
+      opposingInterpretation:
+          'Material downward like-for-like revenue revisions oppose the Revisions family.',
+      neutralInterpretation:
+          'Small or conflicting revenue revisions are neutral.',
+      recommendationImpact:
+          'Revenue revisions contribute inside the single Revisions family and cannot become an independent vote.',
+      limitations:
+          'Analyst coverage can be sparse or wrong. Different fiscal target periods must never be compared as though they were revisions. Batch 5 normalization is provisional.',
+    ),
+    InvestorMetricKind.dilutedEpsEstimateRevision: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures how analyst consensus diluted EPS for one matching future fiscal period changed across historical estimate vintages.',
+      calculation:
+          'Compares latest EPS consensus with available 30-day and 90-day like-for-like historical vintages. Near-zero baselines are withheld because percentage revisions would be unstable.',
+      whyItMatters:
+          'EPS revisions can summarize changes in analysts’ expectations for future per-share profitability.',
+      supportiveInterpretation:
+          'Material upward EPS revisions support the Revisions family.',
+      opposingInterpretation:
+          'Material downward EPS revisions oppose the Revisions family.',
+      neutralInterpretation: 'Small or conflicting EPS revisions are neutral.',
+      recommendationImpact:
+          'EPS revisions are de-duplicated with revenue and FCF revisions inside one Revisions family.',
+      limitations:
+          'EPS estimates are sensitive to accounting, tax, share count and one-off assumptions. Consensus can herd and can be revised after price has already moved.',
+    ),
+    InvestorMetricKind.freeCashFlowEstimateRevision: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures how analyst consensus free cash flow for one matching future fiscal period changed across historical estimate vintages.',
+      calculation:
+          'Compares latest FCF consensus with available 30-day and 90-day like-for-like vintages. Near-zero baselines are withheld.',
+      whyItMatters:
+          'Forward cash-generation revisions can change the company’s expected capacity to reinvest, repay debt or return capital.',
+      supportiveInterpretation:
+          'Material upward FCF revisions support the Revisions family.',
+      opposingInterpretation:
+          'Material downward FCF revisions oppose the Revisions family.',
+      neutralInterpretation: 'Small or conflicting FCF revisions are neutral.',
+      recommendationImpact:
+          'FCF revisions contribute only inside the single Revisions family.',
+      limitations:
+          'FCF forecasts can be volatile because of working capital and capital spending assumptions, and provider history must preserve genuine historical vintages.',
+    ),
+    InvestorMetricKind.returnOnInvestedCapitalPersistence: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether reported ROIC remained positive and avoided severe erosion across the available annual history.',
+      calculation:
+          'Combines the share of positive annual ROIC observations with a penalty when the latest ROIC has eroded materially from the first observation.',
+      whyItMatters:
+          'Persistent returns on invested capital are more compatible with durable economics than returns that repeatedly disappear or collapse.',
+      supportiveInterpretation:
+          'Consistently positive ROIC with limited erosion supports observed durability.',
+      opposingInterpretation:
+          'Repeated negative ROIC or severe erosion opposes observed durability.',
+      neutralInterpretation: 'Mixed persistence is neutral.',
+      recommendationImpact:
+          'ROIC Persistence contributes inside Competitive Durability, which is explicitly correlated with Profitability & Quality in Batch 5 and cannot yet satisfy independent core breadth.',
+      limitations:
+          'Positive ROIC does not prove an economic moat because Batch 5 does not compare ROIC with cost of capital or identify a structural competitive-advantage mechanism.',
+    ),
+    InvestorMetricKind.operatingMarginPersistence: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether operating profitability stayed positive and avoided severe erosion across multiple reported years.',
+      calculation:
+          'Combines the share of positive operating-margin observations with a penalty for material erosion from the first to latest observation.',
+      whyItMatters:
+          'Operating economics that persist through time are more durable than economics that disappear rapidly.',
+      supportiveInterpretation:
+          'Consistently positive operating margins with limited erosion support observed durability.',
+      opposingInterpretation:
+          'Repeated negative margins or severe erosion oppose observed durability.',
+      neutralInterpretation: 'Mixed margin persistence is neutral.',
+      recommendationImpact:
+          'Operating Margin Persistence is one proxy inside Competitive Durability and is overlap-discounted because Profitability & Quality uses related raw data.',
+      limitations:
+          'This does not identify pricing power, switching costs, brand value or cost advantage, and normal margins vary by business model.',
+    ),
+    InvestorMetricKind.freeCashFlowPersistence: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether free cash flow remained positive and resilient across the available annual history.',
+      calculation:
+          'Combines the share of positive FCF observations with a penalty for erosion from the historical peak to the latest observation.',
+      whyItMatters:
+          'Persistent cash generation can make a long-term business thesis more resilient.',
+      supportiveInterpretation:
+          'Repeated positive FCF with limited erosion supports observed durability.',
+      opposingInterpretation:
+          'Repeated negative FCF or severe erosion from peak cash generation opposes observed durability.',
+      neutralInterpretation: 'Mixed FCF persistence is neutral.',
+      recommendationImpact:
+          'FCF Persistence contributes inside Competitive Durability and is not an independent vote.',
+      limitations:
+          'Working-capital and capital-expenditure cycles can make FCF volatile. This proxy does not prove a structural moat and overlaps with other quality evidence.',
     ),
   };
 

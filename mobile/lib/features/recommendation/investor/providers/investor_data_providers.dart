@@ -17,7 +17,7 @@ abstract interface class FundamentalDataProvider {
 /// Production use requires a provider that preserves historical estimate
 /// vintages. A current consensus value must never be backfilled into history.
 abstract interface class AnalystEstimateProvider {
-  Future<List<InvestorMetricPoint<InvestorEstimateMetric>>> loadEstimates({
+  Future<List<InvestorEstimatePoint>> loadEstimates({
     required String symbol,
     required DateTime asOf,
   });

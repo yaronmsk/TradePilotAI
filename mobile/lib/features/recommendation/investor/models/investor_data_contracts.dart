@@ -69,6 +69,26 @@ enum InvestorFundamentalMetric {
 
 enum InvestorEstimateMetric { revenue, dilutedEps, freeCashFlow }
 
+class InvestorEstimatePoint {
+  const InvestorEstimatePoint({
+    required this.metric,
+    required this.value,
+    required this.targetPeriodEnd,
+    required this.metadata,
+  });
+
+  final InvestorEstimateMetric metric;
+  final double value;
+
+  /// Fiscal/forecast period this consensus estimate refers to.
+  ///
+  /// Revision analysis must compare historical vintages only when this target
+  /// period matches. Comparing FY1 with FY2 would create a false revision.
+  final DateTime targetPeriodEnd;
+
+  final InvestorDataMetadata metadata;
+}
+
 enum InvestorMarketMetric { marketCapitalization, enterpriseValue }
 
 enum InvestorValuationMultiple {
@@ -141,7 +161,7 @@ class InvestorPointInTimeSnapshot {
     required this.analysisTime,
     List<InvestorMetricPoint<InvestorFundamentalMetric>> fundamentals =
         const [],
-    List<InvestorMetricPoint<InvestorEstimateMetric>> estimates = const [],
+    List<InvestorEstimatePoint> estimates = const [],
     List<InvestorMetricPoint<InvestorMarketMetric>> market = const [],
     List<InvestorValuationReference> valuationReferences = const [],
     List<InvestorMetricPoint<InvestorMacroMetric>> macro = const [],
@@ -158,7 +178,7 @@ class InvestorPointInTimeSnapshot {
   final DateTime analysisTime;
 
   final List<InvestorMetricPoint<InvestorFundamentalMetric>> fundamentals;
-  final List<InvestorMetricPoint<InvestorEstimateMetric>> estimates;
+  final List<InvestorEstimatePoint> estimates;
   final List<InvestorMetricPoint<InvestorMarketMetric>> market;
   final List<InvestorValuationReference> valuationReferences;
   final List<InvestorMetricPoint<InvestorMacroMetric>> macro;

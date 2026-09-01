@@ -54,7 +54,7 @@ The current focus is:
 
 **v0.12.0 — Investor Strategy Brain**
 
-Batch 4 Valuation implemented and validated.
+Batch 5 Revisions + Competitive Durability implemented and validated.
 
 Detailed v0.12 contract:
 
@@ -103,7 +103,7 @@ No existing Trader evidence provider is automatically valid for Swing merely bec
 
 * Trader — implemented and active.
 * Swing — v0.11.0 release acceptance complete; strategy-specific backend, visible activation, Decision Helpers and recommendation-state clarity are implemented and validated.
-* Investor — v0.12.0 Batch 4 Valuation evidence implemented and validated; production recommendation remains unavailable.
+* Investor — v0.12.0 Batch 5 Revisions + Competitive Durability implemented and validated; production recommendation remains unavailable.
 * Strategy Summary is the master context selector for detailed analysis.
 * Recommendation, Evidence, Context and Risk belong explicitly to the selected strategy.
 * Trader Primary Analysis Interval is selectable:
@@ -815,6 +815,61 @@ Batch 4 validation:
 - Investor suite: 35 passing tests.
 - Recommendation subsystem suite: 490 passing tests.
 - Full automated suite: 564 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 5 — Revisions + Competitive Durability
+
+Implemented and validated on 2026-09-01.
+
+Batch 5 adds point-in-time analyst Revisions and an observed Competitive Durability proxy while keeping Investor recommendation generation unavailable.
+
+Revisions implementation:
+
+- Added target-period-aware `InvestorEstimatePoint` so historical estimate vintages identify the fiscal/forecast period they refer to.
+- Historical revisions compare only like-for-like estimates for the same future target period.
+- Comparing FY1 with FY2 is explicitly forbidden because it would create a false revision.
+- Revenue Estimate Revision.
+- Diluted EPS Estimate Revision.
+- Free Cash Flow Estimate Revision.
+- Available 90-day and 30-day windows are combined inside each forecast metric before Revenue/EPS/FCF are de-duplicated into one Revisions family.
+- Current consensus cannot be silently backfilled into historical analysis.
+- Near-zero estimate baselines are withheld when percentage revision math would be unstable.
+- Revisions is an independent Investor core family, but Investor recommendations remain inactive.
+
+Competitive Durability implementation:
+
+- ROIC Persistence.
+- Operating Margin Persistence.
+- Free Cash Flow Persistence.
+- Durability measures observed persistence/resilience of reported economics only.
+- It does not claim to identify a structural economic moat.
+- It does not infer network effects, switching costs, brand power, patents, cost advantage or efficient scale.
+- It does not yet compare ROIC with cost of capital.
+- The family receives an explicit reliability discount because its raw inputs overlap with Profitability & Quality.
+
+Correlation / breadth safeguard:
+
+- `CompetitiveDurability` has a separate evidence-family identity for explainability and future architecture.
+- Batch 5 explicitly marks it as sharing inputs with Profitability & Quality.
+- Competitive Durability is **not eligible to increase independent core breadth in Batch 5**.
+- Batch 8 must define an explicit overlap/de-duplication/correlation policy before Competitive Durability can influence actionable Investor breadth or attribution.
+- Revisions remains independently eligible because it is based on point-in-time forward estimate changes rather than the reported profitability inputs used by Profitability & Quality.
+
+Architecture invariants:
+
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+- No Investor UI activation occurs in Batch 5.
+- All development estimate/fundamental fixtures used here remain explicitly synthetic.
+
+Batch 5 validation:
+
+- Flutter analyzer: clean after the Batch 5 lint/nullability corrections.
+- Investor suite: 46 passing tests.
+- Recommendation subsystem suite: 501 passing tests.
+- Full automated suite: 575 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 

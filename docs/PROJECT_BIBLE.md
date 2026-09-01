@@ -143,7 +143,7 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-v0.12.0 Batch 4 Valuation evidence is implemented and validated. Investor remains unavailable for production recommendation generation. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+v0.12.0 Batch 5 Revisions + Competitive Durability is implemented and validated. Investor remains unavailable for production recommendation generation, and Competitive Durability remains overlap-gated from independent core breadth pending Batch 8. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
@@ -189,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain. Batch 4 Valuation validated.
+10. v0.12.0 — Investor Strategy Brain. Batch 5 Revisions + Competitive Durability validated.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -441,6 +441,61 @@ Batch 4 validation:
 - Investor suite: 35 passing tests.
 - Recommendation subsystem suite: 490 passing tests.
 - Full automated suite: 564 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 5 — Revisions + Competitive Durability
+
+Implemented and validated on 2026-09-01.
+
+Batch 5 adds point-in-time analyst Revisions and an observed Competitive Durability proxy while keeping Investor recommendation generation unavailable.
+
+Revisions implementation:
+
+- Added target-period-aware `InvestorEstimatePoint` so historical estimate vintages identify the fiscal/forecast period they refer to.
+- Historical revisions compare only like-for-like estimates for the same future target period.
+- Comparing FY1 with FY2 is explicitly forbidden because it would create a false revision.
+- Revenue Estimate Revision.
+- Diluted EPS Estimate Revision.
+- Free Cash Flow Estimate Revision.
+- Available 90-day and 30-day windows are combined inside each forecast metric before Revenue/EPS/FCF are de-duplicated into one Revisions family.
+- Current consensus cannot be silently backfilled into historical analysis.
+- Near-zero estimate baselines are withheld when percentage revision math would be unstable.
+- Revisions is an independent Investor core family, but Investor recommendations remain inactive.
+
+Competitive Durability implementation:
+
+- ROIC Persistence.
+- Operating Margin Persistence.
+- Free Cash Flow Persistence.
+- Durability measures observed persistence/resilience of reported economics only.
+- It does not claim to identify a structural economic moat.
+- It does not infer network effects, switching costs, brand power, patents, cost advantage or efficient scale.
+- It does not yet compare ROIC with cost of capital.
+- The family receives an explicit reliability discount because its raw inputs overlap with Profitability & Quality.
+
+Correlation / breadth safeguard:
+
+- `CompetitiveDurability` has a separate evidence-family identity for explainability and future architecture.
+- Batch 5 explicitly marks it as sharing inputs with Profitability & Quality.
+- Competitive Durability is **not eligible to increase independent core breadth in Batch 5**.
+- Batch 8 must define an explicit overlap/de-duplication/correlation policy before Competitive Durability can influence actionable Investor breadth or attribution.
+- Revisions remains independently eligible because it is based on point-in-time forward estimate changes rather than the reported profitability inputs used by Profitability & Quality.
+
+Architecture invariants:
+
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+- No Investor UI activation occurs in Batch 5.
+- All development estimate/fundamental fixtures used here remain explicitly synthetic.
+
+Batch 5 validation:
+
+- Flutter analyzer: clean after the Batch 5 lint/nullability corrections.
+- Investor suite: 46 passing tests.
+- Recommendation subsystem suite: 501 passing tests.
+- Full automated suite: 575 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 
