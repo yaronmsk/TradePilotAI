@@ -143,7 +143,7 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-v0.12.0 Batch 0 architecture/research scope is active. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+v0.12.0 Batch 1 domain/family/provider-contract foundation is implemented and validated. Investor remains unavailable for production recommendation generation. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
@@ -189,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain. Active architecture/research scope.
+10. v0.12.0 — Investor Strategy Brain. Batch 1 foundation validated.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -227,6 +227,47 @@ Final release gate:
 - `flutter build web`: passed (`build/web` produced successfully).
 - `git diff --check`: clean.
 - Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
+
+## Batch 1 — Investor Domain / Family Foundation
+
+Implemented and validated on 2026-09-01.
+
+Foundation changes:
+
+- Expanded `EvidenceFamily` with independent Investor families:
+  - Growth
+  - Profitability & Quality
+  - Financial Strength
+  - Valuation
+  - Revisions
+  - Competitive Durability
+  - Capital Allocation
+  - Ownership & Positioning
+- Retained the legacy `fundamentals` family only for compatibility/reserved use; it is not counted as Investor core-fundamental breadth.
+- Added `InvestorEvidenceFamilyPolicy` with exactly seven core fundamental families and separate contextual families.
+- Added vendor-neutral typed contracts for:
+  - `FundamentalDataProvider`
+  - `AnalystEstimateProvider`
+  - `PeerClassificationProvider`
+  - `MacroContextProvider`
+  - `OwnershipPositioningProvider`
+  - `InvestorHistoricalDataProvider`
+- Added point-in-time metadata with separate `observedAt` and `availableAt` timestamps.
+- Added explicit synthetic-data identification in Investor point-in-time snapshots.
+- Added exhaustive human-readable presentation handling for all new families in shared evidence/consensus/attribution widgets.
+- Kept `EvidenceKind` unchanged in Batch 1.
+- Kept Investor `StrategyAnalysisPolicy` planned/deferred.
+- Kept `RecommendationStrategyPolicy.forStrategy(Investor)` unavailable.
+- Added no Investor evidence providers, scoring weights, thresholds, recommendation generation or UI activation.
+
+Batch 1 validation:
+
+- Flutter analyzer: clean.
+- Investor foundation suite: 8 passing tests.
+- Recommendation subsystem suite: 463 passing tests.
+- Full automated suite: 537 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable and Batch 1 does not activate new Investor UI behavior.
 
 ## UI roadmap
 

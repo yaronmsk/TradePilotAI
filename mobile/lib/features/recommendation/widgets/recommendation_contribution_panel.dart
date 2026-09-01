@@ -457,5 +457,21 @@ String _familyLabel(EvidenceFamily family) {
       return 'Fundamentals';
     case EvidenceFamily.sentiment:
       return 'Sentiment';
+    case EvidenceFamily.growth:
+      return 'Growth';
+    case EvidenceFamily.profitabilityQuality:
+      return 'Profitability & Quality';
+    case EvidenceFamily.financialStrength:
+      return 'Financial Strength';
+    case EvidenceFamily.valuation:
+      return 'Valuation';
+    case EvidenceFamily.revisions:
+      return 'Revisions';
+    case EvidenceFamily.competitiveDurability:
+      return 'Competitive Durability';
+    case EvidenceFamily.capitalAllocation:
+      return 'Capital Allocation';
+    case EvidenceFamily.ownershipPositioning:
+      return 'Ownership & Positioning';
   }
 }

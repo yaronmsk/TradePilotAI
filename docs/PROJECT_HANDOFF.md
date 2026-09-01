@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 0 Scope
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 1 Foundation Validated
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -539,7 +539,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor production brain is not implemented; v0.12.0 architecture/research scope is now open.
+* Investor production scoring/recommendation brain is not yet implemented; v0.12.0 Batch 1 foundation is implemented and validated.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -622,6 +622,47 @@ Permanent v0.11.0 constraints:
 * Synthetic/mock data honesty remains mandatory.
 
 ---
+
+## Batch 1 — Investor Domain / Family Foundation
+
+Implemented and validated on 2026-09-01.
+
+Foundation changes:
+
+- Expanded `EvidenceFamily` with independent Investor families:
+  - Growth
+  - Profitability & Quality
+  - Financial Strength
+  - Valuation
+  - Revisions
+  - Competitive Durability
+  - Capital Allocation
+  - Ownership & Positioning
+- Retained the legacy `fundamentals` family only for compatibility/reserved use; it is not counted as Investor core-fundamental breadth.
+- Added `InvestorEvidenceFamilyPolicy` with exactly seven core fundamental families and separate contextual families.
+- Added vendor-neutral typed contracts for:
+  - `FundamentalDataProvider`
+  - `AnalystEstimateProvider`
+  - `PeerClassificationProvider`
+  - `MacroContextProvider`
+  - `OwnershipPositioningProvider`
+  - `InvestorHistoricalDataProvider`
+- Added point-in-time metadata with separate `observedAt` and `availableAt` timestamps.
+- Added explicit synthetic-data identification in Investor point-in-time snapshots.
+- Added exhaustive human-readable presentation handling for all new families in shared evidence/consensus/attribution widgets.
+- Kept `EvidenceKind` unchanged in Batch 1.
+- Kept Investor `StrategyAnalysisPolicy` planned/deferred.
+- Kept `RecommendationStrategyPolicy.forStrategy(Investor)` unavailable.
+- Added no Investor evidence providers, scoring weights, thresholds, recommendation generation or UI activation.
+
+Batch 1 validation:
+
+- Flutter analyzer: clean.
+- Investor foundation suite: 8 passing tests.
+- Recommendation subsystem suite: 463 passing tests.
+- Full automated suite: 537 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable and Batch 1 does not activate new Investor UI behavior.
 
 ## Handoff Principle
 
