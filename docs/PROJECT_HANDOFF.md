@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 2 Growth + Profitability/Quality Validated
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 3 Financial Strength + Capital Allocation Validated
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -539,7 +539,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor production recommendation generation is still unavailable; v0.12.0 Batch 2 Growth + Profitability/Quality evidence is implemented and validated.
+* Investor production recommendation generation is still unavailable; v0.12.0 Batch 3 Financial Strength + Capital Allocation & Dilution evidence is implemented and validated.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -729,6 +729,63 @@ Batch 2 validation:
 - Full automated suite: 547 passing tests.
 - `git diff --cached --check`: clean.
 - Batch 2 code checkpoint before documentation: 10 new files, 1,255 insertions.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 3 — Financial Strength + Capital Allocation & Dilution
+
+Implemented and validated on 2026-09-01.
+
+Batch 3 adds two more independent Investor core-fundamental families while keeping Investor recommendation generation unavailable.
+
+Financial Strength implementation:
+
+- Net Debt / Free Cash Flow.
+- Operating-profit Interest Coverage.
+- Cash / Debt.
+- The three measures are aggregated into exactly one Financial Strength family result.
+- Net cash and strong debt-service capacity can support the family.
+- Heavy net debt, weak coverage and low liquidity can oppose the family.
+- The model is explicitly not a credit rating.
+- Generic corporate leverage rules are withheld for identified banks, insurers and similar financial-sector structures because their balance sheets require specialized regulatory/accounting analysis.
+- `unavailable` is preferred over applying invalid industrial-company leverage rules.
+
+Capital Allocation & Dilution implementation:
+
+- Net Share Count Change.
+- Stock-Based Compensation Burden.
+- Cash Return Funding.
+- Net share-count change receives the greatest influence because it measures the actual shareholder dilution outcome after buybacks and issuance.
+- Gross buyback spending cannot hide a rising share count.
+- No dividend/buyback program is neutral rather than automatically negative.
+- Cash returns comfortably funded within FCF receive only modest positive influence; larger payouts are not treated as automatically better.
+- Materially over-funded distributions can oppose the family.
+- The three measures are aggregated into exactly one Capital Allocation & Dilution family result.
+
+Data-contract / synthetic-fixture extensions:
+
+- Added positive cash-flow fields for `dividendsPaid` and `shareRepurchases`.
+- Expanded the deterministic Investor mock fundamentals with cash, debt, interest expense, shares outstanding, SBC, dividends and repurchases.
+- Existing `IVBULL`, `IVBEAR`, `IVMIX` and neutral/default fixtures now carry the additional balance-sheet and allocation data.
+- All development inputs remain explicitly synthetic and preserve point-in-time availability metadata.
+
+Architecture / de-duplication proof:
+
+- Growth remains one family.
+- Profitability & Quality remains one family.
+- Financial Strength remains one family.
+- Capital Allocation & Dilution remains one family.
+- Feeding all four implemented core-family results into the existing `ConsensusEngine` produces exactly four independent families rather than treating each underlying metric as a separate vote.
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+
+Batch 3 validation:
+
+- Flutter analyzer: clean.
+- Investor suite: 27 passing tests.
+- Recommendation subsystem suite: 482 passing tests.
+- Full automated suite: 556 passing tests.
+- `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 
 ## Handoff Principle

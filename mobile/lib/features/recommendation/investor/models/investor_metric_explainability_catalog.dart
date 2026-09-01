@@ -8,6 +8,12 @@ enum InvestorMetricKind {
   operatingMarginQuality,
   freeCashFlowMarginQuality,
   returnOnInvestedCapitalQuality,
+  netDebtToFreeCashFlow,
+  interestCoverage,
+  cashToDebt,
+  netShareCountChange,
+  stockBasedCompensationBurden,
+  cashReturnFunding,
 }
 
 extension InvestorMetricKindPresentation on InvestorMetricKind {
@@ -22,6 +28,13 @@ extension InvestorMetricKindPresentation on InvestorMetricKind {
         'Free Cash Flow Margin Quality',
       InvestorMetricKind.returnOnInvestedCapitalQuality =>
         'Return on Invested Capital',
+      InvestorMetricKind.netDebtToFreeCashFlow => 'Net Debt / Free Cash Flow',
+      InvestorMetricKind.interestCoverage => 'Interest Coverage',
+      InvestorMetricKind.cashToDebt => 'Cash / Debt',
+      InvestorMetricKind.netShareCountChange => 'Net Share Count Change',
+      InvestorMetricKind.stockBasedCompensationBurden =>
+        'Stock-Based Compensation Burden',
+      InvestorMetricKind.cashReturnFunding => 'Cash Return Funding',
     };
   }
 }
@@ -162,6 +175,116 @@ class InvestorMetricExplainabilityCatalog {
           'ROIC is one input inside Profitability & Quality and is de-duplicated with margin evidence.',
       limitations:
           'ROIC definitions and normal levels vary by sector, accounting treatment and business model. Peer-relative calibration and cost-of-capital comparison are deferred.',
+    ),
+    InvestorMetricKind.netDebtToFreeCashFlow: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Compares debt net of cash with annual free cash flow for an ordinary non-financial operating company.',
+      calculation:
+          'Subtracts cash from total debt and divides the result by current positive free cash flow. Net cash is supportive; progressively larger positive multiples receive progressively more opposing scores.',
+      whyItMatters:
+          'A company with heavy net debt relative to internally generated cash may have less flexibility to survive downturns, invest or refinance safely.',
+      supportiveInterpretation:
+          'Net cash or low net debt relative to free cash flow supports Financial Strength.',
+      opposingInterpretation:
+          'High net debt relative to free cash flow, especially alongside non-positive FCF, opposes Financial Strength.',
+      neutralInterpretation:
+          'Moderate leverage provides limited directional evidence.',
+      recommendationImpact:
+          'Net Debt / FCF is one input inside Financial Strength and cannot become a separate family vote.',
+      limitations:
+          'The ratio ignores debt maturities, lease obligations and off-balance-sheet commitments. Generic thresholds are provisional and invalid for banks/insurers.',
+    ),
+    InvestorMetricKind.interestCoverage: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Estimates how many times operating profit covers reported interest expense.',
+      calculation:
+          'Estimates operating profit as revenue multiplied by operating margin, then divides by positive interest expense.',
+      whyItMatters:
+          'Weak coverage can indicate that debt service is consuming too much operating profit.',
+      supportiveInterpretation:
+          'High operating-profit coverage of interest supports Financial Strength.',
+      opposingInterpretation:
+          'Coverage near or below one times opposes Financial Strength.',
+      neutralInterpretation:
+          'Intermediate coverage provides limited directional evidence.',
+      recommendationImpact:
+          'Interest Coverage contributes only inside the Financial Strength family.',
+      limitations:
+          'Operating income and interest expense can be affected by accounting classification, cyclicality and one-off items. This is not a credit rating.',
+    ),
+    InvestorMetricKind.cashToDebt: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs: 'Compares current cash and equivalents with total debt.',
+      calculation:
+          'Divides cash and equivalents by total debt, with debt-free companies treated as having the strongest cash/debt position.',
+      whyItMatters:
+          'A larger cash cushion can provide refinancing flexibility and reduce balance-sheet stress.',
+      supportiveInterpretation:
+          'Cash covering a large share of debt supports Financial Strength.',
+      opposingInterpretation:
+          'Very little cash relative to debt opposes Financial Strength.',
+      neutralInterpretation: 'Intermediate cash/debt coverage is mixed.',
+      recommendationImpact:
+          'Cash / Debt is de-duplicated inside Financial Strength with the other leverage measures.',
+      limitations:
+          'Cash may be restricted or needed for operations, and debt maturity timing is not modeled. Sector-specific balance-sheet structures require separate treatment.',
+    ),
+    InvestorMetricKind.netShareCountChange: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures the multi-year net change in shares outstanding after buybacks, stock issuance and equity compensation.',
+      calculation:
+          'Compares the earliest and latest positive share-count observations. Falling share count is supportive; rising share count indicates dilution.',
+      whyItMatters:
+          'Business growth creates less per-share value when each shareholder owns a progressively smaller fraction of the company.',
+      supportiveInterpretation:
+          'A sustained net reduction in shares supports Capital Allocation & Dilution.',
+      opposingInterpretation:
+          'Persistent net share issuance/dilution opposes Capital Allocation & Dilution.',
+      neutralInterpretation: 'A broadly stable share count is neutral.',
+      recommendationImpact:
+          'Net Share Count Change receives the largest weight inside Capital Allocation & Dilution.',
+      limitations:
+          'Share-count reduction is not automatically value-creating if buybacks were executed at excessive prices. This metric measures ownership dilution, not repurchase valuation.',
+    ),
+    InvestorMetricKind.stockBasedCompensationBurden: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures current stock-based compensation as a percentage of revenue.',
+      calculation:
+          'Divides stock-based compensation by positive revenue and applies transparent provisional burden bands.',
+      whyItMatters:
+          'Heavy equity compensation can transfer a meaningful share of business value to employees and offset headline repurchase programs.',
+      supportiveInterpretation:
+          'A contained SBC burden can modestly support capital-allocation discipline.',
+      opposingInterpretation:
+          'A very high SBC burden opposes per-share capital-allocation quality.',
+      neutralInterpretation: 'Moderate SBC burden is neutral.',
+      recommendationImpact:
+          'SBC Burden contributes inside Capital Allocation & Dilution and is not an independent vote.',
+      limitations:
+          'Normal SBC varies widely by industry and company maturity. Batch 3 thresholds are provisional and require later peer-relative calibration.',
+    ),
+    InvestorMetricKind.cashReturnFunding: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Compares dividends plus gross share repurchases with current free cash flow.',
+      calculation:
+          'Adds positive dividend and repurchase cash amounts and divides by positive FCF. No payout is neutral; well-funded payouts receive only modest positive influence; materially over-funded payouts receive opposing influence.',
+      whyItMatters:
+          'Repeatedly returning more cash than the business generates can consume balance-sheet capacity or require debt/issuance.',
+      supportiveInterpretation:
+          'Cash returns comfortably funded within free cash flow can modestly support capital-allocation discipline.',
+      opposingInterpretation:
+          'Cash returns materially exceeding free cash flow oppose capital-allocation sustainability.',
+      neutralInterpretation:
+          'No payout or roughly fully funded payouts can remain neutral.',
+      recommendationImpact:
+          'Cash Return Funding has bounded influence inside Capital Allocation & Dilution; larger payouts are not treated as automatically better.',
+      limitations:
+          'A company can rationally use accumulated cash or temporary borrowing, and reinvestment can be preferable to distributions. Gross buybacks do not reveal whether dilution was actually offset, so Net Share Count Change remains a separate input in the same family.',
     ),
   };
 

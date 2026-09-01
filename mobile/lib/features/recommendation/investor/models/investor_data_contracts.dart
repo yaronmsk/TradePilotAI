@@ -60,6 +60,10 @@ enum InvestorFundamentalMetric {
   interestExpense,
   sharesOutstanding,
   stockBasedCompensation,
+
+  /// Positive cash amounts used for capital-allocation analysis.
+  dividendsPaid,
+  shareRepurchases,
 }
 
 enum InvestorEstimateMetric { revenue, dilutedEps, freeCashFlow }
