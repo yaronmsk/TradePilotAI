@@ -43,6 +43,7 @@ class MockInvestorFundamentalDataProvider implements FundamentalDataProvider {
       add(InvestorFundamentalMetric.revenue, profile.revenue[index]);
       add(InvestorFundamentalMetric.dilutedEps, profile.eps[index]);
       add(InvestorFundamentalMetric.freeCashFlow, profile.freeCashFlow[index]);
+      add(InvestorFundamentalMetric.netIncome, profile.netIncome[index]);
       add(InvestorFundamentalMetric.grossMargin, profile.grossMargin[index]);
       add(
         InvestorFundamentalMetric.operatingMargin,
@@ -89,6 +90,7 @@ class MockInvestorFundamentalDataProvider implements FundamentalDataProvider {
         revenue: [100, 115, 135, 160],
         eps: [2.0, 2.4, 3.0, 4.0],
         freeCashFlow: [12, 16, 22, 30],
+        netIncome: [10, 14, 19, 25],
         grossMargin: [40, 42, 44, 46],
         operatingMargin: [15, 17, 20, 23],
         freeCashFlowMargin: [12, 14, 16.3, 18.8],
@@ -105,6 +107,7 @@ class MockInvestorFundamentalDataProvider implements FundamentalDataProvider {
         revenue: [160, 150, 135, 115],
         eps: [4.0, 3.2, 2.0, 0.8],
         freeCashFlow: [25, 20, 12, 5],
+        netIncome: [20, 15, 8, 3],
         grossMargin: [48, 45, 41, 36],
         operatingMargin: [22, 18, 12, 5],
         freeCashFlowMargin: [15.6, 13.3, 8.9, 4.3],
@@ -121,6 +124,7 @@ class MockInvestorFundamentalDataProvider implements FundamentalDataProvider {
         revenue: [100, 110, 122, 135],
         eps: [2.0, 2.2, 2.3, 2.4],
         freeCashFlow: [12, 13, 13, 14],
+        netIncome: [12, 12, 12, 12],
         grossMargin: [46, 44, 42, 40],
         operatingMargin: [18, 16, 14, 12],
         freeCashFlowMargin: [12, 11.5, 10.7, 10.4],
@@ -137,6 +141,7 @@ class MockInvestorFundamentalDataProvider implements FundamentalDataProvider {
         revenue: [100, 101, 102, 103],
         eps: [2.0, 2.02, 2.04, 2.06],
         freeCashFlow: [10, 10.1, 10.2, 10.3],
+        netIncome: [10, 10.1, 10.2, 10.3],
         grossMargin: [40, 40.1, 40.0, 40.1],
         operatingMargin: [12, 12.1, 12.0, 12.1],
         freeCashFlowMargin: [10, 10.0, 10.1, 10.0],
@@ -158,6 +163,7 @@ class _MockFundamentalProfile {
     required this.revenue,
     required this.eps,
     required this.freeCashFlow,
+    required this.netIncome,
     required this.grossMargin,
     required this.operatingMargin,
     required this.freeCashFlowMargin,
@@ -174,6 +180,7 @@ class _MockFundamentalProfile {
   final List<double> revenue;
   final List<double> eps;
   final List<double> freeCashFlow;
+  final List<double> netIncome;
   final List<double> grossMargin;
   final List<double> operatingMargin;
   final List<double> freeCashFlowMargin;

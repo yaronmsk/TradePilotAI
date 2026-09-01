@@ -1,6 +1,6 @@
 # TradePilot AI — v0.12.0 Investor Strategy Brain
 
-Status: Implementation active — Batch 3 Financial Strength + Capital Allocation validated
+Status: Implementation active — Batch 4 Valuation validated
 Release: v0.12.0
 Baseline: v0.11.0 — Swing Strategy Brain
 Baseline commit: 665fd8f0be86c8ce62cb2d37e1d2acbda910bd69
@@ -286,7 +286,7 @@ Every visible analytical value requires its own info/explainability path.
 - **Batch 1** — Investor domain/family/provider-contract foundation ✅
 - **Batch 2** — Growth + Profitability/Quality ✅
 - **Batch 3** — Financial Strength + Capital Allocation ✅
-- **Batch 4** — Valuation
+- **Batch 4** — Valuation ✅
 - **Batch 5** — Revisions + Competitive Durability
 - **Batch 6** — Global Market & Macro Context + Stock Sensitivity Profile
 - **Batch 7** — Ownership/Positioning + zero-vote Market Expectations helper
@@ -457,6 +457,57 @@ Batch 3 validation:
 - Investor suite: 27 passing tests.
 - Recommendation subsystem suite: 482 passing tests.
 - Full automated suite: 556 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 4 — Valuation
+
+Implemented and validated on 2026-09-01.
+
+Batch 4 adds the fifth independent Investor core-fundamental family while keeping Investor recommendation generation unavailable.
+
+Valuation data architecture:
+
+- Added a vendor-neutral `MarketValuationDataProvider`.
+- Added point-in-time market valuation inputs separate from filing fundamentals.
+- Added point-in-time valuation-reference metadata so historical/peer medians cannot silently use information that became available only later.
+- Market valuation inputs are not stored as filing fundamentals.
+- Added synthetic deterministic valuation fixtures for development/testing only.
+
+Initial Valuation family:
+
+- P/E versus own-history and/or peer median.
+- Price / Free Cash Flow versus own-history and/or peer median.
+- Enterprise Value / Operating Profit versus own-history and/or peer median.
+- The three usable comparisons are aggregated into exactly one Valuation family result.
+
+Permanent Batch 4 safeguards:
+
+- No absolute rule such as “P/E below X is cheap.”
+- A multiple becomes directional only relative to explicit valid own-history and/or peer benchmarks.
+- Negative or zero earnings make P/E unavailable rather than artificially cheap.
+- Negative or zero free cash flow makes Price/FCF unavailable.
+- Negative or zero operating profit makes EV/Operating Profit unavailable.
+- Relative multiple discounts/premiums are not presented as price-target upside/downside.
+- No single fair-value price target or DCF point estimate is produced.
+- Identified banks, insurers and REITs are withheld until specialized valuation rules exist.
+- At least two usable relative multiples are required for an available Valuation family assessment.
+
+Explainability / de-duplication:
+
+- Every new valuation metric has complete individual explainability.
+- P/E, Price/FCF and EV/Operating Profit remain inputs inside one Valuation family rather than becoming three independent votes.
+- Growth, Profitability & Quality, Financial Strength, Capital Allocation & Dilution and Valuation now produce exactly five independent implemented core-family votes in the existing `ConsensusEngine`.
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+
+Batch 4 validation:
+
+- Flutter analyzer: clean after the missing valuation-test import was corrected.
+- Investor suite: 35 passing tests.
+- Recommendation subsystem suite: 490 passing tests.
+- Full automated suite: 564 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 

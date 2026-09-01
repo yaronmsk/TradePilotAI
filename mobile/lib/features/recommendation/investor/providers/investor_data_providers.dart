@@ -31,6 +31,19 @@ abstract interface class PeerClassificationProvider {
   });
 }
 
+/// Vendor-neutral source for point-in-time market valuation inputs and
+/// comparison references.
+///
+/// Production implementations must preserve the market timestamp and must not
+/// reconstruct historical peer/history medians with information that became
+/// available only later.
+abstract interface class MarketValuationDataProvider {
+  Future<InvestorValuationContext> loadValuationContext({
+    required String symbol,
+    required DateTime asOf,
+  });
+}
+
 /// Vendor-neutral source for long-horizon macro/global market context.
 abstract interface class MacroContextProvider {
   Future<List<InvestorMetricPoint<InvestorMacroMetric>>> loadContext({

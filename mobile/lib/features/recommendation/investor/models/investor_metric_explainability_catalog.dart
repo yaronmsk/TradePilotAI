@@ -14,6 +14,9 @@ enum InvestorMetricKind {
   netShareCountChange,
   stockBasedCompensationBurden,
   cashReturnFunding,
+  priceToEarningsRelative,
+  priceToFreeCashFlowRelative,
+  enterpriseValueToOperatingProfitRelative,
 }
 
 extension InvestorMetricKindPresentation on InvestorMetricKind {
@@ -35,6 +38,11 @@ extension InvestorMetricKindPresentation on InvestorMetricKind {
       InvestorMetricKind.stockBasedCompensationBurden =>
         'Stock-Based Compensation Burden',
       InvestorMetricKind.cashReturnFunding => 'Cash Return Funding',
+      InvestorMetricKind.priceToEarningsRelative => 'P/E vs Benchmarks',
+      InvestorMetricKind.priceToFreeCashFlowRelative =>
+        'Price / Free Cash Flow vs Benchmarks',
+      InvestorMetricKind.enterpriseValueToOperatingProfitRelative =>
+        'EV / Operating Profit vs Benchmarks',
     };
   }
 }
@@ -285,6 +293,63 @@ class InvestorMetricExplainabilityCatalog {
           'Cash Return Funding has bounded influence inside Capital Allocation & Dilution; larger payouts are not treated as automatically better.',
       limitations:
           'A company can rationally use accumulated cash or temporary borrowing, and reinvestment can be preferable to distributions. Gross buybacks do not reveal whether dilution was actually offset, so Net Share Count Change remains a separate input in the same family.',
+    ),
+    InvestorMetricKind.priceToEarningsRelative: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Compares the company’s current positive-earnings P/E multiple with its own historical median and/or a relevant peer median.',
+      calculation:
+          'Divides market capitalization by positive net income, then measures the percentage premium or discount versus each valid point-in-time benchmark. Negative or zero earnings make P/E unavailable rather than artificially cheap.',
+      whyItMatters:
+          'P/E can show how much investors currently pay for each unit of reported earnings relative to explicit comparison anchors.',
+      supportiveInterpretation:
+          'A meaningful discount to valid historical/peer P/E benchmarks supports Valuation evidence.',
+      opposingInterpretation:
+          'A meaningful premium to valid historical/peer P/E benchmarks opposes Valuation evidence.',
+      neutralInterpretation:
+          'P/E close to the available benchmarks is neutral.',
+      recommendationImpact:
+          'P/E is one input inside the single Valuation family and is not a standalone recommendation vote or fair-value target.',
+      limitations:
+          'Earnings can be cyclical, distorted or temporarily depressed. A lower P/E can be justified by weaker growth, quality or risk. Financial companies and REITs require specialized valuation handling.',
+    ),
+    InvestorMetricKind.priceToFreeCashFlowRelative: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Compares market capitalization with positive free cash flow and then compares that multiple with historical/peer medians.',
+      calculation:
+          'Divides market capitalization by positive free cash flow. The resulting multiple is compared with each valid point-in-time own-history and peer benchmark.',
+      whyItMatters:
+          'Price/FCF relates equity value to cash generated after operating and capital-investment needs.',
+      supportiveInterpretation:
+          'A meaningful discount to valid Price/FCF benchmarks supports Valuation evidence.',
+      opposingInterpretation:
+          'A meaningful premium to valid Price/FCF benchmarks opposes Valuation evidence.',
+      neutralInterpretation: 'Price/FCF close to benchmarks is neutral.',
+      recommendationImpact:
+          'Price/FCF contributes only inside the single Valuation family.',
+      limitations:
+          'Free cash flow can be temporarily distorted by working-capital or capital-expenditure cycles. Non-positive FCF makes the multiple unavailable.',
+    ),
+    InvestorMetricKind
+        .enterpriseValueToOperatingProfitRelative: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Compares enterprise value with positive operating profit and then compares that multiple with historical/peer medians.',
+      calculation:
+          'Estimates operating profit from revenue multiplied by operating margin, divides enterprise value by positive operating profit, and compares the multiple with valid point-in-time benchmarks.',
+      whyItMatters:
+          'Enterprise-value multiples help compare the value of the whole operating business while incorporating capital structure more directly than equity-only multiples.',
+      supportiveInterpretation:
+          'A meaningful discount to valid EV/Operating Profit benchmarks supports Valuation evidence.',
+      opposingInterpretation:
+          'A meaningful premium to valid EV/Operating Profit benchmarks opposes Valuation evidence.',
+      neutralInterpretation:
+          'EV/Operating Profit close to benchmarks is neutral.',
+      recommendationImpact:
+          'EV/Operating Profit is de-duplicated with P/E and Price/FCF inside the single Valuation family.',
+      limitations:
+          'Operating profit can be cyclical and accounting-sensitive. Non-positive operating profit invalidates the multiple. Banks, insurers and REITs require specialized valuation methods.',
     ),
   };
 

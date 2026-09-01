@@ -143,7 +143,7 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-v0.12.0 Batch 3 Financial Strength + Capital Allocation & Dilution evidence is implemented and validated. Investor remains unavailable for production recommendation generation. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+v0.12.0 Batch 4 Valuation evidence is implemented and validated. Investor remains unavailable for production recommendation generation. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
@@ -189,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain. Batch 3 Financial Strength + Capital Allocation validated.
+10. v0.12.0 — Investor Strategy Brain. Batch 4 Valuation validated.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -390,6 +390,57 @@ Batch 3 validation:
 - Investor suite: 27 passing tests.
 - Recommendation subsystem suite: 482 passing tests.
 - Full automated suite: 556 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 4 — Valuation
+
+Implemented and validated on 2026-09-01.
+
+Batch 4 adds the fifth independent Investor core-fundamental family while keeping Investor recommendation generation unavailable.
+
+Valuation data architecture:
+
+- Added a vendor-neutral `MarketValuationDataProvider`.
+- Added point-in-time market valuation inputs separate from filing fundamentals.
+- Added point-in-time valuation-reference metadata so historical/peer medians cannot silently use information that became available only later.
+- Market valuation inputs are not stored as filing fundamentals.
+- Added synthetic deterministic valuation fixtures for development/testing only.
+
+Initial Valuation family:
+
+- P/E versus own-history and/or peer median.
+- Price / Free Cash Flow versus own-history and/or peer median.
+- Enterprise Value / Operating Profit versus own-history and/or peer median.
+- The three usable comparisons are aggregated into exactly one Valuation family result.
+
+Permanent Batch 4 safeguards:
+
+- No absolute rule such as “P/E below X is cheap.”
+- A multiple becomes directional only relative to explicit valid own-history and/or peer benchmarks.
+- Negative or zero earnings make P/E unavailable rather than artificially cheap.
+- Negative or zero free cash flow makes Price/FCF unavailable.
+- Negative or zero operating profit makes EV/Operating Profit unavailable.
+- Relative multiple discounts/premiums are not presented as price-target upside/downside.
+- No single fair-value price target or DCF point estimate is produced.
+- Identified banks, insurers and REITs are withheld until specialized valuation rules exist.
+- At least two usable relative multiples are required for an available Valuation family assessment.
+
+Explainability / de-duplication:
+
+- Every new valuation metric has complete individual explainability.
+- P/E, Price/FCF and EV/Operating Profit remain inputs inside one Valuation family rather than becoming three independent votes.
+- Growth, Profitability & Quality, Financial Strength, Capital Allocation & Dilution and Valuation now produce exactly five independent implemented core-family votes in the existing `ConsensusEngine`.
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+
+Batch 4 validation:
+
+- Flutter analyzer: clean after the missing valuation-test import was corrected.
+- Investor suite: 35 passing tests.
+- Recommendation subsystem suite: 490 passing tests.
+- Full automated suite: 564 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 

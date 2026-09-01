@@ -51,6 +51,7 @@ enum InvestorFundamentalMetric {
   revenue,
   dilutedEps,
   freeCashFlow,
+  netIncome,
   grossMargin,
   operatingMargin,
   freeCashFlowMargin,
@@ -67,6 +68,39 @@ enum InvestorFundamentalMetric {
 }
 
 enum InvestorEstimateMetric { revenue, dilutedEps, freeCashFlow }
+
+enum InvestorMarketMetric { marketCapitalization, enterpriseValue }
+
+enum InvestorValuationMultiple {
+  priceToEarnings,
+  priceToFreeCashFlow,
+  enterpriseValueToOperatingProfit,
+}
+
+class InvestorValuationReference {
+  const InvestorValuationReference({
+    required this.multiple,
+    required this.metadata,
+    this.ownHistoryMedian,
+    this.peerMedian,
+  });
+
+  final InvestorValuationMultiple multiple;
+  final double? ownHistoryMedian;
+  final double? peerMedian;
+  final InvestorDataMetadata metadata;
+}
+
+class InvestorValuationContext {
+  InvestorValuationContext({
+    List<InvestorMetricPoint<InvestorMarketMetric>> market = const [],
+    List<InvestorValuationReference> references = const [],
+  }) : market = List.unmodifiable(market),
+       references = List.unmodifiable(references);
+
+  final List<InvestorMetricPoint<InvestorMarketMetric>> market;
+  final List<InvestorValuationReference> references;
+}
 
 enum InvestorMacroMetric {
   policyRate,
@@ -108,11 +142,15 @@ class InvestorPointInTimeSnapshot {
     List<InvestorMetricPoint<InvestorFundamentalMetric>> fundamentals =
         const [],
     List<InvestorMetricPoint<InvestorEstimateMetric>> estimates = const [],
+    List<InvestorMetricPoint<InvestorMarketMetric>> market = const [],
+    List<InvestorValuationReference> valuationReferences = const [],
     List<InvestorMetricPoint<InvestorMacroMetric>> macro = const [],
     List<InvestorMetricPoint<InvestorPositioningMetric>> positioning = const [],
     this.peerClassification,
   }) : fundamentals = List.unmodifiable(fundamentals),
        estimates = List.unmodifiable(estimates),
+       market = List.unmodifiable(market),
+       valuationReferences = List.unmodifiable(valuationReferences),
        macro = List.unmodifiable(macro),
        positioning = List.unmodifiable(positioning);
 
@@ -121,6 +159,8 @@ class InvestorPointInTimeSnapshot {
 
   final List<InvestorMetricPoint<InvestorFundamentalMetric>> fundamentals;
   final List<InvestorMetricPoint<InvestorEstimateMetric>> estimates;
+  final List<InvestorMetricPoint<InvestorMarketMetric>> market;
+  final List<InvestorValuationReference> valuationReferences;
   final List<InvestorMetricPoint<InvestorMacroMetric>> macro;
   final List<InvestorMetricPoint<InvestorPositioningMetric>> positioning;
   final InvestorPeerClassification? peerClassification;
@@ -131,6 +171,12 @@ class InvestorPointInTimeSnapshot {
     }
     for (final point in estimates) {
       yield point.metadata;
+    }
+    for (final point in market) {
+      yield point.metadata;
+    }
+    for (final reference in valuationReferences) {
+      yield reference.metadata;
     }
     for (final point in macro) {
       yield point.metadata;
