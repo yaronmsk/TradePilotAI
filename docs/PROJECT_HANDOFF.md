@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 7 Ownership & Positioning + zero-vote Market Expectations Validated
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 8 Recommendation Policy + Attribution Validated
 **Date:** 2026-08-31
 **Primary Branch:** `develop`
 
@@ -539,7 +539,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor production recommendation generation is still unavailable; v0.12.0 Batch 7 Ownership & Positioning + zero-vote Market Expectations is implemented and validated. Ownership/Positioning remains contextual-only, Market Expectations remains zero-vote, market/macro remains contextual-only, VIX remains non-directional, and Competitive Durability remains overlap-gated from breadth pending Batch 8.
+* Investor dedicated backend recommendation generation is implemented and validated in v0.12.0 Batch 8, but generic strategy orchestration and UI activation remain unavailable. Action breadth is 4-of-6 core families with Valuation mandatory; Market/Ownership context is capped to 20% direction share; Competitive Durability has zero recommendation weight in v0.12.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -1087,6 +1087,128 @@ Batch 7 validation:
 - Full automated suite: 602 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 8 — Investor Recommendation Policy + Attribution
+
+Implemented and validated on 2026-09-04.
+
+Batch 8 introduces the dedicated Investor recommendation backend while preserving the shared family-level consensus and attribution architecture.
+
+### Frozen actionable core policy
+
+The six breadth-eligible core families are:
+
+1. Growth
+2. Profitability & Quality
+3. Financial Strength
+4. Valuation
+5. Revisions
+6. Capital Allocation & Dilution
+
+Actionable BUY/SELL requires:
+- at least **4 of 6** breadth-eligible core families;
+- core coverage of at least **2/3**;
+- **Valuation available**;
+- absolute direction score **>= 40**;
+- confidence **>= 65**;
+- no material core-fundamental conflict.
+
+Strong BUY/SELL requires:
+- absolute direction score **>= 70**;
+- confidence **>= 80**;
+- the same breadth and Valuation gates.
+
+BUY and SELL use symmetric thresholds.
+
+Non-action behavior:
+- absolute direction `<= 20` => HOLD / No Clear Direction;
+- core conflict `>= 0.50` => HOLD / No Clear Direction;
+- insufficient direction/confidence => WAIT / Wait for Confirmation;
+- insufficient breadth or missing Valuation => WAIT with typed coverage/breadth reasons.
+
+### Competitive Durability overlap resolution for v0.12
+
+Competitive Durability remains visible analysis, but its current proxy reuses ROIC, operating-margin and FCF inputs already represented in Profitability & Quality.
+
+Therefore in v0.12 Batch 8:
+- recommendation direction weight = `0`;
+- confidence weight = `0`;
+- breadth credit = `0`.
+
+It cannot double-count Quality. Future non-zero weight requires genuinely independent durability inputs.
+
+### Context cap
+
+Directional context families are:
+- Market Context;
+- Ownership & Positioning.
+
+Their **collective absolute direction-attribution share is capped at 20%** of the active post-de-duplication directional basis.
+
+Context:
+- cannot satisfy core breadth;
+- cannot create BUY/SELL without core action gates;
+- cannot dominate recommendation attribution;
+- remains secondary to the company/business thesis.
+
+### Confidence and attribution
+
+Batch 8 confidence is derived from breadth-eligible core fundamentals only.
+
+- Market Context confidence share = `0`.
+- Ownership & Positioning confidence share = `0`.
+- Competitive Durability confidence share = `0`.
+- Market-implied volatility remains zero-direction and receives `0` confidence-adjustment points in Batch 8.
+- No unvalidated VIX penalty is invented.
+
+Direction attribution remains separate from confidence attribution.
+
+The Investor backend preserves:
+- family-capped direction influence;
+- family direction shares reconciling to 100% when direction exists;
+- provider direction impact reconciling to family impact;
+- signed supportive/opposing influence;
+- core-only confidence attribution;
+- contextual direction only after the 20% cap.
+
+Market Expectations remains:
+- zero evidence votes;
+- zero direction points;
+- zero confidence points.
+
+### Dedicated backend boundary
+
+Batch 8 does **not** activate Investor through the generic `RecommendationEngine`.
+
+The generic engine uses total independent-family count for action breadth, which would allow contextual families to satisfy an Investor fundamental gate incorrectly.
+
+Instead `InvestorRecommendationEngine`:
+- calculates fundamental breadth separately;
+- preserves missing core families in the coverage denominator;
+- applies the context cap before shared consensus;
+- excludes zero-weight Competitive Durability;
+- reuses the shared `ConsensusEngine`;
+- merges contextual direction attribution with core-only confidence attribution;
+- emits the shared `Recommendation` and `ScoringResult` models.
+
+### Activation boundary
+
+The dedicated Investor recommendation backend is implemented and validated, but:
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable;
+- Investor `StrategyAnalysisPolicy` remains `planned`;
+- generic Investor orchestration remains guarded;
+- Investor UI activation remains off.
+
+Batch 9 adds Investor Historical Setup Validation before UI activation.
+
+### Batch 8 validation
+
+- Flutter analyzer: clean.
+- Investor suite: **87 passing tests**.
+- Recommendation subsystem suite: **542 passing tests**.
+- Full automated suite: **616 passing tests**.
+- `git diff --check`: clean.
+- No visual acceptance required because Investor UI remains inactive.
 
 ## Handoff Principle
 

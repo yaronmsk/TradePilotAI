@@ -1,6 +1,6 @@
 # TradePilot AI — v0.12.0 Investor Strategy Brain
 
-Status: Implementation active — Batch 7 Ownership & Positioning + zero-vote Market Expectations validated
+Status: Implementation active — Batch 8 Investor recommendation policy + attribution validated
 Release: v0.12.0
 Baseline: v0.11.0 — Swing Strategy Brain
 Baseline commit: 665fd8f0be86c8ce62cb2d37e1d2acbda910bd69
@@ -291,7 +291,7 @@ Every visible analytical value requires its own info/explainability path.
 - **Batch 5** — Revisions + Competitive Durability ✅
 - **Batch 6** — Global Market & Macro Context + Stock Sensitivity Profile ✅
 - **Batch 7** — Ownership/Positioning + zero-vote Market Expectations helper ✅
-- **Batch 8** — Investor recommendation policy + attribution
+- **Batch 8** — Investor recommendation policy + attribution ✅
 - **Batch 9** — Investor Historical Setup Validation
 - **Batch 10** — Investor UI activation
 - **Batch 11** — v0.12.0 release acceptance
@@ -760,6 +760,128 @@ Batch 7 validation:
 - Full automated suite: 602 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 8 — Investor Recommendation Policy + Attribution
+
+Implemented and validated on 2026-09-04.
+
+Batch 8 introduces the dedicated Investor recommendation backend while preserving the shared family-level consensus and attribution architecture.
+
+### Frozen actionable core policy
+
+The six breadth-eligible core families are:
+
+1. Growth
+2. Profitability & Quality
+3. Financial Strength
+4. Valuation
+5. Revisions
+6. Capital Allocation & Dilution
+
+Actionable BUY/SELL requires:
+- at least **4 of 6** breadth-eligible core families;
+- core coverage of at least **2/3**;
+- **Valuation available**;
+- absolute direction score **>= 40**;
+- confidence **>= 65**;
+- no material core-fundamental conflict.
+
+Strong BUY/SELL requires:
+- absolute direction score **>= 70**;
+- confidence **>= 80**;
+- the same breadth and Valuation gates.
+
+BUY and SELL use symmetric thresholds.
+
+Non-action behavior:
+- absolute direction `<= 20` => HOLD / No Clear Direction;
+- core conflict `>= 0.50` => HOLD / No Clear Direction;
+- insufficient direction/confidence => WAIT / Wait for Confirmation;
+- insufficient breadth or missing Valuation => WAIT with typed coverage/breadth reasons.
+
+### Competitive Durability overlap resolution for v0.12
+
+Competitive Durability remains visible analysis, but its current proxy reuses ROIC, operating-margin and FCF inputs already represented in Profitability & Quality.
+
+Therefore in v0.12 Batch 8:
+- recommendation direction weight = `0`;
+- confidence weight = `0`;
+- breadth credit = `0`.
+
+It cannot double-count Quality. Future non-zero weight requires genuinely independent durability inputs.
+
+### Context cap
+
+Directional context families are:
+- Market Context;
+- Ownership & Positioning.
+
+Their **collective absolute direction-attribution share is capped at 20%** of the active post-de-duplication directional basis.
+
+Context:
+- cannot satisfy core breadth;
+- cannot create BUY/SELL without core action gates;
+- cannot dominate recommendation attribution;
+- remains secondary to the company/business thesis.
+
+### Confidence and attribution
+
+Batch 8 confidence is derived from breadth-eligible core fundamentals only.
+
+- Market Context confidence share = `0`.
+- Ownership & Positioning confidence share = `0`.
+- Competitive Durability confidence share = `0`.
+- Market-implied volatility remains zero-direction and receives `0` confidence-adjustment points in Batch 8.
+- No unvalidated VIX penalty is invented.
+
+Direction attribution remains separate from confidence attribution.
+
+The Investor backend preserves:
+- family-capped direction influence;
+- family direction shares reconciling to 100% when direction exists;
+- provider direction impact reconciling to family impact;
+- signed supportive/opposing influence;
+- core-only confidence attribution;
+- contextual direction only after the 20% cap.
+
+Market Expectations remains:
+- zero evidence votes;
+- zero direction points;
+- zero confidence points.
+
+### Dedicated backend boundary
+
+Batch 8 does **not** activate Investor through the generic `RecommendationEngine`.
+
+The generic engine uses total independent-family count for action breadth, which would allow contextual families to satisfy an Investor fundamental gate incorrectly.
+
+Instead `InvestorRecommendationEngine`:
+- calculates fundamental breadth separately;
+- preserves missing core families in the coverage denominator;
+- applies the context cap before shared consensus;
+- excludes zero-weight Competitive Durability;
+- reuses the shared `ConsensusEngine`;
+- merges contextual direction attribution with core-only confidence attribution;
+- emits the shared `Recommendation` and `ScoringResult` models.
+
+### Activation boundary
+
+The dedicated Investor recommendation backend is implemented and validated, but:
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable;
+- Investor `StrategyAnalysisPolicy` remains `planned`;
+- generic Investor orchestration remains guarded;
+- Investor UI activation remains off.
+
+Batch 9 adds Investor Historical Setup Validation before UI activation.
+
+### Batch 8 validation
+
+- Flutter analyzer: clean.
+- Investor suite: **87 passing tests**.
+- Recommendation subsystem suite: **542 passing tests**.
+- Full automated suite: **616 passing tests**.
+- `git diff --check`: clean.
+- No visual acceptance required because Investor UI remains inactive.
 
 ## Acceptance criteria
 
