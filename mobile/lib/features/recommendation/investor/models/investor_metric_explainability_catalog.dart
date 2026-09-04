@@ -29,6 +29,10 @@ enum InvestorMetricKind {
   financialConditionsSensitivity,
   usdIndexSensitivity,
   marketImpliedVolatilityContext,
+  institutionalOwnershipTrend,
+  institutionalHolderBreadthTrend,
+  shortInterestTrend,
+  insiderTransactionContext,
 }
 
 extension InvestorMetricKindPresentation on InvestorMetricKind {
@@ -74,6 +78,13 @@ extension InvestorMetricKindPresentation on InvestorMetricKind {
       InvestorMetricKind.usdIndexSensitivity => 'U.S. Dollar Sensitivity',
       InvestorMetricKind.marketImpliedVolatilityContext =>
         'Market-Implied Volatility Context',
+      InvestorMetricKind.institutionalOwnershipTrend =>
+        'Institutional Ownership Trend',
+      InvestorMetricKind.institutionalHolderBreadthTrend =>
+        'Institutional Holder Breadth',
+      InvestorMetricKind.shortInterestTrend => 'Short Interest Trend',
+      InvestorMetricKind.insiderTransactionContext =>
+        'Insider Transaction Context',
     };
   }
 }
@@ -600,6 +611,76 @@ class InvestorMetricExplainabilityCatalog {
           'VIX-style measures reflect expected broad-market volatility over a short horizon and are not directional forecasts for an individual stock.',
       boundedImpact:
           'Batch 6 contributes zero direction points. Any future confidence/risk adjustment approved in Batch 8 must be explicitly capped and cannot create BUY/SELL direction.',
+    ),
+    InvestorMetricKind.institutionalOwnershipTrend: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures the change in published institutional ownership percentage across multiple available filing observations.',
+      calculation:
+          'Compares the latest three point-in-time-safe institutional-ownership observations. The absolute ownership level is not scored; only the published trend is evaluated, and reliability falls as the underlying quarter-end observation becomes stale.',
+      whyItMatters:
+          'Broadening institutional ownership can provide supportive long-horizon positioning context, while declining institutional ownership can provide opposing context.',
+      supportiveInterpretation:
+          'A material multi-period increase in published institutional ownership supports contextual Ownership & Positioning evidence.',
+      opposingInterpretation:
+          'A material multi-period decline in published institutional ownership opposes contextual Ownership & Positioning evidence.',
+      neutralInterpretation:
+          'Small, mixed or stale institutional-ownership changes provide limited directional context.',
+      recommendationImpact:
+          'Institutional Ownership Trend contributes only inside the contextual Ownership & Positioning family and cannot satisfy core breadth or create BUY/SELL.',
+      limitations:
+          '13F-style data can be delayed by weeks, does not represent all investors, and can be affected by passive/index flows. Published holdings may already have changed by the time they become public.',
+    ),
+    InvestorMetricKind.institutionalHolderBreadthTrend: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the number of published institutional holders is broadening or narrowing across multiple available observations.',
+      calculation:
+          'Computes the percentage change in institutional-holder count across the latest three point-in-time-safe observations and reduces reliability as the underlying observation ages.',
+      whyItMatters:
+          'Broader participation across institutions can be more informative than a change driven by only one large holder.',
+      supportiveInterpretation:
+          'A material increase in published institutional-holder breadth supports contextual positioning.',
+      opposingInterpretation:
+          'A material decrease in published institutional-holder breadth opposes contextual positioning.',
+      neutralInterpretation:
+          'Small or mixed changes in holder breadth are neutral.',
+      recommendationImpact:
+          'Institutional Holder Breadth is de-duplicated with institutional ownership and short interest inside one contextual family.',
+      limitations:
+          'Holder count does not measure position size, conviction or investment motive, and quarterly filing lag can make the information stale.',
+    ),
+    InvestorMetricKind.shortInterestTrend: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures the change in published aggregate short interest as a percentage of float across recent position snapshots.',
+      calculation:
+          'Compares the latest three point-in-time-safe short-interest position observations. Rising short interest is opposing context and falling short interest is supportive context; the absolute level itself is deliberately not scored.',
+      whyItMatters:
+          'Changes in aggregate short positioning can show whether bearish positioning is building or being reduced.',
+      supportiveInterpretation:
+          'A material decline in published short interest supports contextual positioning.',
+      opposingInterpretation:
+          'A material increase in published short interest opposes contextual positioning.',
+      neutralInterpretation:
+          'Small or mixed short-interest changes are neutral.',
+      recommendationImpact:
+          'Short Interest Trend contributes only inside Ownership & Positioning and cannot create an Investor recommendation.',
+      limitations:
+          'Short interest is a periodic aggregate position snapshot, not daily short-sale volume. High short interest can reflect hedging or create squeeze risk, so the absolute level is not assigned a universal bearish meaning.',
+    ),
+    InvestorMetricKind.insiderTransactionContext: MetricExplainability(
+      semanticRole: MetricSemanticRole.contextConfiguration,
+      whatItIs:
+          'Explains why raw insider net-share data is not directionally interpreted until transaction-code-aware ownership filings are available.',
+      calculation:
+          'Batch 7 may surface raw insider net shares for data-availability context but assigns zero signed score because transaction types such as open-market purchases, grants, option exercises, tax withholding and gifts have different meanings.',
+      whyItMatters:
+          'Insider transactions can be informative only when the transaction type and filing context are understood.',
+      recommendationImpact:
+          'Raw insider net shares add zero direction points, zero confidence points and zero evidence votes in Batch 7.',
+      limitations:
+          'Without Form 4 transaction codes and transaction-level context, a net share count can be materially misleading.',
     ),
   };
 

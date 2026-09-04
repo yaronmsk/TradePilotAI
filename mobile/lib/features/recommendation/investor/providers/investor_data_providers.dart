@@ -69,6 +69,13 @@ abstract interface class MacroContextProvider {
 /// Filing-based holdings must preserve publication lag. For example, a 13F
 /// portfolio-period observation cannot be treated as known before the filing
 /// became public.
+///
+/// Production insider activity must preserve transaction-level classification
+/// (for example, open-market purchase/sale versus grant, option exercise,
+/// withholding or gift). Raw net-share totals are not directionally safe.
+///
+/// Short-interest implementations must use published aggregate position data,
+/// not substitute daily short-sale volume as though the two were equivalent.
 abstract interface class OwnershipPositioningProvider {
   Future<List<InvestorMetricPoint<InvestorPositioningMetric>>> loadPositioning({
     required String symbol,

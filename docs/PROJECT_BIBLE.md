@@ -143,7 +143,7 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-v0.12.0 Batch 6 Global Market & Macro Context + Stock Sensitivity Profile is implemented and validated. Investor remains unavailable for production recommendation generation; market/macro remains contextual-only, VIX remains non-directional, and Competitive Durability remains overlap-gated from breadth pending Batch 8. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+v0.12.0 Batch 7 Ownership & Positioning + zero-vote Market Expectations is implemented and validated. Investor remains unavailable for production recommendation generation; Ownership/Positioning remains contextual-only, Market Expectations remains zero-vote, market/macro remains contextual-only, VIX remains non-directional, and Competitive Durability remains overlap-gated from breadth pending Batch 8. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
@@ -189,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain. Batch 6 Global Market & Macro Context + Stock Sensitivity Profile validated.
+10. v0.12.0 — Investor Strategy Brain. Batch 7 Ownership & Positioning + zero-vote Market Expectations validated.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -570,6 +570,126 @@ Batch 6 validation:
 - Investor suite: 58 passing tests.
 - Recommendation subsystem suite: 513 passing tests.
 - Full automated suite: 587 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 7 — Ownership & Positioning + zero-vote Market Expectations
+
+Implemented and validated on 2026-09-04.
+
+Batch 7 adds a point-in-time-safe Investor Ownership & Positioning context family and a zero-vote Market Expectations presentation helper while keeping Investor recommendation generation and UI activation unavailable.
+
+Ownership & Positioning implementation:
+
+- Uses the existing vendor-neutral `OwnershipPositioningProvider`.
+- Production provider requirements are strengthened:
+  - filing-based holdings must preserve publication lag;
+  - 13F-style quarter-end observations cannot be treated as known before publication;
+  - short-interest data must use published aggregate position snapshots rather than daily short-sale volume;
+  - raw insider net-share totals are not directionally safe without transaction-level classification.
+- Added deterministic synthetic development fixtures for:
+  - institutional ownership percentage;
+  - institutional holder count;
+  - short interest as percentage of float;
+  - raw insider net shares.
+- All synthetic fixtures preserve separate `observedAt` and `availableAt` timestamps.
+
+Institutional Ownership Trend:
+
+- Requires at least three published observations.
+- Scores the multi-period **change** in institutional ownership percentage.
+- The absolute institutional ownership level is not assigned bullish/bearish direction.
+- Reliability is reduced as the underlying observation becomes stale.
+- 13F-style publication lag remains visible in the point-in-time metadata and explainability.
+
+Institutional Holder Breadth:
+
+- Requires at least three positive published holder-count observations.
+- Scores the percentage change in institutional-holder count.
+- Holder breadth remains in the same `ownershipPositioning` family and cannot become a separate independent vote.
+- Holder count does not imply position size, conviction or investment motive.
+
+Short Interest Trend:
+
+- Requires at least three published aggregate short-interest observations.
+- Rising short interest is opposing context; falling short interest is supportive context.
+- The **absolute short-interest level is not directionally scored**.
+- Short interest is explicitly distinguished from daily short-sale volume.
+- High short interest is not universally treated as bearish because hedging, positioning structure and squeeze risk can change interpretation.
+
+Insider Transaction Context:
+
+- Raw `insiderNetShares` remains non-directional in Batch 7.
+- Batch 7 assigns zero signed score because raw net shares cannot distinguish:
+  - open-market purchases/sales;
+  - grants;
+  - option exercises;
+  - tax withholding;
+  - gifts;
+  - other transaction mechanics.
+- Transaction-code-aware Form 4-style data is required before insider activity may receive directional interpretation.
+
+Ownership-family role boundaries:
+
+- `EvidenceFamily.ownershipPositioning` remains contextual.
+- Ownership & Positioning cannot satisfy core-fundamental breadth.
+- Ownership & Positioning cannot create an Investor BUY/SELL.
+- Exact maximum contextual direction influence remains deferred to Batch 8.
+- Publication age/staleness directly reduces reliability.
+
+Market Expectations helper:
+
+- Added `InvestorMarketExpectationsService`.
+- This is **not** an evidence provider.
+- Permanent invariants:
+  - zero evidence votes;
+  - zero direction points;
+  - zero confidence points.
+- Requires:
+  - an available Valuation family; and
+  - at least two available business families from Growth, Profitability & Quality and Revisions.
+- It summarizes already-counted evidence into:
+  - Expectations look conservative;
+  - Expectations look balanced;
+  - Expectations look demanding;
+  - Expectations look very demanding;
+  - Not enough data.
+- The helper reconstructs signed family strength from already-counted family results and compares business support with valuation pressure.
+- Ownership & Positioning may be displayed as contextual narrative but **does not alter the Market Expectations classification**.
+- Market Expectations is not:
+  - a fair-value model;
+  - a DCF;
+  - a price target;
+  - a market-implied forecast;
+  - a probability of future return.
+- Its deterministic pressure bands are presentation heuristics and must never be reused as hidden recommendation weights.
+
+Explainability:
+
+- Added complete per-input explainability for:
+  - Institutional Ownership Trend;
+  - Institutional Holder Breadth;
+  - Short Interest Trend;
+  - Insider Transaction Context.
+- Added complete helper-level explainability for Market Expectations.
+- The distinction between evidence direction, contextual narrative and zero-vote presentation remains explicit.
+
+Architecture invariants:
+
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+- No Investor recommendation or UI activation occurs in Batch 7.
+- Development ownership/positioning inputs remain explicitly synthetic.
+- Competitive Durability remains excluded from actionable core breadth pending Batch 8 overlap resolution.
+- Market/macro context from Batch 6 remains contextual-only and VIX remains non-directional.
+
+Batch 7 validation:
+
+- Flutter analyzer: clean.
+- Investor suite: 73 passing tests.
+- Recommendation subsystem suite: 528 passing tests.
+- Full automated suite: 602 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 
