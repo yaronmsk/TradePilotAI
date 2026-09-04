@@ -31,7 +31,17 @@ void main() {
   test('all Batch 2 metric explainability definitions are complete', () {
     expect(InvestorMetricExplainabilityCatalog.isComplete, isTrue);
 
-    for (final kind in InvestorMetricKind.values) {
+    const batch2Kinds = {
+      InvestorMetricKind.revenueCagr,
+      InvestorMetricKind.dilutedEpsCagr,
+      InvestorMetricKind.freeCashFlowCagr,
+      InvestorMetricKind.grossMarginTrend,
+      InvestorMetricKind.operatingMarginQuality,
+      InvestorMetricKind.freeCashFlowMarginQuality,
+      InvestorMetricKind.returnOnInvestedCapitalQuality,
+    };
+
+    for (final kind in batch2Kinds) {
       final explainability = InvestorMetricExplainabilityCatalog.forKind(kind);
       expect(explainability.isComplete, isTrue, reason: '$kind');
       expect(explainability.allowsDirectionalInfluence, isTrue);

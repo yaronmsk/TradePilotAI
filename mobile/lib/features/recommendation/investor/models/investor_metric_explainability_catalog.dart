@@ -23,6 +23,12 @@ enum InvestorMetricKind {
   returnOnInvestedCapitalPersistence,
   operatingMarginPersistence,
   freeCashFlowPersistence,
+  broadMarketSensitivity,
+  sectorSensitivity,
+  longTermYieldSensitivity,
+  financialConditionsSensitivity,
+  usdIndexSensitivity,
+  marketImpliedVolatilityContext,
 }
 
 extension InvestorMetricKindPresentation on InvestorMetricKind {
@@ -59,6 +65,15 @@ extension InvestorMetricKindPresentation on InvestorMetricKind {
         'Operating Margin Persistence',
       InvestorMetricKind.freeCashFlowPersistence =>
         'Free Cash Flow Persistence',
+      InvestorMetricKind.broadMarketSensitivity => 'Broad Market Sensitivity',
+      InvestorMetricKind.sectorSensitivity => 'Sector Sensitivity',
+      InvestorMetricKind.longTermYieldSensitivity =>
+        'Long-Term Yield Sensitivity',
+      InvestorMetricKind.financialConditionsSensitivity =>
+        'Financial Conditions Sensitivity',
+      InvestorMetricKind.usdIndexSensitivity => 'U.S. Dollar Sensitivity',
+      InvestorMetricKind.marketImpliedVolatilityContext =>
+        'Market-Implied Volatility Context',
     };
   }
 }
@@ -475,6 +490,116 @@ class InvestorMetricExplainabilityCatalog {
           'FCF Persistence contributes inside Competitive Durability and is not an independent vote.',
       limitations:
           'Working-capital and capital-expenditure cycles can make FCF volatile. This proxy does not prove a structural moat and overlaps with other quality evidence.',
+    ),
+    InvestorMetricKind.broadMarketSensitivity: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the stock has shown a sufficiently strong and stable historical relationship with broad-market weekly returns.',
+      calculation:
+          'Fits the stock/market relationship from at least 52 prior aligned weekly observations, requires material full-sample correlation and matching-sign half-sample correlations, then combines that historical relationship with the latest standardized broad-market move.',
+      whyItMatters:
+          'Some stocks behave as high market-beta exposures while others are more defensive or idiosyncratic. Measuring the relationship is safer than assuming every stock responds equally to the broad market.',
+      supportiveInterpretation:
+          'A current broad-market move that historically aligned positively with this stock supports contextual direction.',
+      opposingInterpretation:
+          'A current broad-market move that historically aligned negatively with this stock opposes contextual direction.',
+      neutralInterpretation:
+          'Weak, unstable or small broad-market sensitivity remains neutral or unavailable.',
+      recommendationImpact:
+          'Broad Market Sensitivity contributes only inside Investor Market Context. It cannot satisfy fundamental breadth or create a recommendation; exact context caps are deferred to Batch 8.',
+      limitations:
+          'Correlation can change across regimes and does not prove causation. Market sensitivity can also overlap with sector or style factors, so Batch 6 applies a collinearity guard.',
+    ),
+    InvestorMetricKind.sectorSensitivity: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the stock has shown a sufficiently strong and stable historical relationship with its sector’s weekly returns.',
+      calculation:
+          'Fits the stock/sector relationship from at least 52 prior aligned weekly observations with full-sample and half-sample stability gates, then applies the latest standardized sector move.',
+      whyItMatters:
+          'Sector economics can affect companies through common demand, input costs, regulation and valuation regimes.',
+      supportiveInterpretation:
+          'A current sector move that historically aligned positively with this stock supports contextual direction.',
+      opposingInterpretation:
+          'A current sector move that historically aligned negatively with this stock opposes contextual direction.',
+      neutralInterpretation:
+          'Weak, unstable or small sector sensitivity remains neutral or unavailable.',
+      recommendationImpact:
+          'Sector Sensitivity is contextual only and cannot replace the core company/business thesis.',
+      limitations:
+          'Sector classifications can be imperfect and sector returns often correlate with the broad market. Highly collinear factors are de-duplicated.',
+    ),
+    InvestorMetricKind.longTermYieldSensitivity: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the stock has shown a sufficiently strong and stable historical relationship with weekly changes in long-term interest yields.',
+      calculation:
+          'Uses at least 52 prior aligned weekly observations, requires material correlation and matching-sign half-sample relationships, then combines the validated stock correlation with the latest standardized yield move.',
+      whyItMatters:
+          'Long-term yields can affect discount rates, financing economics and relative valuation differently across companies.',
+      supportiveInterpretation:
+          'A current yield move that historically aligned positively with this stock supports contextual direction.',
+      opposingInterpretation:
+          'A current yield move that historically aligned negatively with this stock opposes contextual direction.',
+      neutralInterpretation:
+          'Weak, unstable or small yield sensitivity remains neutral or unavailable.',
+      recommendationImpact:
+          'Long-Term Yield Sensitivity contributes only inside Investor Market Context and cannot create an Investor BUY/SELL.',
+      limitations:
+          'Rate sensitivity can change across regimes, and correlation may reflect omitted market or sector variables rather than a direct causal exposure.',
+    ),
+    InvestorMetricKind.financialConditionsSensitivity: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the stock has shown a sufficiently strong and stable historical relationship with changes in a broad financial-conditions factor.',
+      calculation:
+          'Uses at least 52 prior aligned weekly observations and stability checks across sample halves, then applies the latest standardized financial-conditions move. TradePilot does not assume tighter or looser conditions affect every stock the same way.',
+      whyItMatters:
+          'Funding, credit, equity-market and banking conditions can affect financing access, risk appetite and demand differently across companies.',
+      supportiveInterpretation:
+          'A current financial-conditions move that historically aligned positively with the stock supports contextual direction.',
+      opposingInterpretation:
+          'A current financial-conditions move that historically aligned negatively with the stock opposes contextual direction.',
+      neutralInterpretation:
+          'Weak or unstable sensitivity remains neutral or unavailable.',
+      recommendationImpact:
+          'Financial Conditions Sensitivity is contextual only and cannot replace the business thesis.',
+      limitations:
+          'Broad financial-condition indexes combine multiple market variables and may overlap with other factors. Batch 6 therefore applies a collinearity guard.',
+    ),
+    InvestorMetricKind.usdIndexSensitivity: MetricExplainability(
+      semanticRole: MetricSemanticRole.directionalEvaluative,
+      whatItIs:
+          'Measures whether the stock has shown a sufficiently strong and stable historical relationship with weekly changes in a broad U.S. dollar factor.',
+      calculation:
+          'Uses at least 52 prior aligned weekly observations, half-sample stability checks and the latest standardized dollar move.',
+      whyItMatters:
+          'Currency moves can affect translated foreign revenue, imported costs, commodity economics and global financial conditions differently by company.',
+      supportiveInterpretation:
+          'A current dollar move that historically aligned positively with the stock supports contextual direction.',
+      opposingInterpretation:
+          'A current dollar move that historically aligned negatively with the stock opposes contextual direction.',
+      neutralInterpretation:
+          'Weak, unstable or small dollar sensitivity remains neutral or unavailable.',
+      recommendationImpact:
+          'U.S. Dollar Sensitivity contributes only to contextual Investor direction and cannot create a BUY/SELL.',
+      limitations:
+          'A broad dollar factor is only a proxy for company-specific currency exposure. Revenue/cost currency mapping is not yet modeled.',
+    ),
+    InvestorMetricKind.marketImpliedVolatilityContext: MetricExplainability(
+      semanticRole: MetricSemanticRole.confidenceRiskOnly,
+      whatItIs:
+          'Shows whether the latest market-implied-volatility move is unusually large relative to its prior weekly-change history.',
+      calculation:
+          'Standardizes the latest weekly change in market-implied volatility against prior weekly changes. Batch 6 assigns exactly zero directional score.',
+      whyItMatters:
+          'A volatility shock can indicate a more uncertain market environment even when it does not tell us whether an individual stock should move up or down.',
+      recommendationImpact:
+          'Market-implied volatility is confidence/risk context only. It cannot support or oppose Investor direction and cannot create a recommendation.',
+      limitations:
+          'VIX-style measures reflect expected broad-market volatility over a short horizon and are not directional forecasts for an individual stock.',
+      boundedImpact:
+          'Batch 6 contributes zero direction points. Any future confidence/risk adjustment approved in Batch 8 must be explicitly capped and cannot create BUY/SELL direction.',
     ),
   };
 

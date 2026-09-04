@@ -44,6 +44,18 @@ abstract interface class MarketValuationDataProvider {
   });
 }
 
+/// Vendor-neutral source for aligned stock, market, sector and macro
+/// history used to estimate stock-specific long-horizon sensitivities.
+///
+/// Production implementations must preserve observation/release timestamps and
+/// must not backfill revised macro data into historical analysis.
+abstract interface class InvestorSensitivityDataProvider {
+  Future<List<InvestorSensitivityObservation>> loadSensitivityHistory({
+    required String symbol,
+    required DateTime asOf,
+  });
+}
+
 /// Vendor-neutral source for long-horizon macro/global market context.
 abstract interface class MacroContextProvider {
   Future<List<InvestorMetricPoint<InvestorMacroMetric>>> loadContext({

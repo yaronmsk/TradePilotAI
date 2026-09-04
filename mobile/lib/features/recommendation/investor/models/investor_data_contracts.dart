@@ -132,6 +132,42 @@ enum InvestorMacroMetric {
   marketImpliedVolatility,
 }
 
+enum InvestorSensitivityFactor {
+  broadMarket,
+  sector,
+  longTermYield,
+  financialConditions,
+  usdIndex,
+  marketImpliedVolatility,
+}
+
+class InvestorSensitivityObservation {
+  InvestorSensitivityObservation({
+    required this.stockReturnPercent,
+    required Map<InvestorSensitivityFactor, double> factorChanges,
+    required this.metadata,
+  }) : factorChanges = Map.unmodifiable(factorChanges);
+
+  /// Stock return aligned to the observation period.
+  final double stockReturnPercent;
+
+  /// Already-aligned weekly factor changes.
+  ///
+  /// Examples:
+  /// - broad market / sector: weekly percentage return
+  /// - long-term yield: weekly yield change
+  /// - financial conditions: weekly index change
+  /// - USD: weekly index/percentage change from the selected provider
+  /// - implied volatility: weekly index change
+  ///
+  /// Using changes avoids pretending raw levels across unlike factors are
+  /// directly comparable. The evidence provider standardizes each factor
+  /// against its own historical distribution.
+  final Map<InvestorSensitivityFactor, double> factorChanges;
+
+  final InvestorDataMetadata metadata;
+}
+
 enum InvestorPositioningMetric {
   institutionalOwnershipPercent,
   institutionalHolderCount,
@@ -165,6 +201,7 @@ class InvestorPointInTimeSnapshot {
     List<InvestorMetricPoint<InvestorMarketMetric>> market = const [],
     List<InvestorValuationReference> valuationReferences = const [],
     List<InvestorMetricPoint<InvestorMacroMetric>> macro = const [],
+    List<InvestorSensitivityObservation> sensitivityHistory = const [],
     List<InvestorMetricPoint<InvestorPositioningMetric>> positioning = const [],
     this.peerClassification,
   }) : fundamentals = List.unmodifiable(fundamentals),
@@ -172,6 +209,7 @@ class InvestorPointInTimeSnapshot {
        market = List.unmodifiable(market),
        valuationReferences = List.unmodifiable(valuationReferences),
        macro = List.unmodifiable(macro),
+       sensitivityHistory = List.unmodifiable(sensitivityHistory),
        positioning = List.unmodifiable(positioning);
 
   final String symbol;
@@ -182,6 +220,7 @@ class InvestorPointInTimeSnapshot {
   final List<InvestorMetricPoint<InvestorMarketMetric>> market;
   final List<InvestorValuationReference> valuationReferences;
   final List<InvestorMetricPoint<InvestorMacroMetric>> macro;
+  final List<InvestorSensitivityObservation> sensitivityHistory;
   final List<InvestorMetricPoint<InvestorPositioningMetric>> positioning;
   final InvestorPeerClassification? peerClassification;
 
@@ -200,6 +239,9 @@ class InvestorPointInTimeSnapshot {
     }
     for (final point in macro) {
       yield point.metadata;
+    }
+    for (final observation in sensitivityHistory) {
+      yield observation.metadata;
     }
     for (final point in positioning) {
       yield point.metadata;

@@ -19,6 +19,20 @@ class InvestorEvidenceFamilyPolicy {
     EvidenceFamily.capitalAllocation,
   };
 
+  /// Core families currently allowed to satisfy actionable breadth.
+  ///
+  /// Competitive Durability remains a core business concept, but Batch 5
+  /// demonstrated raw-input overlap with Profitability & Quality. It therefore
+  /// stays excluded from breadth until Batch 8 defines the overlap policy.
+  static const Set<EvidenceFamily> breadthEligibleCoreFundamentalFamilies = {
+    EvidenceFamily.growth,
+    EvidenceFamily.profitabilityQuality,
+    EvidenceFamily.financialStrength,
+    EvidenceFamily.valuation,
+    EvidenceFamily.revisions,
+    EvidenceFamily.capitalAllocation,
+  };
+
   static const Set<EvidenceFamily> contextualFamilies = {
     EvidenceFamily.marketContext,
     EvidenceFamily.trend,
@@ -33,11 +47,24 @@ class InvestorEvidenceFamilyPolicy {
     return families.toSet().where(coreFundamentalFamilies.contains).length;
   }
 
+  static bool isBreadthEligibleCoreFundamental(EvidenceFamily family) =>
+      breadthEligibleCoreFundamentalFamilies.contains(family);
+
+  static int countBreadthEligibleCoreFundamentalFamilies(
+    Iterable<EvidenceFamily> families,
+  ) {
+    return families
+        .toSet()
+        .where(breadthEligibleCoreFundamentalFamilies.contains)
+        .length;
+  }
+
   static bool hasCoreFundamentalBreadth(
     Iterable<EvidenceFamily> families, {
     required int minimumFamilies,
   }) {
     assert(minimumFamilies >= 0);
-    return countCoreFundamentalFamilies(families) >= minimumFamilies;
+    return countBreadthEligibleCoreFundamentalFamilies(families) >=
+        minimumFamilies;
   }
 }

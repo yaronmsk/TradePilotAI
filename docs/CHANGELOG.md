@@ -28,7 +28,7 @@ Related Documents:
 
 Status
 
-Implementation Active — Batch 5 Revisions + Competitive Durability Validated
+Implementation Active — Batch 6 Global Market & Macro Context + Stock Sensitivity Profile Validated
 
 Date
 
@@ -314,6 +314,80 @@ Batch 5 validation:
 - Investor suite: 46 passing tests.
 - Recommendation subsystem suite: 501 passing tests.
 - Full automated suite: 575 passing tests.
+- `git diff --check`: clean.
+- No visual acceptance was required because Investor remains unavailable in the UI.
+
+## Batch 6 — Global Market & Macro Context + Stock Sensitivity Profile
+
+Implemented and validated on 2026-09-04.
+
+Batch 6 adds a point-in-time-safe Investor market/macro context layer based on measured stock-specific sensitivity rather than universal macro assumptions. Investor recommendation generation and UI activation remain unavailable.
+
+Sensitivity architecture:
+
+- Added a vendor-neutral `InvestorSensitivityDataProvider`.
+- Added aligned weekly `InvestorSensitivityObservation` history carrying:
+  - stock return;
+  - broad-market change;
+  - sector change;
+  - long-term-yield change;
+  - financial-conditions change;
+  - U.S.-dollar change;
+  - market-implied-volatility change;
+  - point-in-time metadata.
+- Factor **changes**, not unlike raw factor levels, are stored in the aligned sensitivity history.
+- The current observation is excluded from fitting historical sensitivity and is used only after the historical relationship is established.
+- Point-in-time safety applies to the complete sensitivity history, including synthetic development fixtures.
+
+Directional sensitivity gates:
+
+- Minimum 52 **prior** aligned weekly observations are required, plus one current observation.
+- Minimum absolute full-sample stock/factor correlation: `0.35`.
+- Both historical half-samples must maintain the same correlation sign.
+- Minimum absolute half-sample correlation: `0.20`.
+- The current factor move is standardized against prior factor-change history before contextual scoring.
+- Highly collinear factors at absolute correlation `>= 0.75` cannot both survive as independent directional context inputs; the weaker stock-specific relationship is suppressed.
+- Broad Market and Sector are modeled first, followed by Long-Term Yield, Financial Conditions and U.S. Dollar sensitivity.
+- Weak, unstable, insufficient or collinear sensitivity becomes neutral/unavailable rather than generating false precision.
+
+Role boundaries:
+
+- All directional sensitivity remains inside `EvidenceFamily.marketContext`.
+- Market/macro context cannot satisfy core-fundamental breadth.
+- Market/macro context cannot create an Investor BUY/SELL.
+- Exact maximum context/timing direction influence remains deferred to Batch 8.
+- Market-implied volatility remains **confidence/risk-only** and contributes exactly zero direction points in Batch 6.
+- Any future volatility confidence/risk effect must be explicitly capped and cannot create BUY/SELL direction.
+
+Competitive Durability breadth enforcement:
+
+- `CompetitiveDurability` remains a core business concept/family.
+- Because Batch 5 durability reuses ROIC, operating-margin and FCF inputs that overlap with Profitability & Quality, it remains excluded from actionable breadth.
+- Batch 6 now enforces that safeguard centrally through a separate breadth-eligible core-family set.
+- `hasCoreFundamentalBreadth(...)` uses breadth-eligible core families, not every conceptual core family.
+- Batch 8 must explicitly resolve the Competitive Durability overlap before it may count toward actionable breadth or recommendation attribution.
+
+Explainability / regression correction:
+
+- Added individual explainability for Broad Market Sensitivity, Sector Sensitivity, Long-Term Yield Sensitivity, Financial Conditions Sensitivity, U.S. Dollar Sensitivity and Market-Implied Volatility Context.
+- The historical Batch 2 integrity test was narrowed to the seven metrics that actually existed in Batch 2. It still requires those original metrics to remain directional.
+- Global Investor metric-catalog completeness remains enforced.
+- The Batch 2 test no longer incorrectly requires future confidence/risk-only metrics such as Market-Implied Volatility Context to be directional.
+
+Architecture invariants:
+
+- Global `EvidenceKind` remains unchanged.
+- Investor `StrategyAnalysisPolicy` remains planned.
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable.
+- No Investor recommendation or UI activation occurs in Batch 6.
+- Development market/macro/sensitivity inputs remain explicitly synthetic.
+
+Batch 6 validation:
+
+- Flutter analyzer: clean.
+- Investor suite: 58 passing tests.
+- Recommendation subsystem suite: 513 passing tests.
+- Full automated suite: 587 passing tests.
 - `git diff --check`: clean.
 - No visual acceptance was required because Investor remains unavailable in the UI.
 
