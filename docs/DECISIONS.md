@@ -355,3 +355,36 @@ Changes require:
 1. Approval.
 2. Version update.
 3. Git commit.
+
+## 2026-09-05 — Fast-track Personal Android Beta before further major intelligence expansion
+
+Decision:
+
+After release `v0.12.0`, prioritize a thin real-data Android vertical slice over additional major brain features.
+
+Why:
+
+- Trader, Swing and Investor now have validated strategy-specific architectures.
+- The largest usefulness gap is real data/productization rather than another evidence family.
+- Real-world use will expose higher-value intelligence/calibration work than synthetic-fixture expansion.
+- Early Android use shortens the feedback loop.
+- One primary data path and manual refresh reduce time-to-use.
+- Monitoring/alerts can be added after the app is already useful.
+
+Guardrails:
+
+- Preserve v0.12.0 recommendation semantics.
+- Keep mocks for deterministic regression.
+- No mock fallback in live mode.
+- Explicit live/partial/stale/error/synthetic state.
+- Protect provider credentials behind a minimal gateway.
+- Synthetic historical outcomes cannot affect live confidence.
+- Deferred intelligence ideas remain explicitly preserved.
+
+Authoritative plan:
+
+`docs/PERSONAL_BETA_ROADMAP.md`
+
+Next release:
+
+`v0.13.0 — Personal Android Beta`

@@ -1678,3 +1678,41 @@ With this checkpoint committed, pushed and tagged `v0.12.0`, the Investor Strate
 The next product milestone is:
 
 **v1.0.0 — validated multi-strategy milestone with Trader, Swing and Investor implemented, followed by production-data hardening and broader release-readiness work.**
+
+## Post-v0.12 Fast-Track Development Priority
+
+Decision date: 2026-09-05.
+
+After completing v0.12.0, TradePilot AI moves from a brain-first phase to a Personal Android Beta fast-track.
+
+Authoritative roadmap:
+
+`docs/PERSONAL_BETA_ROADMAP.md`
+
+Core sequencing rule:
+
+**Frozen validated brain → thin live vertical slice → Android use → real-world feedback → monitoring → hardening → resume advanced intelligence.**
+
+This is a development-priority change, not a recommendation-architecture rewrite.
+
+Major new intelligence work is temporarily deferred unless required for safe/meaningful real-world use.
+
+The next release is:
+
+**v0.13.0 — Personal Android Beta**
+
+Target scope:
+
+- U.S. equities first;
+- one primary live-data path;
+- minimal secure data gateway;
+- manual analysis/refresh before monitoring;
+- Trader/Swing live market-data slice;
+- Investor real/partial-live core slice;
+- explicit LIVE / PARTIAL LIVE / STALE / DATA ERROR / SYNTHETIC state;
+- no silent mock fallback in live mode;
+- synthetic Historical Validation cannot modify live confidence.
+
+Monitoring and push notifications move to v0.14.0.
+
+Deferred intelligence ideas are preserved in the roadmap and are not rejected.

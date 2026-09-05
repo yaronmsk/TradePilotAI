@@ -48,40 +48,42 @@ Approved release sequence:
 
 ## 2. Current Development Phase
 
-**Brain-first feature development.**
+**Productization / Personal Android Beta fast-track.**
 
-The current focus is:
+Current released baseline:
 
-**v0.12.0 — Investor Strategy Brain**
+**v0.12.0 — Investor Strategy Brain** (`b2e358a`, tag `v0.12.0`)
 
-v0.12.0 release acceptance complete — Batches 0–11 implemented and validated.
+Current active development target:
 
-Detailed v0.12 contract:
+**v0.13.0 — Personal Android Beta**
 
-`docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
+Authoritative roadmap:
 
-The current UI remains functional and intentionally provisional.
+`docs/PERSONAL_BETA_ROADMAP.md`
 
-The first v0.11.0 production objective is not Swing UI activation.
+The project is temporarily freezing major new intelligence expansion.
 
-The first production architecture must introduce a strategy-aware analysis/evidence policy capable of expressing genuine differences between Trader and Swing.
+The immediate objective is to connect real data through a thin end-to-end path, install TradePilot on the owner's Android phone early, validate the existing Trader/Swing/Investor brains against real inputs, and then expand monitoring and product hardening.
 
-Approved implementation sequence begins with:
+Fast-track order:
 
-1. Strategy-aware evidence/applicability policy.
-2. Swing timeframe/context orchestration.
-3. Evidence-family-by-family Swing calibration.
-4. Swing historical-validation horizon.
-5. Swing recommendation orchestration and recommendation policy.
-6. Attribution and explainability.
-7. Human-readable Swing UI and decision helpers.
-8. Full regression, visual acceptance, documentation and release.
+1. Provider feasibility spike.
+2. Minimal secure data gateway.
+3. Explicit live/partial/stale/error/synthetic data-state contract.
+4. Real U.S. market quote/history integration.
+5. Trader + Swing live vertical slice.
+6. Early Android APK/install.
+7. Investor live core fundamentals/valuation.
+8. Partial-live safety, freshness and provider-failure handling.
+9. v0.13.0 Personal Android Beta acceptance.
+10. v0.14.0 monitoring and notifications.
+11. Product hardening.
+12. Resume deferred intelligence using real-world evidence.
 
-Detailed evidence-by-evidence decisions are maintained in:
+This changes development order, not validated recommendation architecture.
 
-`docs/SWING_STRATEGY_BRAIN_V0_11.md`
-
-No existing Trader evidence provider is automatically valid for Swing merely because it can consume slower candles.
+The v0.12.0 scoring, evidence-family de-duplication, attribution, point-in-time discipline and strategy-specific semantics remain the baseline.
 
 ---
 
@@ -1723,3 +1725,41 @@ Immediate priorities after the v0.12.0 tag:
 3. Define the v1.0.0 validated multi-strategy scope before coding.
 4. Prioritize production-data hardening, real historical validation, risk architecture and release-readiness gaps rather than silently changing accepted Trader/Swing/Investor semantics.
 5. Preserve explicit synthetic/mock-data labeling until authoritative providers replace development fixtures.
+
+## Post-v0.12 Fast-Track Development Priority
+
+Decision date: 2026-09-05.
+
+After completing v0.12.0, TradePilot AI moves from a brain-first phase to a Personal Android Beta fast-track.
+
+Authoritative roadmap:
+
+`docs/PERSONAL_BETA_ROADMAP.md`
+
+Core sequencing rule:
+
+**Frozen validated brain → thin live vertical slice → Android use → real-world feedback → monitoring → hardening → resume advanced intelligence.**
+
+This is a development-priority change, not a recommendation-architecture rewrite.
+
+Major new intelligence work is temporarily deferred unless required for safe/meaningful real-world use.
+
+The next release is:
+
+**v0.13.0 — Personal Android Beta**
+
+Target scope:
+
+- U.S. equities first;
+- one primary live-data path;
+- minimal secure data gateway;
+- manual analysis/refresh before monitoring;
+- Trader/Swing live market-data slice;
+- Investor real/partial-live core slice;
+- explicit LIVE / PARTIAL LIVE / STALE / DATA ERROR / SYNTHETIC state;
+- no silent mock fallback in live mode;
+- synthetic Historical Validation cannot modify live confidence.
+
+Monitoring and push notifications move to v0.14.0.
+
+Deferred intelligence ideas are preserved in the roadmap and are not rejected.

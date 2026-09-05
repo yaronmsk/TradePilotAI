@@ -1619,3 +1619,41 @@ TradePilot AI must not treat all historical measurements as equally informative.
 ## Market, Event & News Context rule
 
 Market Breadth belongs to the existing Market Context evidence family so index/sector trend and breadth cannot manufacture multiple independent market votes. News Sentiment is a separate Sentiment family but is reliability-gated by source diversity, freshness and materiality. Scheduled Event Risk is not directional evidence: earnings or high-impact macro proximity may reduce confidence within a bounded penalty but cannot create Buy/Sell direction by itself. Synthetic development context must be labeled and must never be presented as real current market/news/calendar data.
+
+## Post-v0.12 Fast-Track Development Priority
+
+Decision date: 2026-09-05.
+
+After completing v0.12.0, TradePilot AI moves from a brain-first phase to a Personal Android Beta fast-track.
+
+Authoritative roadmap:
+
+`docs/PERSONAL_BETA_ROADMAP.md`
+
+Core sequencing rule:
+
+**Frozen validated brain → thin live vertical slice → Android use → real-world feedback → monitoring → hardening → resume advanced intelligence.**
+
+This is a development-priority change, not a recommendation-architecture rewrite.
+
+Major new intelligence work is temporarily deferred unless required for safe/meaningful real-world use.
+
+The next release is:
+
+**v0.13.0 — Personal Android Beta**
+
+Target scope:
+
+- U.S. equities first;
+- one primary live-data path;
+- minimal secure data gateway;
+- manual analysis/refresh before monitoring;
+- Trader/Swing live market-data slice;
+- Investor real/partial-live core slice;
+- explicit LIVE / PARTIAL LIVE / STALE / DATA ERROR / SYNTHETIC state;
+- no silent mock fallback in live mode;
+- synthetic Historical Validation cannot modify live confidence.
+
+Monitoring and push notifications move to v0.14.0.
+
+Deferred intelligence ideas are preserved in the roadmap and are not rejected.
