@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import '../../engines/consensus_engine.dart';
+import '../../history/historical_confidence_adjuster.dart';
+import '../../history/historical_setup_validation.dart';
 import '../../models/evidence_contribution.dart';
 import '../../models/evidence_definition.dart';
 import '../../models/evidence_family.dart';
@@ -19,6 +21,7 @@ class InvestorRecommendationAnalysis {
     required this.requiredCoreFamiliesAvailable,
     required this.contextDirectionScale,
     required this.contextDirectionShare,
+    required this.coreConflict,
     required List<EvidenceFamily> excludedRecommendationFamilies,
   }) : excludedRecommendationFamilies = List.unmodifiable(
          excludedRecommendationFamilies,
@@ -41,6 +44,9 @@ class InvestorRecommendationAnalysis {
   /// Actual post-cap Market Context + Ownership direction-attribution share.
   final double contextDirectionShare;
 
+  /// Core-fundamental conflict before contextual direction is merged.
+  final double coreConflict;
+
   /// Families that remain visible analysis but intentionally receive zero
   /// recommendation weight.
   final List<EvidenceFamily> excludedRecommendationFamilies;
@@ -49,9 +55,11 @@ class InvestorRecommendationAnalysis {
 class InvestorRecommendationEngine {
   const InvestorRecommendationEngine({
     this.consensusEngine = const ConsensusEngine(),
+    this.historicalConfidenceAdjuster = const HistoricalConfidenceAdjuster(),
   });
 
   final ConsensusEngine consensusEngine;
+  final HistoricalConfidenceAdjuster historicalConfidenceAdjuster;
 
   InvestorRecommendationAnalysis create({
     required Iterable<InvestorEvidenceAssessment> assessments,
@@ -185,9 +193,43 @@ class InvestorRecommendationEngine {
       requiredCoreFamiliesAvailable: requiredCoreFamiliesAvailable,
       contextDirectionScale: contextScale,
       contextDirectionShare: contextDirectionShare,
+      coreConflict: coreConsensus.conflict,
       excludedRecommendationFamilies: const [
         EvidenceFamily.competitiveDurability,
       ],
+    );
+  }
+
+  InvestorRecommendationAnalysis applyHistoricalValidation({
+    required InvestorRecommendationAnalysis analysis,
+    required HistoricalSetupValidation validation,
+  }) {
+    final adjustedScoring = historicalConfidenceAdjuster.apply(
+      scoringResult: analysis.recommendation.consensus,
+      validation: validation,
+    );
+
+    final reclassified = _decide(
+      scoring: adjustedScoring,
+      evidenceReport: analysis.recommendation.evidenceReport,
+      analysisTime:
+          analysis.recommendation.analysisTime ??
+          DateTime.fromMillisecondsSinceEpoch(0),
+      coreFamilyCount: analysis.coreFamilyCount,
+      coreCoverage: analysis.coreCoverage,
+      requiredCoreFamiliesAvailable: analysis.requiredCoreFamiliesAvailable,
+      coreConflict: analysis.coreConflict,
+    ).copyWith(historicalValidation: validation);
+
+    return InvestorRecommendationAnalysis(
+      recommendation: reclassified,
+      coreFamilyCount: analysis.coreFamilyCount,
+      coreCoverage: analysis.coreCoverage,
+      requiredCoreFamiliesAvailable: analysis.requiredCoreFamiliesAvailable,
+      contextDirectionScale: analysis.contextDirectionScale,
+      contextDirectionShare: analysis.contextDirectionShare,
+      coreConflict: analysis.coreConflict,
+      excludedRecommendationFamilies: analysis.excludedRecommendationFamilies,
     );
   }
 

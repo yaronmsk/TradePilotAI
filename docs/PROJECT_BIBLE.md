@@ -143,7 +143,7 @@ Detailed Swing evidence and capability rules are defined in:
 ### Investor
 Months to years. Fundamentals, valuation, growth, quality, revisions, competitive position and long-term technical context.
 
-v0.12.0 Batch 8 Investor Recommendation Policy + Attribution is implemented and validated. A dedicated Investor backend recommendation path now exists, but generic strategy orchestration and UI activation remain unavailable. Action requires 4-of-6 core families with Valuation mandatory; Market/Ownership context is capped to 20% direction share; Competitive Durability has zero recommendation weight in v0.12. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
+v0.12.0 Batch 9 Investor Historical Setup Validation is implemented and validated. The dedicated Investor backend now includes bounded point-in-time 6m/12m/24m historical confidence validation with same-stock and benchmark-relative controls; generic strategy orchestration and UI activation remain unavailable. Detailed contract: `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`.
 
 Investor fundamentals are split into independent Growth, Profitability/Quality, Financial Strength, Valuation, Revisions, Competitive Durability and Capital Allocation/Dilution families. Global Market/Macro Context is measurable context based on observable regimes plus stock-specific sensitivity. `Market Expectations` is a zero-vote synthesis and cannot double-count its inputs.
 
@@ -189,7 +189,7 @@ When the brain begins learning from historical effectiveness:
 7. v0.10 — Broader market breadth, scheduled event risk and reliability-weighted news sentiment. Done.
 8. v0.10.1 — Reusable explainability architecture, semantic roles and bidirectional/confidence-only invariants. Done.
 9. v0.11.0 — Swing Strategy Brain. Release acceptance complete.
-10. v0.12.0 — Investor Strategy Brain. Batch 8 Investor Recommendation Policy + Attribution validated.
+10. v0.12.0 — Investor Strategy Brain. Batch 9 Investor Historical Setup Validation validated.
 11. v1.0.0 — Validated multi-strategy milestone with Trader, Swing and Investor implemented.
 12. v1.x — Real historical setup database, walk-forward calibration and AI Analyst / Mentor grounded in deterministic analysis.
 
@@ -812,6 +812,176 @@ Batch 9 adds Investor Historical Setup Validation before UI activation.
 - Investor suite: **87 passing tests**.
 - Recommendation subsystem suite: **542 passing tests**.
 - Full automated suite: **616 passing tests**.
+- `git diff --check`: clean.
+- No visual acceptance required because Investor UI remains inactive.
+
+## Batch 9 — Investor Historical Setup Validation
+
+Implemented and validated on 2026-09-05.
+
+Batch 9 adds Investor-specific point-in-time Historical Setup Validation while preserving the permanent rule that historical evidence is **confidence-only**.
+
+### Investor-specific historical contract
+
+Investor Historical Validation does not reuse the Trader/Swing candle fingerprint.
+
+Instead each historical Investor case stores:
+
+- symbol;
+- historical setup timestamp;
+- timestamp when the full historical recommendation fingerprint was actually knowable;
+- signed scores for the six breadth-eligible core Investor families;
+- historical recommendation direction/confidence;
+- core-family count;
+- mature 6-month, 12-month and 24-month forward outcomes;
+- stock return and benchmark return for each mature horizon;
+- explicit synthetic/source labeling.
+
+A historical setup is rejected if its complete recommendation fingerprint became available **after** the setup timestamp.
+
+Forward outcomes are usable only after the relevant horizon has fully matured by the current analysis date.
+
+### Historical matching basis
+
+Similarity uses only the six breadth-eligible core Investor families:
+
+1. Growth
+2. Profitability & Quality
+3. Financial Strength
+4. Valuation
+5. Revisions
+6. Capital Allocation & Dilution
+
+Historical validation therefore cannot gain similarity credit from:
+
+- Market Context;
+- Ownership & Positioning;
+- Market Expectations;
+- Competitive Durability's overlapping proxy;
+- other contextual helpers.
+
+The current fingerprint must satisfy the same minimum core breadth as the recommendation policy and must include Valuation.
+
+### Frozen matching safeguards
+
+- Minimum similarity: **0.75**.
+- Minimum de-overlapped matched cases: **8**.
+- Minimum same-stock control cases: **12**.
+- Minimum spacing between retained matched setups: **90 calendar days**.
+- Near-duplicate historical setups inside the 90-day window are de-overlapped by retaining the higher-similarity case.
+- Historical cases must be from the same symbol.
+- Current/future cases are excluded.
+- Look-ahead setup fingerprints are rejected.
+- Neutral current Investor direction receives zero historical confidence impact.
+
+### 6m / 12m / 24m horizon model
+
+Investor historical outcomes are evaluated at:
+
+- **6 months** — 25% policy weight;
+- **12 months** — 50% policy weight;
+- **24 months** — 25% policy weight.
+
+Rules:
+
+- 12-month evidence is mandatory.
+- At least two mature usable horizons are required.
+- If one non-mandatory horizon is unavailable, remaining horizon weights are renormalized.
+- No horizon receives its own ±8 confidence allowance.
+- All usable horizons collapse into **one combined historical-confidence overlay**.
+
+### Same-stock baseline and benchmark-relative outcomes
+
+Each mature horizon compares similar historical setups with the stock's broader same-direction historical baseline.
+
+Two follow-through dimensions are measured:
+
+1. Absolute directional follow-through.
+2. Benchmark-relative directional follow-through.
+
+The historical score therefore asks whether similar setups historically performed better or worse than that stock usually did under broader same-direction Investor setups, both absolutely and relative to the benchmark.
+
+This prevents a generally strong bull market from being mistaken for setup-specific historical edge.
+
+### Confidence-only boundary
+
+Permanent invariants:
+
+- historical direction impact = `0`;
+- historical core-breadth impact = `0`;
+- historical evidence votes = `0`;
+- historical provider/family direction attribution = unchanged;
+- historical contextual direction share = unchanged.
+
+The existing shared `HistoricalConfidenceAdjuster` remains the only confidence-application mechanism.
+
+The combined 6m/12m/24m result is bounded to:
+
+**-8 to +8 final-confidence points maximum.**
+
+Historical validation remains a separately labeled `historicalValidation` confidence modifier and is never reassigned to evidence-family/provider confidence attribution.
+
+### Explainability
+
+Investor Historical Validation has a complete confidence/risk-only explainability contract describing:
+
+- what is matched;
+- point-in-time reconstruction;
+- horizon maturity;
+- 6m/12m/24m weighting;
+- same-stock baseline;
+- benchmark-relative follow-through;
+- de-overlapping;
+- confidence-only role;
+- ±8 cap;
+- important limitations.
+
+Historical similarity is explicitly **not** presented as a probability of profit, causal proof, fair value, or guaranteed forward return.
+
+### Synthetic fixture correction during validation
+
+The `IVOPPOSE` synthetic historical fixture initially produced approximately the same aligned outcome rate as its control baseline, correctly resulting in a `mixed` verdict.
+
+The fixture was corrected so the intentionally opposing matched population has materially weaker follow-through than its control baseline.
+
+This was a **test-data calibration only**:
+
+- no production similarity threshold changed;
+- no horizon weighting changed;
+- no confidence cap changed;
+- no historical scoring rule changed;
+- no recommendation threshold changed.
+
+### Integration with Investor recommendation backend
+
+`InvestorRecommendationEngine.applyHistoricalValidation()`:
+
+- applies the shared bounded historical confidence modifier;
+- reclassifies recommendation state only when adjusted confidence crosses an existing Investor confidence threshold;
+- preserves direction score;
+- preserves direction attribution;
+- preserves core-family count and coverage;
+- preserves required-family status;
+- preserves contextual direction share;
+- attaches the shared `HistoricalSetupValidation` model to the recommendation.
+
+### Activation boundary after Batch 9
+
+Investor recommendation backend + historical validation are implemented and validated, but:
+
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable;
+- Investor `StrategyAnalysisPolicy` remains `planned`;
+- generic Investor orchestration remains guarded;
+- Investor UI activation remains off.
+
+The next implementation step is **Batch 10 — Investor UI activation**.
+
+### Batch 9 validation
+
+- Flutter analyzer: clean.
+- Investor suite: **101 passing tests**.
+- Recommendation subsystem suite: **556 passing tests**.
+- Full automated suite: **630 passing tests**.
 - `git diff --check`: clean.
 - No visual acceptance required because Investor UI remains inactive.
 

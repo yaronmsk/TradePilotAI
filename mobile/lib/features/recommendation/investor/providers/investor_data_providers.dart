@@ -1,4 +1,5 @@
 import '../models/investor_data_contracts.dart';
+import '../models/investor_historical_validation_case.dart';
 
 /// Vendor-neutral source for reported company fundamentals.
 ///
@@ -83,12 +84,16 @@ abstract interface class OwnershipPositioningProvider {
   });
 }
 
-/// Point-in-time historical bundle used by future Investor validation.
+/// Point-in-time historical Investor recommendation/outcome source.
 ///
-/// Batch 1 defines the contract only; no historical performance or scoring is
-/// activated here.
+/// Historical fingerprints must be reconstructed only from information that
+/// was available at each setup timestamp. Later filing restatements, current
+/// analyst estimates or future-known context must not be backfilled.
+///
+/// Forward outcomes may be returned only when their horizon has matured by
+/// [asOf]. The validation service performs an additional maturity check.
 abstract interface class InvestorHistoricalDataProvider {
-  Future<InvestorPointInTimeSnapshot> loadSnapshot({
+  Future<List<InvestorHistoricalValidationCase>> loadValidationCases({
     required String symbol,
     required DateTime asOf,
   });
