@@ -2,7 +2,7 @@
 
 **Document:** Project Continuation / Chat Handoff
 **Version:** 1.2
-**Checkpoint:** v0.12.0 — Investor Strategy Brain Batch 10 UI Activation Validated + Visually Accepted
+**Checkpoint:** v0.12.0 — Investor Strategy Brain Release Acceptance Complete
 **Date:** 2026-09-05
 **Primary Branch:** `develop`
 
@@ -59,31 +59,29 @@ Do not initiate a major visual redesign unless the project documentation explici
 
 Previous tagged baseline release:
 
-**v0.10.1 — Explainability & Bidirectional Audit**
+**v0.11.0 — Swing Strategy Brain**
 
 Release commit:
 
-`c53ad00 — docs: finalize v0.10.1 explainability release`
+`665fd8f — feat: finalize v0.11.0 Swing Strategy Brain`
 
-v0.10.1 is complete, tagged and synchronized with GitHub.
+v0.11.0 is complete, tagged and synchronized with GitHub.
 
 Current release checkpoint:
 
-**v0.11.0 — Swing Strategy Brain**
+**v0.12.0 — Investor Strategy Brain**
 
 Status:
 
-**Release acceptance complete — Batches 1–10 implemented and validated; designated release tag: `v0.11.0`.**
+**Release acceptance complete — Batches 0–11 implemented and validated; designated release tag: `v0.12.0`.**
 
 Detailed evidence, capability and acceptance contract:
 
-`docs/SWING_STRATEGY_BRAIN_V0_11.md`
+`docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
 
-Swing now has a validated strategy-specific backend, visible Strategy Summary activation, presentation-only Decision Helpers, typed recommendation-state reasons and human-readable non-action wording. Final v0.11.0 release acceptance passed on 2026-08-31.
+Investor now has a validated dedicated recommendation backend, point-in-time Historical Setup Validation and visually accepted long-horizon dashboard. Current Investor app wiring is explicitly synthetic development data, not live production intelligence.
 
-Swing must not be implemented as Trader logic running on slower candles.
-
-Before Swing activation, every existing evidence provider, context input, confidence modifier, historical capability and decision helper requires an explicit Swing applicability/calibration decision.
+The generic Trader/Swing Investor strategy-policy path remains unavailable by design; dedicated Investor orchestration is the accepted v0.12 architecture.
 
 Approved roadmap:
 
@@ -526,6 +524,97 @@ Final release gate:
 - `git diff --check`: clean.
 - Manual Chrome visual acceptance: passed, including Swing BUY presentation and the Batch 10B non-action wording/explanations.
 
+## Batch 11 — v0.12.0 Release Acceptance
+
+Release acceptance completed on 2026-09-05.
+
+Batch 11 is a release-only checkpoint. It does not introduce new Investor scoring, thresholds, evidence, attribution, historical-validation behavior or recommendation semantics.
+
+### Release metadata
+
+- Flutter package version: `0.12.0+1`.
+- Visible application version: `Version 0.12.0`.
+- Designated release tag: `v0.12.0`.
+- Release validator: `./tools/validate-release-0.12.sh`.
+
+### Final automated release gate
+
+The v0.12.0 release validator completed successfully.
+
+Final validated results:
+
+- Dart formatting check: passed with no required formatting changes.
+- Flutter analyzer: clean.
+- Investor suite: **107 passing tests**.
+- Dashboard strategy-orchestration suite: **3 passing tests**.
+- Full dashboard widget acceptance test: **1 passing test**.
+- Recommendation subsystem suite: **563 passing tests**.
+- Full automated suite: **637 passing tests**.
+- `flutter build web`: passed and produced `build/web`.
+- `git diff --check`: clean.
+
+### Visual acceptance
+
+The Investor dashboard received manual Chrome visual acceptance in Batch 10 on 2026-09-05.
+
+That acceptance covered:
+
+- Investor selectable from Strategy Summary;
+- complete Investor section order;
+- explicit synthetic development-data warning;
+- no misleading `0 candles` long-term decision basis;
+- readable per-value info/explainability dialogs;
+- separate direction and confidence attribution;
+- zero-vote Market Expectations presentation;
+- confidence-only Historical Validation presentation;
+- no material clipping/overflow;
+- strategy switching between Trader, Swing and Investor.
+
+Batch 11 changes only release metadata and the reusable release validator. The visible `Version 0.12.0` footer is also protected by the passing full-dashboard widget test, so no new analytical/UI behavior was introduced after visual acceptance.
+
+### v0.12.0 acceptance result
+
+The v0.12.0 Investor Strategy Brain acceptance criteria are satisfied for the current development-data architecture:
+
+- Investor is a genuine months-to-years strategy rather than Swing on slower candles.
+- Independent long-term economic families are implemented.
+- Actionable Investor BUY/SELL requires sufficient independent core-fundamental breadth and Valuation.
+- Market/Macro context is measurable and stock-sensitivity-aware rather than vague opinion.
+- Market Expectations remains transparent and zero-vote.
+- Ownership/Positioning remains contextual and latency-aware.
+- invalid universal formulas are withheld where business-model normalization is not supported.
+- point-in-time guards protect historical reconstruction.
+- BUY/SELL parity and directional-family behavior are regression-tested.
+- direction attribution and confidence attribution remain mathematically separate.
+- every visible Investor analytical value has an individual explainability path.
+- Trader and Swing remain regression-protected.
+- synthetic Investor data remains explicitly labeled.
+
+### Production-readiness boundary
+
+`v0.12.0` is an accepted **development milestone**, not a claim of live-data production readiness.
+
+Still intentionally outstanding:
+
+- authoritative production Investor fundamental provider integration;
+- licensed/authoritative analyst-estimate history;
+- production peer classifications/distributions;
+- production ownership/positioning feeds;
+- real historical Investor setup database and out-of-sample calibration;
+- production Investor Risk Engine;
+- AI Analyst / Mentor;
+- final commercial UI/design pass.
+
+The dedicated Investor backend remains separate from the generic Trader/Swing `RecommendationStrategyPolicy` and `StrategyAnalysisPolicy` path. That separation is intentional and must not be removed merely to make the architecture look uniform.
+
+### Release completion
+
+With this checkpoint committed, pushed and tagged `v0.12.0`, the Investor Strategy Brain release is complete.
+
+The next product milestone is:
+
+**v1.0.0 — validated multi-strategy milestone with Trader, Swing and Investor implemented, followed by production-data hardening and broader release-readiness work.**
+
 ## Current Known Limitations
 
 The project is not yet production-ready.
@@ -539,7 +628,7 @@ Important limitations include:
 * Same-time-of-day historical RVOL is not implemented.
 * True session VWAP requires authoritative intraday/session data.
 * Swing brain is implemented and v0.11.0 release acceptance is complete; synthetic/mock data limitations still prevent interpreting this checkpoint as live production market intelligence.
-* Investor dedicated backend recommendation generation, point-in-time Historical Setup Validation and the dedicated Investor dashboard are implemented through v0.12.0 Batch 10. The UI is visually accepted with explicit synthetic-data labeling. Generic Trader/Swing Investor policy activation remains intentionally unavailable; Batch 11 release acceptance is next.
+* Investor dedicated backend recommendation generation, point-in-time Historical Setup Validation and the dedicated Investor dashboard are release-accepted in v0.12.0. The UI keeps explicit synthetic-data labeling. Generic Trader/Swing Investor policy activation remains intentionally unavailable by design.
 * AI Analyst/Mentor is not connected.
 * Historical validation results are not real backtested strategy-performance claims.
 
@@ -566,60 +655,39 @@ When starting a new conversation:
 
 ## Immediate Continuation Point
 
-Current tagged release:
-
-**v0.11.0 — Swing Strategy Brain** (`665fd8f`, tag `v0.11.0`)
-
-Active development release:
+Current release checkpoint:
 
 **v0.12.0 — Investor Strategy Brain**
 
-Detailed architecture/research contract:
+Designated release tag:
+
+`v0.12.0`
+
+Detailed architecture/release contract:
 
 `docs/INVESTOR_STRATEGY_BRAIN_V0_12.md`
 
-The approved evidence-by-evidence audit is authoritative during implementation.
+Immediate sequence after the accepted release checkpoint is committed, pushed and tagged:
 
-Immediate sequence:
+1. Preserve v0.12.0 as the immutable Investor Strategy Brain baseline.
+2. Reconstruct from the six canonical project docs plus the Investor/Swing specifications before new implementation.
+3. Define the v1.0.0 validated multi-strategy scope before coding.
+4. Prioritize production-data integration, real historical/out-of-sample validation, production risk architecture and release-readiness gaps.
+5. Do not silently alter accepted Trader, Swing or Investor scoring semantics under the v0.12.0 version.
+6. Keep synthetic/mock data explicitly labeled until authoritative providers replace it.
 
-1. Keep Investor unavailable; Investor remains deferred to v0.12.0.
-2. Preserve Batch 9B Decision Helpers as presentation-derived summaries only; they must not become evidence votes or alter confidence/direction.
-3. Preserve the accepted v0.11.0 release checkpoint; do not alter its scoring/recommendation behavior without a new semantic version.
-4. Commit, push and tag the accepted v0.11.0 checkpoint, then continue with v0.12.0 Investor Strategy Brain planning/implementation.
+Permanent multi-strategy constraints:
 
-For every existing evidence/capability, determine:
-
-* Whether Swing uses it.
-* Why it matters to Swing.
-* Correct timeframe and lookback.
-* Calculation/threshold changes.
-* Direction effect.
-* Confidence effect.
-* Risk or entry-quality effect.
-* Evidence-family relationship.
-* BUY/SELL interpretation.
-* User-facing wording.
-* Individual info/explainability behavior.
-* Attribution behavior.
-* Limitations.
-
-Permanent v0.11.0 constraints:
-
-* Swing is not Trader on slower candles.
-* Main UI remains human-readable.
-* Every analytical input/value has an individual info path.
-* Direction attribution reconciles to 100% of active effective directional influence.
-* Provider attribution reconciles to capped family attribution.
-* Confidence attribution remains separate.
+* Trader, Swing and Investor remain genuinely strategy-specific.
+* Direction and confidence attribution remain separate.
 * Evidence-family de-duplication remains mandatory.
-* Event Risk remains confidence-only and capped at a maximum 12-point penalty.
-* Historical Setup Validation remains confidence-only and capped at ±8 points.
-* Current analysis-window VWAP is not automatically valid Swing evidence.
-* RSI must not use simplistic overbought-equals-SELL / oversold-equals-BUY Swing semantics.
-* Price Extension must not automatically claim trend reversal.
-* Support/resistance proximity alone is not confirmed directional evidence.
-* 4H Relative Volume must not fabricate same-time-of-day normalization.
-* Synthetic/mock data honesty remains mandatory.
+* Confidence-only modifiers remain explicitly bounded.
+* Historical validation cannot create recommendation direction.
+* Investor Market Expectations remains zero-vote.
+* Investor Market + Ownership contextual direction remains collectively capped.
+* Competitive Durability remains zero recommendation weight while its proxy overlaps Quality.
+* Current Investor development-data providers must never be presented as live production fundamentals.
+* A production Investor Risk Engine is still not implemented.
 
 ---
 

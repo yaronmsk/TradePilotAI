@@ -205,10 +205,10 @@ void main() {
     expect(find.text('Investor Historical Setup Validation'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('Version 0.11.0'),
+      find.text('Version 0.12.0'),
       250,
       scrollable: dashboardScroll,
     );
-    expect(find.text('Version 0.11.0'), findsOneWidget);
+    expect(find.text('Version 0.12.0'), findsOneWidget);
   });
 }

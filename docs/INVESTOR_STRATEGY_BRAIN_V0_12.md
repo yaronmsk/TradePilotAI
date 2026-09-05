@@ -1,6 +1,6 @@
 # TradePilot AI — v0.12.0 Investor Strategy Brain
 
-Status: Implementation active — Batch 10 Investor UI activation validated and visually accepted
+Status: Release acceptance complete — v0.12.0 Investor Strategy Brain
 Release: v0.12.0
 Baseline: v0.11.0 — Swing Strategy Brain
 Baseline commit: 665fd8f0be86c8ce62cb2d37e1d2acbda910bd69
@@ -294,7 +294,7 @@ Every visible analytical value requires its own info/explainability path.
 - **Batch 8** — Investor recommendation policy + attribution ✅
 - **Batch 9** — Investor Historical Setup Validation ✅
 - **Batch 10** — Investor UI activation ✅
-- **Batch 11** — v0.12.0 release acceptance
+- **Batch 11** — v0.12.0 release acceptance ✅
 
 ## Batch 1 — Investor Domain / Family Foundation
 
@@ -1312,6 +1312,97 @@ Batch 10 does not:
 The next and final v0.12 implementation step is:
 
 **Batch 11 — v0.12.0 release acceptance.**
+
+## Batch 11 — v0.12.0 Release Acceptance
+
+Release acceptance completed on 2026-09-05.
+
+Batch 11 is a release-only checkpoint. It does not introduce new Investor scoring, thresholds, evidence, attribution, historical-validation behavior or recommendation semantics.
+
+### Release metadata
+
+- Flutter package version: `0.12.0+1`.
+- Visible application version: `Version 0.12.0`.
+- Designated release tag: `v0.12.0`.
+- Release validator: `./tools/validate-release-0.12.sh`.
+
+### Final automated release gate
+
+The v0.12.0 release validator completed successfully.
+
+Final validated results:
+
+- Dart formatting check: passed with no required formatting changes.
+- Flutter analyzer: clean.
+- Investor suite: **107 passing tests**.
+- Dashboard strategy-orchestration suite: **3 passing tests**.
+- Full dashboard widget acceptance test: **1 passing test**.
+- Recommendation subsystem suite: **563 passing tests**.
+- Full automated suite: **637 passing tests**.
+- `flutter build web`: passed and produced `build/web`.
+- `git diff --check`: clean.
+
+### Visual acceptance
+
+The Investor dashboard received manual Chrome visual acceptance in Batch 10 on 2026-09-05.
+
+That acceptance covered:
+
+- Investor selectable from Strategy Summary;
+- complete Investor section order;
+- explicit synthetic development-data warning;
+- no misleading `0 candles` long-term decision basis;
+- readable per-value info/explainability dialogs;
+- separate direction and confidence attribution;
+- zero-vote Market Expectations presentation;
+- confidence-only Historical Validation presentation;
+- no material clipping/overflow;
+- strategy switching between Trader, Swing and Investor.
+
+Batch 11 changes only release metadata and the reusable release validator. The visible `Version 0.12.0` footer is also protected by the passing full-dashboard widget test, so no new analytical/UI behavior was introduced after visual acceptance.
+
+### v0.12.0 acceptance result
+
+The v0.12.0 Investor Strategy Brain acceptance criteria are satisfied for the current development-data architecture:
+
+- Investor is a genuine months-to-years strategy rather than Swing on slower candles.
+- Independent long-term economic families are implemented.
+- Actionable Investor BUY/SELL requires sufficient independent core-fundamental breadth and Valuation.
+- Market/Macro context is measurable and stock-sensitivity-aware rather than vague opinion.
+- Market Expectations remains transparent and zero-vote.
+- Ownership/Positioning remains contextual and latency-aware.
+- invalid universal formulas are withheld where business-model normalization is not supported.
+- point-in-time guards protect historical reconstruction.
+- BUY/SELL parity and directional-family behavior are regression-tested.
+- direction attribution and confidence attribution remain mathematically separate.
+- every visible Investor analytical value has an individual explainability path.
+- Trader and Swing remain regression-protected.
+- synthetic Investor data remains explicitly labeled.
+
+### Production-readiness boundary
+
+`v0.12.0` is an accepted **development milestone**, not a claim of live-data production readiness.
+
+Still intentionally outstanding:
+
+- authoritative production Investor fundamental provider integration;
+- licensed/authoritative analyst-estimate history;
+- production peer classifications/distributions;
+- production ownership/positioning feeds;
+- real historical Investor setup database and out-of-sample calibration;
+- production Investor Risk Engine;
+- AI Analyst / Mentor;
+- final commercial UI/design pass.
+
+The dedicated Investor backend remains separate from the generic Trader/Swing `RecommendationStrategyPolicy` and `StrategyAnalysisPolicy` path. That separation is intentional and must not be removed merely to make the architecture look uniform.
+
+### Release completion
+
+With this checkpoint committed, pushed and tagged `v0.12.0`, the Investor Strategy Brain release is complete.
+
+The next product milestone is:
+
+**v1.0.0 — validated multi-strategy milestone with Trader, Swing and Investor implemented, followed by production-data hardening and broader release-readiness work.**
 
 ## Acceptance criteria
 
