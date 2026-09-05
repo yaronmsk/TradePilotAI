@@ -1,3 +1,5 @@
+import '../../../core/data/data_provenance.dart';
+
 class MarketCandle {
   final DateTime timestamp;
   final double open;
@@ -5,6 +7,7 @@ class MarketCandle {
   final double low;
   final double close;
   final double volume;
+  final DataProvenance provenance;
 
   const MarketCandle({
     required this.timestamp,
@@ -13,6 +16,7 @@ class MarketCandle {
     required this.low,
     required this.close,
     required this.volume,
+    this.provenance = const DataProvenance.synthetic(),
   });
 
   bool get isBullish => close > open;

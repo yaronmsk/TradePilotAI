@@ -1,3 +1,4 @@
+import '../../../core/data/data_provenance.dart';
 import 'market_candle.dart';
 
 class MarketSnapshot {
@@ -7,6 +8,7 @@ class MarketSnapshot {
   final double currentPrice;
   final double currentVolume;
   final List<MarketCandle> candles;
+  final DataProvenance provenance;
 
   const MarketSnapshot({
     required this.symbol,
@@ -15,6 +17,7 @@ class MarketSnapshot {
     required this.currentPrice,
     required this.currentVolume,
     required this.candles,
+    this.provenance = const DataProvenance.synthetic(),
   });
 
   int get candleCount => candles.length;
