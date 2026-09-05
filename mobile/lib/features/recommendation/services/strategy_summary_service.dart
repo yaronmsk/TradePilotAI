@@ -8,6 +8,7 @@ class StrategySummaryService {
 
   List<StrategySummary> build({
     required List<StrategyRecommendation> recommendations,
+    Set<StrategyType> dedicatedAvailableStrategies = const {},
   }) {
     final byStrategy = <StrategyType, StrategyRecommendation>{
       for (final recommendation in recommendations)
@@ -33,7 +34,8 @@ class StrategySummaryService {
 
           final policy = StrategyAnalysisPolicyCatalog.forStrategy(type);
 
-          if (policy.isRecommendationActive) {
+          if (policy.isRecommendationActive ||
+              dedicatedAvailableStrategies.contains(type)) {
             return StrategySummary(
               type: type,
               title: type.title,

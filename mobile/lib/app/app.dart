@@ -12,6 +12,14 @@ import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
 import '../features/recommendation/history/historical_setup_validation_service.dart';
 import '../features/recommendation/history/mock_historical_setup_provider.dart';
+import '../features/recommendation/investor/history/investor_historical_validation_service.dart';
+import '../features/recommendation/investor/providers/mock_investor_estimate_provider.dart';
+import '../features/recommendation/investor/providers/mock_investor_fundamental_data_provider.dart';
+import '../features/recommendation/investor/providers/mock_investor_historical_data_provider.dart';
+import '../features/recommendation/investor/providers/mock_investor_macro_data_provider.dart';
+import '../features/recommendation/investor/providers/mock_investor_ownership_positioning_provider.dart';
+import '../features/recommendation/investor/providers/mock_investor_valuation_data_provider.dart';
+import '../features/recommendation/investor/services/investor_analysis_service.dart';
 import '../features/recommendation/providers/candle_trend_evidence_provider.dart';
 import '../features/recommendation/providers/ema_structure_evidence_provider.dart';
 import '../features/recommendation/providers/macd_momentum_evidence_provider.dart';
@@ -108,6 +116,19 @@ class _TradePilotAppState extends State<TradePilotApp> {
       provider: MockHistoricalSetupProvider(),
     );
 
+    const investorMacroProvider = MockInvestorMacroDataProvider();
+    const investorAnalysisService = InvestorAnalysisService(
+      fundamentalDataProvider: MockInvestorFundamentalDataProvider(),
+      analystEstimateProvider: MockInvestorEstimateProvider(),
+      marketValuationDataProvider: MockInvestorValuationDataProvider(),
+      macroContextProvider: investorMacroProvider,
+      sensitivityDataProvider: investorMacroProvider,
+      ownershipPositioningProvider: MockInvestorOwnershipPositioningProvider(),
+      historicalValidationService: InvestorHistoricalValidationService(
+        provider: MockInvestorHistoricalDataProvider(),
+      ),
+    );
+
     final dashboardController = DashboardController(
       marketController: marketController,
       marketHistoryController: marketHistoryController,
@@ -116,6 +137,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
       watchlistController: watchlistController,
       recommendationController: recommendationController,
       historicalSetupValidationService: historicalSetupValidationService,
+      investorAnalysisService: investorAnalysisService,
     );
 
     final selectedSymbol = watchlistController.state.selectedSymbol;

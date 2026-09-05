@@ -99,9 +99,9 @@ void main() {
       scrollable: dashboardScroll,
     );
 
-    expect(find.text('Ready to analyze'), findsOneWidget);
-    expect(find.text('Tap to run'), findsOneWidget);
-    expect(find.text('🚧 Coming Soon'), findsOneWidget);
+    expect(find.text('Ready to analyze'), findsNWidgets(2));
+    expect(find.text('Tap to run'), findsNWidgets(2));
+    expect(find.text('🚧 Coming Soon'), findsNothing);
 
     await tester.tap(find.text('Swing'));
     await tester.pumpAndSettle();
@@ -139,6 +139,70 @@ void main() {
     );
     expect(find.text('Swing Evidence'), findsOneWidget);
     expect(find.text('Waiting for Analysis'), findsNothing);
+
+    // Batch 10: activate Investor through the dedicated real dashboard path.
+    await tester.scrollUntilVisible(
+      find.text('Strategy Summary'),
+      -250,
+      scrollable: dashboardScroll,
+    );
+
+    await tester.tap(find.text('Investor'));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('Investor Analysis Context'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Investor Analysis Context'), findsOneWidget);
+    expect(
+      find.textContaining('Investor UI is active for validation'),
+      findsOneWidget,
+    );
+
+    await tester.scrollUntilVisible(
+      find.text('Investor Recommendation'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Investor Recommendation'), findsOneWidget);
+    expect(find.text('Investor Recommendation Insight'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Business Strength'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Business Strength'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Valuation & Expectations'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Valuation & Expectations'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Global Market Context'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Global Market Context'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Investor Risk Context'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Investor Risk Context'), findsOneWidget);
+
+    await tester.scrollUntilVisible(
+      find.text('Investor Historical Setup Validation'),
+      250,
+      scrollable: dashboardScroll,
+    );
+    expect(find.text('Investor Historical Setup Validation'), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Version 0.11.0'),

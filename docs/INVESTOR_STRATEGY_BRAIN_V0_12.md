@@ -1,6 +1,6 @@
 # TradePilot AI — v0.12.0 Investor Strategy Brain
 
-Status: Implementation active — Batch 9 Investor Historical Setup Validation validated
+Status: Implementation active — Batch 10 Investor UI activation validated and visually accepted
 Release: v0.12.0
 Baseline: v0.11.0 — Swing Strategy Brain
 Baseline commit: 665fd8f0be86c8ce62cb2d37e1d2acbda910bd69
@@ -293,7 +293,7 @@ Every visible analytical value requires its own info/explainability path.
 - **Batch 7** — Ownership/Positioning + zero-vote Market Expectations helper ✅
 - **Batch 8** — Investor recommendation policy + attribution ✅
 - **Batch 9** — Investor Historical Setup Validation ✅
-- **Batch 10** — Investor UI activation
+- **Batch 10** — Investor UI activation ✅
 - **Batch 11** — v0.12.0 release acceptance
 
 ## Batch 1 — Investor Domain / Family Foundation
@@ -1052,6 +1052,266 @@ The next implementation step is **Batch 10 — Investor UI activation**.
 - Full automated suite: **630 passing tests**.
 - `git diff --check`: clean.
 - No visual acceptance required because Investor UI remains inactive.
+
+## Batch 10 — Investor UI Activation
+
+Implemented, automated-test validated and visually accepted on 2026-09-05.
+
+Batch 10 activates Investor in the real dashboard while preserving the dedicated v0.12 Investor backend and all previously frozen scoring, attribution and point-in-time rules.
+
+### Dedicated activation path
+
+Investor is selectable from Strategy Summary through its dedicated `InvestorAnalysisService` / `InvestorRecommendationEngine` path.
+
+Batch 10 does **not** route Investor through the generic Trader/Swing recommendation engine.
+
+Permanent integration boundary after Batch 10:
+
+- `RecommendationStrategyPolicy.forStrategy(Investor)` remains unavailable;
+- generic Investor `StrategyAnalysisPolicy` remains `planned`;
+- Trader/Swing `EvidenceKind` orchestration remains unchanged;
+- Strategy Summary can expose Investor availability through an explicit dedicated-backend availability signal;
+- cached Trader, Swing and Investor recommendation states remain independent.
+
+This keeps Investor's fundamental-family breadth and context-cap semantics from leaking into the generic short-horizon orchestration path.
+
+### Investor analysis orchestration
+
+The new Investor application service:
+
+1. loads point-in-time fundamentals;
+2. loads point-in-time analyst estimate vintages;
+3. loads valuation context;
+4. loads macro context;
+5. loads stock-specific macro sensitivity history;
+6. loads Ownership & Positioning;
+7. builds one point-in-time-safe Investor snapshot;
+8. evaluates the nine validated Investor evidence providers;
+9. creates the dedicated Investor recommendation;
+10. builds the zero-vote Market Expectations helper;
+11. runs Investor Historical Setup Validation;
+12. applies the shared bounded historical-confidence modifier.
+
+An unsafe point-in-time snapshot is rejected rather than silently analyzed.
+
+### Development-data boundary
+
+The current application wiring uses the existing synthetic Investor providers.
+
+The UI explicitly displays:
+
+**Synthetic development data**
+
+and explains that the displayed fundamentals, estimates, macro inputs, ownership data and historical examples are not live production company data.
+
+Batch 10 therefore validates orchestration and presentation only. It does not claim that production Investor data vendors are connected.
+
+### Investor dashboard order
+
+The visually accepted Investor flow is:
+
+1. Strategy Summary
+2. Investor Analysis Context
+3. Investor Recommendation
+4. Investor Recommendation Insight
+5. Business Strength
+6. Valuation & Expectations
+7. Global Market Context
+8. Ownership & Positioning
+9. Investor Evidence
+10. Investor Risk Context
+11. Investor Historical Setup Validation
+
+The Investor dashboard does not present a short candle interval or `0 candles` as the long-term decision basis.
+
+Investor selection also does not repurpose the shared price chart into a fake fundamental timeframe.
+
+### Investor Analysis Context
+
+The dedicated context card exposes human-readable values for:
+
+- months-to-years analysis horizon;
+- available core-fundamental breadth;
+- point-in-time safety;
+- explicit data mode;
+- 6m / 12m / 24m historical-validation windows.
+
+Each visible value has its own info affordance.
+
+### Investor Recommendation
+
+The dedicated Investor Recommendation card exposes:
+
+- recommendation state;
+- confidence;
+- signed Investor direction score;
+- core coverage;
+- mandatory Valuation gate.
+
+It intentionally avoids Trader/Swing wording such as primary candle count.
+
+Confidence remains explicitly **not a probability of profit**.
+
+### Recommendation Insight and attribution
+
+The existing shared Recommendation Insight card is reused because its validated model already separates:
+
+- Signal Strength / direction;
+- Confidence;
+- Signal Alignment;
+- direction attribution;
+- confidence attribution.
+
+For Investor, Historical Validation is suppressed inside this shared card and presented later as its own dedicated Investor section so the UI order remains clear.
+
+No Batch 10 UI code creates new recommendation weights.
+
+### Business Strength
+
+The Business Strength card exposes:
+
+- Growth;
+- Profitability & Quality;
+- Financial Strength;
+- Revisions;
+- Capital Allocation;
+- Competitive Durability.
+
+Competitive Durability remains visible but is explicitly labeled as **0 recommendation weight in v0.12** because the current durability proxy overlaps Profitability & Quality.
+
+Batch 10 does not change that Batch 8 de-duplication decision.
+
+### Valuation & Expectations
+
+The card exposes Valuation separately from the Market Expectations presentation helper.
+
+Market Expectations remains a permanent zero-vote helper:
+
+- zero evidence votes;
+- zero direction points;
+- zero confidence points.
+
+Its UI explains that it summarizes already-counted business/valuation evidence and is not a DCF, fair-value target, market-implied forecast or probability.
+
+### Global Market Context
+
+Macro/global context remains secondary.
+
+The UI preserves the frozen rule that Market Context + Ownership & Positioning may collectively receive no more than **20% of Investor direction attribution**.
+
+Context cannot satisfy core-fundamental breadth and contributes zero Investor confidence share in v0.12.
+
+### Ownership & Positioning
+
+Ownership & Positioning remains contextual.
+
+The UI preserves the distinction between:
+
+- institutional ownership trend;
+- institutional holder breadth;
+- published short-interest trend;
+- insider transaction context.
+
+Raw insider net shares are not presented as directionally valid without transaction-code-aware production data.
+
+### Investor Risk Context
+
+Batch 10 intentionally does **not** reuse the generic placeholder RiskCard as though it were a production Investor Risk Engine.
+
+Instead the dedicated Investor Risk Context card exposes validated constraints such as:
+
+- actual contextual direction share;
+- core-fundamental conflict;
+- Historical Validation confidence impact;
+- market-implied volatility context when available;
+- explicit `Risk Engine Status: Not implemented`.
+
+The card states that it is not position sizing, stop-loss or portfolio-risk advice.
+
+### Investor Historical Setup Validation UI
+
+Historical Validation is presented as the final dedicated Investor section.
+
+The card exposes:
+
+- historical verdict;
+- confidence impact;
+- matched setups;
+- average similarity;
+- mature 6m / 12m / 24m horizon details;
+- absolute edge versus same-stock baseline;
+- benchmark-relative edge;
+- reliability.
+
+The UI preserves the permanent confidence-only boundary:
+
+- zero direction impact;
+- zero core-breadth impact;
+- one combined ±8 maximum confidence overlay.
+
+Historical similarity is explicitly not presented as a probability of profit.
+
+### Explainability acceptance
+
+Investor-facing analytical values use visible info affordances.
+
+The accepted dialogs explain, as applicable:
+
+- what the value is;
+- how it is calculated;
+- supportive / opposing / neutral interpretation;
+- why it matters;
+- direction vs confidence/risk role;
+- bounded impact;
+- limitations.
+
+This includes Growth, Valuation, Market Expectations, macro context, Ownership & Positioning, historical validation and Investor Risk Context.
+
+### Automated validation
+
+Final Batch 10 validation:
+
+- Flutter analyzer: clean.
+- Investor suite: **107 passing tests**.
+- Dashboard orchestration suite: **3 passing tests**.
+- Recommendation subsystem suite: **563 passing tests**.
+- Full automated suite: **637 passing tests**.
+- `git diff --check`: clean.
+
+Two UI tests initially used an overly broad `textContaining('Synthetic development data')` finder. The UI legitimately contains both the synthetic-data warning and Data Mode value, so the tests were corrected to target the warning text specifically. This was a **test-selector correction only**; no production behavior changed.
+
+### Visual acceptance
+
+Chrome visual acceptance completed on 2026-09-05.
+
+Accepted checks included:
+
+- Investor selectable from Strategy Summary;
+- complete Investor card order;
+- visible synthetic-data warning;
+- no misleading `0 candles` Investor decision basis;
+- readable per-value info dialogs;
+- separate direction and confidence attribution;
+- zero-vote Market Expectations presentation;
+- confidence-only Historical Validation presentation;
+- no material clipping/overflow observed;
+- Trader → Swing → Investor strategy switching preserves strategy-specific results.
+
+### Release boundary after Batch 10
+
+Batch 10 activates Investor UI, but **v0.12.0 release acceptance is not yet complete**.
+
+Batch 10 does not:
+
+- bump package/release version;
+- change the visible version footer from the current release baseline;
+- create the `v0.12.0` tag;
+- declare production Investor data providers live;
+- claim that a production Investor Risk Engine exists.
+
+The next and final v0.12 implementation step is:
+
+**Batch 11 — v0.12.0 release acceptance.**
 
 ## Acceptance criteria
 

@@ -49,6 +49,22 @@ void main() {
     expect(summaries[2].status, StrategyStatus.comingSoon);
   });
 
+  test(
+    'shows dedicated Investor backend as ready without generic activation',
+    () {
+      final summaries = service.build(
+        recommendations: const [],
+        dedicatedAvailableStrategies: const {StrategyType.investor},
+      );
+
+      expect(summaries[0].status, StrategyStatus.active);
+      expect(summaries[1].status, StrategyStatus.active);
+      expect(summaries[2].status, StrategyStatus.active);
+      expect(summaries[2].recommendation, 'Ready to analyze');
+      expect(summaries[2].confidence, isNull);
+    },
+  );
+
   test('activates any strategy that has a recommendation', () {
     final summaries = service.build(
       recommendations: [

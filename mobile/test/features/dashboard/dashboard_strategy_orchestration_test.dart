@@ -9,6 +9,14 @@ import 'package:mobile/features/market/services/market_service.dart';
 import 'package:mobile/features/recommendation/controllers/recommendation_controller.dart';
 import 'package:mobile/features/recommendation/history/historical_setup_validation_service.dart';
 import 'package:mobile/features/recommendation/history/mock_historical_setup_provider.dart';
+import 'package:mobile/features/recommendation/investor/history/investor_historical_validation_service.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_estimate_provider.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_fundamental_data_provider.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_historical_data_provider.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_macro_data_provider.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_ownership_positioning_provider.dart';
+import 'package:mobile/features/recommendation/investor/providers/mock_investor_valuation_data_provider.dart';
+import 'package:mobile/features/recommendation/investor/services/investor_analysis_service.dart';
 import 'package:mobile/features/recommendation/models/strategy_summary.dart';
 import 'package:mobile/features/recommendation/providers/candle_trend_evidence_provider.dart';
 import 'package:mobile/features/recommendation/providers/rsi_evidence_provider.dart';
@@ -21,6 +29,8 @@ DashboardController buildController() {
   const marketService = MarketService(MockMarketDataProvider());
 
   const historyService = MarketHistoryService(MockMarketHistoryProvider());
+
+  const investorMacroProvider = MockInvestorMacroDataProvider();
 
   return DashboardController(
     marketController: MarketController(marketService),
@@ -42,6 +52,17 @@ DashboardController buildController() {
     ),
     historicalSetupValidationService: const HistoricalSetupValidationService(
       provider: MockHistoricalSetupProvider(),
+    ),
+    investorAnalysisService: const InvestorAnalysisService(
+      fundamentalDataProvider: MockInvestorFundamentalDataProvider(),
+      analystEstimateProvider: MockInvestorEstimateProvider(),
+      marketValuationDataProvider: MockInvestorValuationDataProvider(),
+      macroContextProvider: investorMacroProvider,
+      sensitivityDataProvider: investorMacroProvider,
+      ownershipPositioningProvider: MockInvestorOwnershipPositioningProvider(),
+      historicalValidationService: InvestorHistoricalValidationService(
+        provider: MockInvestorHistoricalDataProvider(),
+      ),
     ),
   );
 }
@@ -142,31 +163,48 @@ void main() {
   );
 
   test(
-    'Investor remains unavailable to recommendation orchestration',
+    'Investor uses dedicated orchestration without overwriting Trader state',
     () async {
       final controller = buildController();
 
       await controller.selectSymbol('AAPL');
 
-      await controller.selectAnalysisTimeframe(StrategyType.investor, '1d');
+      expect(controller.isStrategyAvailable(StrategyType.investor), isTrue);
+      expect(controller.marketController.state.snapshot!.timeframe, '5m');
 
-      expect(
-        controller.selectedPrimaryTimeframeFor(StrategyType.investor),
-        '1d',
-      );
+      final traderRecommendation = controller
+          .recommendationStateFor(StrategyType.trader)
+          .recommendation;
 
-      expect(controller.activeAnalysisStrategy, StrategyType.trader);
+      await controller.analyzeStrategy(StrategyType.investor);
 
-      expect(controller.strategyRecommendations, hasLength(1));
-
-      await expectLater(
-        controller.analyzeStrategy(StrategyType.investor),
-        throwsStateError,
-      );
-
+      expect(controller.activeAnalysisStrategy, StrategyType.investor);
+      expect(controller.investorAnalysisResult, isNotNull);
+      expect(controller.investorAnalysisResult!.isSynthetic, isTrue);
       expect(
         controller.recommendationStateFor(StrategyType.investor).recommendation,
-        isNull,
+        isNotNull,
+      );
+      expect(
+        controller
+            .recommendationStateFor(StrategyType.investor)
+            .recommendation!
+            .timeframe,
+        'Months to years',
+      );
+
+      // Investor does not repurpose the chart into a fake long-horizon candle
+      // analysis; the shared market snapshot remains where Trader left it.
+      expect(controller.marketController.state.snapshot!.timeframe, '5m');
+
+      expect(
+        controller.recommendationStateFor(StrategyType.trader).recommendation,
+        same(traderRecommendation),
+      );
+
+      expect(
+        controller.strategyRecommendations.map((item) => item.strategy),
+        containsAll([StrategyType.trader, StrategyType.investor]),
       );
     },
   );

@@ -11,9 +11,14 @@ import 'historical_setup_validation_panel.dart';
 import 'recommendation_contribution_panel.dart';
 
 class ConsensusSummaryCard extends StatelessWidget {
-  const ConsensusSummaryCard({required this.strategyRecommendation, super.key});
+  const ConsensusSummaryCard({
+    required this.strategyRecommendation,
+    this.showHistoricalValidation = true,
+    super.key,
+  });
 
   final StrategyRecommendation strategyRecommendation;
+  final bool showHistoricalValidation;
 
   @override
   Widget build(BuildContext context) {
@@ -85,8 +90,9 @@ class ConsensusSummaryCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 _WhyConfidencePanel(consensus: consensus),
-                if (recommendation.historicalValidation.status !=
-                    HistoricalValidationStatus.unavailable) ...[
+                if (showHistoricalValidation &&
+                    recommendation.historicalValidation.status !=
+                        HistoricalValidationStatus.unavailable) ...[
                   const SizedBox(height: 16),
                   HistoricalSetupValidationPanel(
                     validation: recommendation.historicalValidation,

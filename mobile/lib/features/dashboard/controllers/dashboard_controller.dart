@@ -10,6 +10,7 @@ import '../../recommendation/context/recommendation_analysis_context.dart';
 import '../../recommendation/context/strategy_timeframe_plan.dart';
 import '../../recommendation/controllers/recommendation_controller.dart';
 import '../../recommendation/history/historical_setup_validation_service.dart';
+import '../../recommendation/investor/services/investor_analysis_service.dart';
 import '../../recommendation/models/recommendation_state.dart';
 import '../../recommendation/models/strategy_recommendation.dart';
 import '../../recommendation/models/strategy_summary.dart';
@@ -26,6 +27,7 @@ class DashboardController extends ChangeNotifier {
     required this.watchlistController,
     required this.recommendationController,
     this.historicalSetupValidationService,
+    this.investorAnalysisService,
   }) : _selectedPrimaryTimeframes = <StrategyType, String>{
          StrategyType.trader: StrategyTimeframePlan.defaultPrimaryTimeframeFor(
            StrategyType.trader,
@@ -54,6 +56,7 @@ class DashboardController extends ChangeNotifier {
   final WatchlistController watchlistController;
   final RecommendationController recommendationController;
   final HistoricalSetupValidationService? historicalSetupValidationService;
+  final InvestorAnalysisService? investorAnalysisService;
 
   final Map<StrategyType, String> _selectedPrimaryTimeframes;
   final Map<StrategyType, RecommendationState> _strategyRecommendationStates =
@@ -62,10 +65,23 @@ class DashboardController extends ChangeNotifier {
   StrategyType _activeAnalysisStrategy = StrategyType.trader;
   bool _isAnalysisReloading = false;
   int _analysisRequestId = 0;
+  InvestorAnalysisResult? _investorAnalysisResult;
 
   bool get isAnalysisReloading => _isAnalysisReloading;
 
   StrategyType get activeAnalysisStrategy => _activeAnalysisStrategy;
+
+  InvestorAnalysisResult? get investorAnalysisResult => _investorAnalysisResult;
+
+  bool isStrategyAvailable(StrategyType strategy) {
+    if (strategy == StrategyType.investor) {
+      return investorAnalysisService != null;
+    }
+
+    return StrategyAnalysisPolicyCatalog.forStrategy(
+      strategy,
+    ).isRecommendationActive;
+  }
 
   RecommendationState recommendationStateFor(StrategyType strategy) {
     return _strategyRecommendationStates[strategy] ??
@@ -113,6 +129,7 @@ class DashboardController extends ChangeNotifier {
     recommendationController.reset();
     marketHistoryController.reset();
     _strategyRecommendationStates.clear();
+    _investorAnalysisResult = null;
     _activeAnalysisStrategy = StrategyType.trader;
 
     await _loadStrategyAnalysis(
@@ -158,6 +175,11 @@ class DashboardController extends ChangeNotifier {
     StrategyType strategy, {
     bool reloadChartHistory = true,
   }) async {
+    if (strategy == StrategyType.investor) {
+      await _analyzeInvestor();
+      return;
+    }
+
     final policy = StrategyAnalysisPolicyCatalog.forStrategy(strategy);
 
     if (!policy.isRecommendationActive) {
@@ -184,6 +206,51 @@ class DashboardController extends ChangeNotifier {
     } finally {
       _isAnalysisReloading = false;
       notifyListeners();
+    }
+  }
+
+  Future<void> _analyzeInvestor() async {
+    final service = investorAnalysisService;
+
+    if (service == null) {
+      throw StateError('Investor recommendation analysis is not active yet.');
+    }
+
+    final symbol = watchlistController.state.selectedSymbol;
+
+    if (symbol == null) {
+      return;
+    }
+
+    final requestId = ++_analysisRequestId;
+    _isAnalysisReloading = true;
+    notifyListeners();
+
+    try {
+      final analysisTime =
+          marketController.state.snapshot?.timestamp ?? DateTime.now();
+
+      final result = await service.analyze(
+        symbol: symbol,
+        analysisTime: analysisTime,
+      );
+
+      if (requestId != _analysisRequestId) {
+        return;
+      }
+
+      _investorAnalysisResult = result;
+      _activeAnalysisStrategy = StrategyType.investor;
+      _strategyRecommendationStates[StrategyType.investor] =
+          RecommendationState(
+            status: RecommendationStatus.ready,
+            recommendation: result.recommendationAnalysis.recommendation,
+          );
+    } finally {
+      if (requestId == _analysisRequestId) {
+        _isAnalysisReloading = false;
+        notifyListeners();
+      }
     }
   }
 
