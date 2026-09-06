@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../core/data/data_provenance.dart';
 import '../../../shared/widgets/collapsible_dashboard_card.dart';
 import '../../market/controllers/market_controller.dart';
 import '../../market/controllers/market_history_controller.dart';
@@ -27,10 +28,19 @@ class MarketStatusCard extends StatelessWidget {
             final snapshot = marketController.state.snapshot;
 
             if (snapshot == null) {
-              return const CollapsibleDashboardCard(
+              final error = marketController.state.errorMessage;
+              return CollapsibleDashboardCard(
                 title: 'Market Status',
-                collapsedSummary: Text('Waiting for market data'),
-                child: Text('Waiting for market data.'),
+                collapsedSummary: Text(
+                  error == null
+                      ? 'Waiting for market data'
+                      : 'Market data unavailable',
+                ),
+                child: Text(
+                  error == null
+                      ? 'Waiting for market data.'
+                      : 'Market data unavailable: $error',
+                ),
               );
             }
 
@@ -39,6 +49,7 @@ class MarketStatusCard extends StatelessWidget {
               collapsedSummary: _CollapsedMarketSummary(
                 symbol: snapshot.symbol,
                 currentPrice: snapshot.currentPrice,
+                provenance: snapshot.provenance,
               ),
               child: LayoutBuilder(
                 builder: (context, constraints) {
@@ -48,6 +59,7 @@ class MarketStatusCard extends StatelessWidget {
                     symbol: snapshot.symbol,
                     currentPrice: snapshot.currentPrice,
                     currentVolume: snapshot.currentVolume,
+                    provenance: snapshot.provenance,
                   );
 
                   final history = _HistorySection(
@@ -83,15 +95,18 @@ class _CollapsedMarketSummary extends StatelessWidget {
   const _CollapsedMarketSummary({
     required this.symbol,
     required this.currentPrice,
+    required this.provenance,
   });
 
   final String symbol;
   final double currentPrice;
+  final DataProvenance provenance;
 
   @override
   Widget build(BuildContext context) {
     return Text(
-      '$symbol  •  \$${currentPrice.toStringAsFixed(2)}',
+      '$symbol  •  \$${currentPrice.toStringAsFixed(2)}  •  '
+      '${provenance.state.wireValue}',
       overflow: TextOverflow.ellipsis,
       style: TextStyle(
         color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -106,11 +121,13 @@ class _MarketSummary extends StatelessWidget {
     required this.symbol,
     required this.currentPrice,
     required this.currentVolume,
+    required this.provenance,
   });
 
   final String symbol;
   final double currentPrice;
   final double currentVolume;
+  final DataProvenance provenance;
 
   @override
   Widget build(BuildContext context) {
@@ -119,14 +136,27 @@ class _MarketSummary extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.circle, size: 12, color: Colors.green),
+            Icon(
+              Icons.circle,
+              size: 12,
+              color: provenance.isLiveUsable ? Colors.green : Colors.orange,
+            ),
             const SizedBox(width: 8),
-            Text(
-              '$symbol connected',
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            Expanded(
+              child: Text(
+                '$symbol • ${provenance.state.wireValue}',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+            ),
+            IconButton(
+              tooltip: 'About this market data',
+              visualDensity: VisualDensity.compact,
+              icon: const Icon(Icons.info_outline, size: 20),
+              onPressed: () => _showDataSourceDialog(context, provenance),
             ),
           ],
         ),
+        Text(provenance.source, style: Theme.of(context).textTheme.bodySmall),
         const SizedBox(height: 20),
         const Text(
           'Current Price',
@@ -142,6 +172,43 @@ class _MarketSummary extends StatelessWidget {
       ],
     );
   }
+}
+
+Future<void> _showDataSourceDialog(
+  BuildContext context,
+  DataProvenance provenance,
+) {
+  final observedAt = provenance.observedAt?.toLocal().toIso8601String();
+  final fetchedAt = provenance.fetchedAt?.toLocal().toIso8601String();
+
+  return showDialog<void>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: const Text('Market data source'),
+        content: SingleChildScrollView(
+          child: Text(
+            'State: ${provenance.state.wireValue}\n'
+            'Source: ${provenance.source}\n'
+            'Market timestamp: ${observedAt ?? 'Not available'}\n'
+            'Fetched: ${fetchedAt ?? 'Not applicable'}\n\n'
+            'LIVE means the market values came through the TradePilot live-data '
+            'path. PARTIAL_LIVE means the source returned fewer observations '
+            'than requested. SYNTHETIC means deterministic development data and '
+            'must not be treated as current market information.\n\n'
+            'Source/freshness labels describe the data input, not the certainty '
+            'or profitability of a recommendation.',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      );
+    },
+  );
 }
 
 class _HistorySection extends StatelessWidget {

@@ -4,4 +4,8 @@
          to allow setting breakpoints, to provide hot reload, etc.
     -->
     <uses-permission android:name="android.permission.INTERNET"/>
+
+    <!-- Local Personal-Beta gateway access only. This override exists in the
+         debug manifest and is not applied to release builds. -->
+    <application android:usesCleartextTraffic="true"/>
 </manifest>

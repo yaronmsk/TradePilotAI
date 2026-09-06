@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../core/config/tradepilot_runtime_config.dart';
+import '../core/network/tradepilot_gateway_client.dart';
 import '../core/storage/shared_preferences_storage_service.dart';
 import '../features/dashboard/controllers/dashboard_controller.dart';
 import '../features/dashboard/dashboard_page.dart';
 import '../features/market/controllers/market_controller.dart';
 import '../features/market/controllers/market_history_controller.dart';
-import '../features/market/providers/mock_market_data_provider.dart';
-import '../features/market/providers/mock_market_history_provider.dart';
 import '../features/market/services/market_history_service.dart';
 import '../features/market/services/market_service.dart';
 import '../features/recommendation/controllers/recommendation_controller.dart';
@@ -34,10 +34,13 @@ import '../features/recommendation/services/recommendation_service.dart';
 import '../features/watchlist/controllers/watchlist_controller.dart';
 import '../features/watchlist/models/watchlist_item.dart';
 import '../features/watchlist/repositories/local_watchlist_repository.dart';
+import 'runtime/tradepilot_runtime_composition.dart';
 import 'theme.dart';
 
 class TradePilotApp extends StatefulWidget {
-  const TradePilotApp({super.key});
+  const TradePilotApp({this.runtimeConfig, super.key});
+
+  final TradePilotRuntimeConfig? runtimeConfig;
 
   @override
   State<TradePilotApp> createState() => _TradePilotAppState();
@@ -51,6 +54,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
   WatchlistController? _watchlistController;
   RecommendationController? _recommendationController;
   DashboardController? _dashboardController;
+  HttpTradePilotGatewayClient? _ownedGatewayClient;
 
   static const _defaultWatchlist = [
     WatchlistItem(symbol: 'AAPL', displayName: 'Apple Inc.'),
@@ -73,11 +77,16 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
     final watchlistRepository = LocalWatchlistRepository(storageService);
 
-    const marketService = MarketService(MockMarketDataProvider());
+    final runtimeConfig =
+        widget.runtimeConfig ?? TradePilotRuntimeConfig.fromEnvironment();
+    final runtimeComposition = buildTradePilotRuntimeComposition(runtimeConfig);
+    _ownedGatewayClient = runtimeComposition.ownedGatewayClient;
+
+    final marketService = MarketService(runtimeComposition.marketDataProvider);
     final marketController = MarketController(marketService);
 
-    const marketHistoryService = MarketHistoryService(
-      MockMarketHistoryProvider(),
+    final marketHistoryService = MarketHistoryService(
+      runtimeComposition.marketHistoryProvider,
     );
 
     final marketHistoryController = MarketHistoryController(
@@ -110,24 +119,33 @@ class _TradePilotAppState extends State<TradePilotApp> {
 
     final recommendationContextService = RecommendationContextService(
       marketService: marketService,
+      securityContextResolver: runtimeComposition.securityContextResolver,
+      externalContextProvider: runtimeComposition.externalContextProvider,
     );
 
-    const historicalSetupValidationService = HistoricalSetupValidationService(
-      provider: MockHistoricalSetupProvider(),
-    );
+    final HistoricalSetupValidationService? historicalSetupValidationService =
+        runtimeComposition.enableSyntheticHistoricalValidation
+        ? const HistoricalSetupValidationService(
+            provider: MockHistoricalSetupProvider(),
+          )
+        : null;
 
-    const investorMacroProvider = MockInvestorMacroDataProvider();
-    const investorAnalysisService = InvestorAnalysisService(
-      fundamentalDataProvider: MockInvestorFundamentalDataProvider(),
-      analystEstimateProvider: MockInvestorEstimateProvider(),
-      marketValuationDataProvider: MockInvestorValuationDataProvider(),
-      macroContextProvider: investorMacroProvider,
-      sensitivityDataProvider: investorMacroProvider,
-      ownershipPositioningProvider: MockInvestorOwnershipPositioningProvider(),
-      historicalValidationService: InvestorHistoricalValidationService(
-        provider: MockInvestorHistoricalDataProvider(),
-      ),
-    );
+    InvestorAnalysisService? investorAnalysisService;
+    if (runtimeComposition.enableSyntheticInvestorAnalysis) {
+      const investorMacroProvider = MockInvestorMacroDataProvider();
+      investorAnalysisService = const InvestorAnalysisService(
+        fundamentalDataProvider: MockInvestorFundamentalDataProvider(),
+        analystEstimateProvider: MockInvestorEstimateProvider(),
+        marketValuationDataProvider: MockInvestorValuationDataProvider(),
+        macroContextProvider: investorMacroProvider,
+        sensitivityDataProvider: investorMacroProvider,
+        ownershipPositioningProvider:
+            MockInvestorOwnershipPositioningProvider(),
+        historicalValidationService: InvestorHistoricalValidationService(
+          provider: MockInvestorHistoricalDataProvider(),
+        ),
+      );
+    }
 
     final dashboardController = DashboardController(
       marketController: marketController,
@@ -160,6 +178,7 @@ class _TradePilotAppState extends State<TradePilotApp> {
     _recommendationController?.dispose();
     _marketHistoryController?.dispose();
     _marketController?.dispose();
+    _ownedGatewayClient?.close();
 
     super.dispose();
   }

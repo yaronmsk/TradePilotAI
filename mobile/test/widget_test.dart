@@ -25,11 +25,15 @@ void main() {
     expect(find.text('Market Status'), findsOneWidget);
 
     await tester.scrollUntilVisible(
-      find.text('AAPL connected'),
+      find.text('AAPL • SYNTHETIC'),
       200,
       scrollable: dashboardScroll,
     );
-    expect(find.text('AAPL connected'), findsOneWidget);
+    expect(find.text('AAPL • SYNTHETIC'), findsOneWidget);
+    expect(
+      find.text('TradePilot deterministic development data'),
+      findsOneWidget,
+    );
 
     await tester.scrollUntilVisible(
       find.text('Price History'),
