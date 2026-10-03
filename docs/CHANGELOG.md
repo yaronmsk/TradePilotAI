@@ -7,13 +7,13 @@ Document:
 Project Changelog
 
 Version:
-1.2
+1.4
 
 Status:
 Approved
 
 Last Updated:
-2026-09-05
+2026-10-03
 
 Owner:
 TradePilot AI
@@ -23,6 +23,47 @@ Related Documents:
 - TP-009 Project Roadmap
 
 ---
+
+## v0.13.0 — Personal Android Beta
+
+Status
+
+Active Development
+
+### Batch 3A — Manual Strategy Refresh
+
+Added an explicit manual refresh control to Strategy Summary after live-use
+validation showed that re-selecting an already-active strategy intentionally
+did not rerun analysis.
+
+Behavior:
+
+- Refresh reruns the currently selected strategy through the existing
+  DashboardController orchestration path.
+- Market snapshot, chart history, Stock DNA, recommendation context,
+  recommendation and evidence are refreshed together.
+- Existing strategy results remain visible while refresh is in progress.
+- The refresh control is disabled while analysis is already reloading.
+- Live refresh continues to honor gateway cache/freshness and provider
+  rate-limit protections.
+- No recommendation scoring, thresholds, evidence semantics, attribution,
+  confidence rules or strategy policy changed.
+
+Validation is defined by `tools/validate-v0.13-batch3a.sh`.
+
+### Batch 3B1 — Live Analysis Consistency
+
+Added correctness safeguards discovered during LIVE usage:
+
+- failed timeframe loads roll back instead of showing an old recommendation
+  under a new interval;
+- strategy/timeframe/manual-analysis refresh no longer reloads the independent
+  Price History chart;
+- confidence/risk-only evidence is excluded from the directional denominator
+  while remaining available for confidence calculation and attribution;
+- recommendation action thresholds are unchanged.
+
+Validation is defined by `tools/validate-v0.13-batch3b1.sh`.
 
 ## v0.12.0 — Investor Strategy Brain
 

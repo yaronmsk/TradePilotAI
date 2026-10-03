@@ -7,12 +7,16 @@ class StrategySummaryCard extends StatelessWidget {
     required this.strategies,
     required this.selectedType,
     required this.onStrategySelected,
+    this.onRefresh,
+    this.isRefreshing = false,
     super.key,
   });
 
   final List<StrategySummary> strategies;
   final StrategyType selectedType;
   final ValueChanged<StrategyType> onStrategySelected;
+  final VoidCallback? onRefresh;
+  final bool isRefreshing;
 
   @override
   Widget build(BuildContext context) {
@@ -23,13 +27,34 @@ class StrategySummaryCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Strategy Summary',
-              style: Theme.of(context).textTheme.titleLarge,
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Strategy Summary',
+                    style: Theme.of(context).textTheme.titleLarge,
+                  ),
+                ),
+                const SizedBox(width: 8),
+                OutlinedButton.icon(
+                  key: const Key('strategy-summary-refresh'),
+                  onPressed: isRefreshing ? null : onRefresh,
+                  icon: isRefreshing
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Icon(Icons.refresh, size: 18),
+                  label: Text(isRefreshing ? 'Refreshing' : 'Refresh'),
+                ),
+              ],
             ),
             const SizedBox(height: 4),
             Text(
-              'Select a strategy to control the recommendation, evidence and risk context below.',
+              'Select a strategy to control the recommendation, evidence and '
+              'risk context below. Refresh reruns the selected strategy and '
+              'updates its dependent analysis together.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: 16),

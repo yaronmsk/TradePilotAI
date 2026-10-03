@@ -52,6 +52,7 @@ void main() {
       scrollable: dashboardScroll,
     );
     expect(find.text('Strategy Summary'), findsOneWidget);
+    expect(find.byKey(const Key('strategy-summary-refresh')), findsOneWidget);
 
     await tester.scrollUntilVisible(
       find.text('Trader Analysis Context'),

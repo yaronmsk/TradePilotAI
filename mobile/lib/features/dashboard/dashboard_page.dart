@@ -75,15 +75,32 @@ class _DashboardPageState extends State<DashboardPage> {
       return;
     }
 
+    final previousStrategy = _selectedStrategy;
+
     setState(() {
       _selectedStrategy = strategy;
     });
 
     try {
-      // Market snapshot and chart state are shared. Re-running the selected
-      // strategy keeps those visible inputs aligned while the controller
-      // continues to retain independent Trader/Swing recommendation states.
-      await dashboardController.analyzeStrategy(strategy);
+      final success = await dashboardController.analyzeStrategy(
+        strategy,
+        reloadChartHistory: false,
+      );
+
+      if (!success && mounted) {
+        setState(() {
+          _selectedStrategy = previousStrategy;
+        });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not analyze ${strategy.title} with fresh market data. '
+              'The previous strategy remains selected.',
+            ),
+          ),
+        );
+      }
     } catch (error) {
       if (!mounted) {
         return;
@@ -91,6 +108,79 @@ class _DashboardPageState extends State<DashboardPage> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Could not analyze ${strategy.title}: $error')),
+      );
+    }
+  }
+
+  Future<void> _refreshSelectedStrategy() async {
+    if (dashboardController.isAnalysisReloading) {
+      return;
+    }
+
+    final strategy = _selectedStrategy;
+
+    try {
+      // Refresh reruns the analytical pipeline only. Price History is an
+      // independent visual range and must not consume another provider credit
+      // merely because the recommendation is refreshed.
+      final success = await dashboardController.analyzeStrategy(
+        strategy,
+        reloadChartHistory: false,
+      );
+
+      if (!mounted) {
+        return;
+      }
+
+      if (!success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not refresh ${strategy.title}: fresh primary market data '
+              'is unavailable. The previous strategy result is still shown.',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not refresh ${strategy.title}: $error')),
+      );
+    }
+  }
+
+  Future<void> _selectAnalysisTimeframe(String timeframe) async {
+    final strategy = _selectedStrategy;
+
+    try {
+      final success = await dashboardController.selectAnalysisTimeframe(
+        strategy,
+        timeframe,
+      );
+
+      if (!success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Could not load fresh $timeframe data for ${strategy.title}. '
+              'The previous analysis interval remains active.',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Could not change ${strategy.title} timeframe: $error'),
+        ),
       );
     }
   }
@@ -160,6 +250,8 @@ class _DashboardPageState extends State<DashboardPage> {
                       onStrategySelected: (strategy) {
                         _selectStrategy(strategy);
                       },
+                      onRefresh: _refreshSelectedStrategy,
+                      isRefreshing: dashboardController.isAnalysisReloading,
                     ),
                     if (dashboardController.isAnalysisReloading) ...[
                       const Padding(
@@ -189,12 +281,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                           availablePrimaryTimeframes: dashboardController
                               .availablePrimaryTimeframesFor(_selectedStrategy),
-                          onPrimaryTimeframeSelected: (timeframe) {
-                            dashboardController.selectAnalysisTimeframe(
-                              _selectedStrategy,
-                              timeframe,
-                            );
-                          },
+                          onPrimaryTimeframeSelected: _selectAnalysisTimeframe,
                           isReloading: dashboardController.isAnalysisReloading,
                         ),
                       if (selectedState.stockBehaviorProfile != null)

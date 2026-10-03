@@ -17,6 +17,7 @@ void main() {
     double dynamicWeight = 1,
     double reliability = 1,
     EvidenceStatus status = EvidenceStatus.available,
+    bool affectsDirection = true,
   }) {
     return EvidenceResult(
       providerName: name,
@@ -34,6 +35,7 @@ void main() {
       baseWeight: baseWeight,
       dynamicWeight: dynamicWeight,
       reliability: reliability,
+      affectsDirection: affectsDirection,
       currentValue: 'test',
       baselineValue: 'test',
       relativeValue: 'test',
@@ -333,4 +335,46 @@ void main() {
       );
     },
   );
+  test('confidence-only family does not dilute directional score', () {
+    final baseline = engine.calculate(
+      report([
+        evidence(
+          name: 'Trend',
+          family: EvidenceFamily.trend,
+          direction: EvidenceDirection.bullish,
+          score: 80,
+        ),
+      ]),
+    );
+
+    final withConfidenceOnly = engine.calculate(
+      report([
+        evidence(
+          name: 'Trend',
+          family: EvidenceFamily.trend,
+          direction: EvidenceDirection.bullish,
+          score: 80,
+        ),
+        evidence(
+          name: 'Entry Risk',
+          family: EvidenceFamily.volatility,
+          direction: EvidenceDirection.neutral,
+          score: 60,
+          affectsDirection: false,
+        ),
+      ]),
+    );
+
+    expect(
+      withConfidenceOnly.directionScore,
+      closeTo(baseline.directionScore!, 0.001),
+    );
+
+    final volatility = withConfidenceOnly.familyContributions.firstWhere(
+      (item) => item.family == EvidenceFamily.volatility,
+    );
+
+    expect(volatility.directionImpactPoints, 0);
+    expect(volatility.confidenceContributionPoints, greaterThan(0));
+  });
 }

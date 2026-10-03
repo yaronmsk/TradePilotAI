@@ -17,6 +17,7 @@ class EvidenceResult {
     required this.baseWeight,
     required this.dynamicWeight,
     required this.reliability,
+    this.affectsDirection = true,
     required this.currentValue,
     required this.baselineValue,
     required this.relativeValue,
@@ -45,6 +46,12 @@ class EvidenceResult {
   /// Data reliability from 0 to 1.
   final double reliability;
 
+  /// Whether this result is allowed to alter bullish/bearish direction.
+  ///
+  /// Confidence/risk-only evidence can remain available and contribute to
+  /// confidence without mathematically pulling the direction score toward 0.
+  final bool affectsDirection;
+
   /// Human-readable values displayed in the UI.
   final String currentValue;
   final String baselineValue;
@@ -68,6 +75,7 @@ class EvidenceResult {
     double? baseWeight,
     double? dynamicWeight,
     double? reliability,
+    bool? affectsDirection,
     String? currentValue,
     String? baselineValue,
     String? relativeValue,
@@ -85,6 +93,7 @@ class EvidenceResult {
       baseWeight: baseWeight ?? this.baseWeight,
       dynamicWeight: dynamicWeight ?? this.dynamicWeight,
       reliability: reliability ?? this.reliability,
+      affectsDirection: affectsDirection ?? this.affectsDirection,
       currentValue: currentValue ?? this.currentValue,
       baselineValue: baselineValue ?? this.baselineValue,
       relativeValue: relativeValue ?? this.relativeValue,

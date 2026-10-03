@@ -115,4 +115,57 @@ void main() {
       expect(selected, StrategyType.swing);
     },
   );
+
+  testWidgets(
+    'refreshes selected strategy and disables refresh while loading',
+    (tester) async {
+      var refreshCount = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StrategySummaryCard(
+              strategies: strategies,
+              selectedType: StrategyType.trader,
+              onStrategySelected: (_) {},
+              onRefresh: () {
+                refreshCount++;
+              },
+            ),
+          ),
+        ),
+      );
+
+      final refreshFinder = find.byKey(const Key('strategy-summary-refresh'));
+
+      expect(refreshFinder, findsOneWidget);
+
+      await tester.tap(refreshFinder);
+      await tester.pump();
+
+      expect(refreshCount, 1);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: StrategySummaryCard(
+              strategies: strategies,
+              selectedType: StrategyType.trader,
+              onStrategySelected: (_) {},
+              onRefresh: () {
+                refreshCount++;
+              },
+              isRefreshing: true,
+            ),
+          ),
+        ),
+      );
+
+      final loadingButton = tester.widget<OutlinedButton>(refreshFinder);
+
+      expect(loadingButton.onPressed, isNull);
+      expect(find.text('Refreshing'), findsOneWidget);
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    },
+  );
 }

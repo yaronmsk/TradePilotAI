@@ -267,6 +267,53 @@ Goal:
 Target:
 approximately week 2 if provider/gateway integration is straightforward.
 
+#### Batch 3A — Manual strategy refresh
+
+Real-use validation identified a missing manual-refresh affordance before
+Investor live integration.
+
+Implementation contract:
+
+- Strategy Summary exposes an explicit Refresh control.
+- Refresh reruns the currently selected strategy even when it is already active.
+- Snapshot, chart history, Stock DNA, analysis context, recommendation and
+  evidence refresh as one consistent orchestration unit rather than as
+  independent card refreshes.
+- The current result remains visible while the replacement analysis is loading.
+- Refresh is disabled while an analysis request is already in flight.
+- Refresh respects gateway cache/freshness and rate-limit safeguards; it does
+  not force unsafe cache bypasses or extra provider-credit consumption.
+- This batch changes orchestration/UI only and does not alter recommendation
+  scoring, thresholds, evidence weights, attribution or strategy semantics.
+
+Acceptance:
+
+- repeated manual refresh reruns the selected strategy;
+- dependent dashboard content remains internally consistent;
+- loading state prevents duplicate refresh requests;
+- automated regression coverage proves the refresh callback and same-strategy
+  rerun behavior.
+
+#### Batch 3B1 — Live analysis consistency
+
+Real-use validation found that a failed timeframe request could leave the
+previous recommendation/confidence visible under a newly selected interval.
+It also confirmed that confidence/risk-only evidence must not dilute direction.
+
+Batch 3B1 therefore:
+
+- makes strategy analysis report success/failure to the dashboard;
+- rolls a failed timeframe selection back to the previous interval;
+- keeps the prior recommendation explicitly tied to its prior timeframe;
+- stops strategy/timeframe/manual-analysis refresh from reloading the
+  independent Price History chart;
+- enforces strategy evidence semantic roles so confidence/risk-only evidence
+  contributes zero direction points while remaining available to confidence;
+- preserves existing Buy/Sell action thresholds and BUY/SELL parity.
+
+Trader short-timeframe calibration remains a separate Batch 3B2 so live
+calibration is performed only after timeframe/result consistency is proven.
+
 ### Batch 4 — Investor live core slice
 
 Connect only what is required for a meaningful first Investor analysis.

@@ -58,6 +58,19 @@ class ConsensusEngine {
       (sum, family) => sum + family.effectiveWeight,
     );
 
+    final directionalFamilyWeights = <EvidenceFamily, double>{
+      for (final entry in grouped.entries)
+        entry.key: entry.value
+            .where((result) => result.affectsDirection)
+            .fold<double>(
+              0,
+              (maximum, result) => math.max(maximum, result.effectiveWeight),
+            ),
+    };
+
+    final totalDirectionalFamilyWeight = directionalFamilyWeights.values
+        .fold<double>(0, (sum, weight) => sum + weight);
+
     if (totalFamilyWeight <= 0) {
       return ScoringResult(
         score: 0,
@@ -83,14 +96,15 @@ class ConsensusEngine {
         1.0,
       );
       final directionalMagnitude = normalizedDirection.abs();
+      final directionalWeight = directionalFamilyWeights[family.family] ?? 0;
 
       if (normalizedDirection > 0) {
-        bullishWeight += family.effectiveWeight * directionalMagnitude;
+        bullishWeight += directionalWeight * directionalMagnitude;
       } else if (normalizedDirection < 0) {
-        bearishWeight += family.effectiveWeight * directionalMagnitude;
+        bearishWeight += directionalWeight * directionalMagnitude;
       }
 
-      neutralWeight += family.effectiveWeight * (1 - directionalMagnitude);
+      neutralWeight += directionalWeight * (1 - directionalMagnitude);
       weightedStrength += family.strengthScore * family.effectiveWeight;
       weightedReliability += family.reliability * family.effectiveWeight;
     }
@@ -117,11 +131,11 @@ class ConsensusEngine {
         : ((2 * math.min(bullishWeight, bearishWeight)) / directionalSupport)
               .clamp(0.0, 1.0);
 
-    final directionScore =
-        (((bullishWeight - bearishWeight) / totalFamilyWeight) * 100).clamp(
-          -100.0,
-          100.0,
-        );
+    final directionScore = totalDirectionalFamilyWeight <= 0
+        ? 0.0
+        : (((bullishWeight - bearishWeight) / totalDirectionalFamilyWeight) *
+                  100)
+              .clamp(-100.0, 100.0);
 
     final averageStrength = weightedStrength / totalFamilyWeight;
     final averageReliability = weightedReliability / totalFamilyWeight;
@@ -155,6 +169,8 @@ class ConsensusEngine {
       grouped: grouped,
       familySummaries: familySummaries,
       totalFamilyWeight: totalFamilyWeight,
+      directionalFamilyWeights: directionalFamilyWeights,
+      totalDirectionalFamilyWeight: totalDirectionalFamilyWeight,
       finalConfidence: confidence,
       confidenceScale: confidenceScale,
     );
@@ -208,6 +224,7 @@ class ConsensusEngine {
     required List<EvidenceResult> evidence,
   }) {
     double totalEvidenceWeight = 0;
+    double directionalEvidenceWeight = 0;
     double signedStrengthTotal = 0;
     double strengthTotal = 0;
     double reliabilityTotal = 0;
@@ -225,6 +242,12 @@ class ConsensusEngine {
 
       final normalizedStrength = (result.score / 100).clamp(0.0, 1.0);
 
+      if (!result.affectsDirection) {
+        continue;
+      }
+
+      directionalEvidenceWeight += weight;
+
       switch (result.direction) {
         case EvidenceDirection.bullish:
           signedStrengthTotal += result.score * weight;
@@ -240,9 +263,12 @@ class ConsensusEngine {
       }
     }
 
-    final directionScore = totalEvidenceWeight == 0
+    final directionScore = directionalEvidenceWeight == 0
         ? 0.0
-        : (signedStrengthTotal / totalEvidenceWeight).clamp(-100.0, 100.0);
+        : (signedStrengthTotal / directionalEvidenceWeight).clamp(
+            -100.0,
+            100.0,
+          );
 
     final strengthScore = totalEvidenceWeight == 0
         ? 0.0
@@ -313,6 +339,8 @@ class ConsensusEngine {
     required Map<EvidenceFamily, List<EvidenceResult>> grouped,
     required List<EvidenceFamilySummary> familySummaries,
     required double totalFamilyWeight,
+    required Map<EvidenceFamily, double> directionalFamilyWeights,
+    required double totalDirectionalFamilyWeight,
     required double finalConfidence,
     required double confidenceScale,
   }) {
@@ -332,15 +360,31 @@ class ConsensusEngine {
 
       final familyWeightShare =
           familySummary.effectiveWeight / totalFamilyWeight;
+      final directionalFamilyWeight =
+          directionalFamilyWeights[familySummary.family] ?? 0;
+      final directionalFamilyWeightShare = totalDirectionalFamilyWeight <= 0
+          ? 0.0
+          : directionalFamilyWeight / totalDirectionalFamilyWeight;
+      final totalDirectionalEvidenceWeight = evidence
+          .where((result) => result.affectsDirection)
+          .fold<double>(0, (sum, result) => sum + result.effectiveWeight);
       final rawProviders = <_RawProviderContribution>[];
 
       for (final result in evidence) {
         final evidenceWeightShare =
             result.effectiveWeight / totalEvidenceWeight;
-        final signedScore = _signedScore(result);
+        final directionalEvidenceWeightShare =
+            !result.affectsDirection || totalDirectionalEvidenceWeight <= 0
+            ? 0.0
+            : result.effectiveWeight / totalDirectionalEvidenceWeight;
+        final signedScore = result.affectsDirection
+            ? _signedScore(result)
+            : 0.0;
 
         final directionImpactPoints =
-            familyWeightShare * evidenceWeightShare * signedScore;
+            directionalFamilyWeightShare *
+            directionalEvidenceWeightShare *
+            signedScore;
 
         final confidenceContributionPoints =
             familyWeightShare *

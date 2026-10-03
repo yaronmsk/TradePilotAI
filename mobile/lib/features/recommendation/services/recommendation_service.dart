@@ -9,6 +9,7 @@ import '../engines/consensus_engine.dart';
 import '../engines/recommendation_engine.dart';
 import '../history/historical_confidence_adjuster.dart';
 import '../history/historical_setup_validation.dart';
+import '../models/evidence_kind.dart';
 import '../models/evidence_report.dart';
 import '../models/evidence_result.dart';
 import '../models/recommendation.dart';
@@ -116,11 +117,13 @@ class RecommendationService {
             strategy: strategy,
           );
 
-    return contextualEvidenceAdjuster.adjust(
+    final adjusted = contextualEvidenceAdjuster.adjust(
       results: <EvidenceResult>[...rawResults, ...contextResults],
       profile: profile,
       strategy: strategy,
     );
+
+    return _applyStrategySemanticRoles(adjusted, strategy: strategy);
   }
 
   Recommendation applyHistoricalValidation({
@@ -177,9 +180,14 @@ class RecommendationService {
             strategy: strategy,
           );
 
-    final evidenceResults = contextualEvidenceAdjuster.adjust(
+    final adjustedEvidence = contextualEvidenceAdjuster.adjust(
       results: <EvidenceResult>[...rawResults, ...contextResults],
       profile: resolvedProfile,
+      strategy: strategy,
+    );
+
+    final evidenceResults = _applyStrategySemanticRoles(
+      adjustedEvidence,
       strategy: strategy,
     );
 
@@ -205,6 +213,33 @@ class RecommendationService {
       candleCount: snapshot.candleCount,
       analysisTime: snapshot.timestamp,
       strategy: strategy,
+    );
+  }
+
+  List<EvidenceResult> _applyStrategySemanticRoles(
+    List<EvidenceResult> results, {
+    required StrategyType strategy,
+  }) {
+    final policy = strategyEvidenceSelector.policyFor(strategy);
+
+    return List<EvidenceResult>.unmodifiable(
+      results.map((result) {
+        final kind = result.definition.kind;
+
+        if (kind == EvidenceKind.generic) {
+          return result;
+        }
+
+        final evidencePolicy = policy.policyFor(kind);
+
+        if (evidencePolicy == null) {
+          return result;
+        }
+
+        return result.copyWith(
+          affectsDirection: evidencePolicy.affectsDirection,
+        );
+      }),
     );
   }
 

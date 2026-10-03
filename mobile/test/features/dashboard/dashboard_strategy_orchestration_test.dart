@@ -2,6 +2,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/features/dashboard/controllers/dashboard_controller.dart';
 import 'package:mobile/features/market/controllers/market_controller.dart';
 import 'package:mobile/features/market/controllers/market_history_controller.dart';
+import 'package:mobile/features/market/models/market_snapshot.dart';
+import 'package:mobile/features/market/providers/market_data_provider.dart';
 import 'package:mobile/features/market/providers/mock_market_data_provider.dart';
 import 'package:mobile/features/market/providers/mock_market_history_provider.dart';
 import 'package:mobile/features/market/services/market_history_service.dart';
@@ -25,8 +27,10 @@ import 'package:mobile/features/recommendation/services/recommendation_service.d
 import 'package:mobile/features/watchlist/controllers/watchlist_controller.dart';
 import 'package:mobile/features/watchlist/models/watchlist_item.dart';
 
-DashboardController buildController() {
-  const marketService = MarketService(MockMarketDataProvider());
+DashboardController buildController({
+  MarketDataProvider marketDataProvider = const MockMarketDataProvider(),
+}) {
+  final marketService = MarketService(marketDataProvider);
 
   const historyService = MarketHistoryService(MockMarketHistoryProvider());
 
@@ -36,7 +40,7 @@ DashboardController buildController() {
     marketController: MarketController(marketService),
     marketHistoryController: MarketHistoryController(historyService),
     stockHistoryService: historyService,
-    recommendationContextService: const RecommendationContextService(
+    recommendationContextService: RecommendationContextService(
       marketService: marketService,
     ),
     watchlistController: WatchlistController(
@@ -65,6 +69,29 @@ DashboardController buildController() {
       ),
     ),
   );
+}
+
+class _FailingTraderTimeframeProvider implements MarketDataProvider {
+  const _FailingTraderTimeframeProvider();
+
+  static const _delegate = MockMarketDataProvider();
+
+  @override
+  Future<MarketSnapshot> fetchSnapshot({
+    required String symbol,
+    required String timeframe,
+    required int candleCount,
+  }) {
+    if (timeframe == '15m') {
+      throw StateError('Synthetic timeframe failure');
+    }
+
+    return _delegate.fetchSnapshot(
+      symbol: symbol,
+      timeframe: timeframe,
+      candleCount: candleCount,
+    );
+  }
 }
 
 void main() {
@@ -205,6 +232,92 @@ void main() {
       expect(
         controller.strategyRecommendations.map((item) => item.strategy),
         containsAll([StrategyType.trader, StrategyType.investor]),
+      );
+    },
+  );
+
+  test(
+    'explicitly reruns the same Trader strategy for manual refresh',
+    () async {
+      final controller = buildController();
+
+      await controller.selectSymbol('AAPL');
+
+      final firstSnapshot = controller.marketController.state.snapshot;
+      final firstRecommendation = controller
+          .recommendationStateFor(StrategyType.trader)
+          .recommendation;
+
+      expect(firstSnapshot, isNotNull);
+      expect(firstRecommendation, isNotNull);
+
+      await controller.analyzeStrategy(StrategyType.trader);
+
+      final refreshedSnapshot = controller.marketController.state.snapshot;
+      final refreshedRecommendation = controller
+          .recommendationStateFor(StrategyType.trader)
+          .recommendation;
+
+      expect(controller.activeAnalysisStrategy, StrategyType.trader);
+      expect(refreshedSnapshot, isNotNull);
+      expect(refreshedRecommendation, isNotNull);
+      expect(refreshedSnapshot, isNot(same(firstSnapshot)));
+      expect(refreshedRecommendation, isNot(same(firstRecommendation)));
+    },
+  );
+  test(
+    'Trader timeframe change produces a recommendation for the new interval',
+    () async {
+      final controller = buildController();
+
+      await controller.selectSymbol('AAPL');
+
+      final success = await controller.selectAnalysisTimeframe(
+        StrategyType.trader,
+        '15m',
+      );
+
+      expect(success, isTrue);
+      expect(
+        controller.selectedPrimaryTimeframeFor(StrategyType.trader),
+        '15m',
+      );
+      expect(
+        controller
+            .recommendationStateFor(StrategyType.trader)
+            .recommendation!
+            .timeframe,
+        '15m',
+      );
+    },
+  );
+
+  test(
+    'failed Trader timeframe change rolls back instead of showing stale result',
+    () async {
+      final controller = buildController(
+        marketDataProvider: const _FailingTraderTimeframeProvider(),
+      );
+
+      await controller.selectSymbol('AAPL');
+
+      final originalRecommendation = controller
+          .recommendationStateFor(StrategyType.trader)
+          .recommendation;
+
+      expect(originalRecommendation, isNotNull);
+      expect(originalRecommendation!.timeframe, '5m');
+
+      final success = await controller.selectAnalysisTimeframe(
+        StrategyType.trader,
+        '15m',
+      );
+
+      expect(success, isFalse);
+      expect(controller.selectedPrimaryTimeframeFor(StrategyType.trader), '5m');
+      expect(
+        controller.recommendationStateFor(StrategyType.trader).recommendation,
+        same(originalRecommendation),
       );
     },
   );

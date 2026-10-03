@@ -139,7 +139,7 @@ class DashboardController extends ChangeNotifier {
     );
   }
 
-  Future<void> selectAnalysisTimeframe(
+  Future<bool> selectAnalysisTimeframe(
     StrategyType strategy,
     String timeframe,
   ) async {
@@ -154,30 +154,40 @@ class DashboardController extends ChangeNotifier {
     }
 
     if (selectedPrimaryTimeframeFor(strategy) == timeframe) {
-      return;
+      return true;
     }
+
+    final previousTimeframe = selectedPrimaryTimeframeFor(strategy);
 
     _selectedPrimaryTimeframes[strategy] = timeframe;
     notifyListeners();
 
     final policy = StrategyAnalysisPolicyCatalog.forStrategy(strategy);
 
-    // Investor remains deferred to v0.12. Keeping its timeframe selection in
-    // the shared model is safe, but no recommendation analysis may run yet.
+    // Investor remains on its dedicated orchestration path. Keeping its
+    // timeframe selection in the shared model is safe even when generic
+    // Trader/Swing recommendation policy is not active.
     if (!policy.isRecommendationActive) {
-      return;
+      return true;
     }
 
-    await analyzeStrategy(strategy, reloadChartHistory: true);
+    final success = await analyzeStrategy(strategy, reloadChartHistory: false);
+
+    if (!success) {
+      _selectedPrimaryTimeframes[strategy] = previousTimeframe;
+      notifyListeners();
+    }
+
+    return success;
   }
 
-  Future<void> analyzeStrategy(
+  Future<bool> analyzeStrategy(
     StrategyType strategy, {
-    bool reloadChartHistory = true,
+    bool reloadChartHistory = false,
   }) async {
     if (strategy == StrategyType.investor) {
       await _analyzeInvestor();
-      return;
+      return true;
     }
 
     final policy = StrategyAnalysisPolicyCatalog.forStrategy(strategy);
@@ -191,14 +201,14 @@ class DashboardController extends ChangeNotifier {
     final symbol = watchlistController.state.selectedSymbol;
 
     if (symbol == null) {
-      return;
+      return false;
     }
 
     _isAnalysisReloading = true;
     notifyListeners();
 
     try {
-      await _loadStrategyAnalysis(
+      return await _loadStrategyAnalysis(
         symbol: symbol,
         strategy: strategy,
         reloadChartHistory: reloadChartHistory,
@@ -254,7 +264,7 @@ class DashboardController extends ChangeNotifier {
     }
   }
 
-  Future<void> _loadStrategyAnalysis({
+  Future<bool> _loadStrategyAnalysis({
     required String symbol,
     required StrategyType strategy,
     required bool reloadChartHistory,
@@ -269,14 +279,14 @@ class DashboardController extends ChangeNotifier {
     );
 
     if (requestId != _analysisRequestId) {
-      return;
+      return false;
     }
 
     final snapshot = marketController.state.snapshot;
 
     if (snapshot == null) {
       notifyListeners();
-      return;
+      return false;
     }
 
     final chartHistoryFuture = reloadChartHistory
@@ -301,7 +311,7 @@ class DashboardController extends ChangeNotifier {
     final analysisContext = await analysisContextFuture;
 
     if (requestId != _analysisRequestId) {
-      return;
+      return false;
     }
 
     recommendationController.analyze(
@@ -312,7 +322,7 @@ class DashboardController extends ChangeNotifier {
     );
 
     if (requestId != _analysisRequestId) {
-      return;
+      return false;
     }
 
     _activeAnalysisStrategy = strategy;
@@ -329,7 +339,10 @@ class DashboardController extends ChangeNotifier {
 
     if (requestId == _analysisRequestId) {
       notifyListeners();
+      return true;
     }
+
+    return false;
   }
 
   Future<void> _applyHistoricalSetupValidation({
