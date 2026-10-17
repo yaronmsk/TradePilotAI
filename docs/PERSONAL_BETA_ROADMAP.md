@@ -314,6 +314,50 @@ Batch 3B1 therefore:
 Trader short-timeframe calibration remains a separate Batch 3B2 so live
 calibration is performed only after timeframe/result consistency is proven.
 
+#### Batch 3B2 — Trader LIVE timeframe calibration
+
+Batch 3B1 proved that timeframe selection, refresh and stale-result handling
+are consistent in LIVE use. Batch 3B2 corrects the highest-confidence
+timeframe assumptions that are not safe to reuse unchanged across
+1m/5m/15m/30m/1h Trader analysis.
+
+Implemented policy:
+
+- LIVE Trader Candle Trend uses volatility-normalized movement rather than one
+  fixed raw-percent move threshold across every interval;
+- the selected interval supplies its own volatility/noise estimate, preserving
+  BUY/SELL symmetry without lowering action thresholds;
+- LIVE intraday Relative Volume is unavailable until comparable
+  same-session-position volume history exists;
+- LIVE intraday Volume Confirmation is unavailable for the same reason;
+- Stock Behavior explicitly marks the short-term intraday volume baseline
+  unavailable instead of presenting a fabricated RVOL value;
+- LIVE Trader analysis-window VWAP uses ATR-normalized distance while remaining
+  clearly labeled as an analysis-window reference, not full-session VWAP;
+- 1-minute Trader analysis is explicitly experimental in the Personal Beta
+  because the current LIVE path uses completed REST candles rather than a
+  streaming execution feed;
+- deterministic synthetic fixtures retain their legacy calculations so the
+  established regression suite remains stable.
+
+Not changed in Batch 3B2:
+
+- Trader Buy/Sell/Hold/Wait thresholds;
+- evidence-family caps or attribution rules;
+- Swing or Investor scoring;
+- EMA/RSI/MACD periods. Those already operate on the selected bar interval and
+  remain frozen until LIVE distribution evidence shows a concrete calibration
+  defect rather than being changed speculatively.
+
+Acceptance:
+
+- all five Trader intervals execute the LIVE volatility-normalized trend path;
+- identical raw movement can be directional in low-noise data and neutral in
+  high-noise data;
+- invalid intraday volume comparisons are explicitly unavailable;
+- synthetic regression behavior remains intact;
+- analyzer, focused tests, recommendation suite, full suite and web build pass.
+
 ### Batch 4 — Investor live core slice
 
 Connect only what is required for a meaningful first Investor analysis.

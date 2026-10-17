@@ -23,7 +23,7 @@ class RelativeVolumeEvidenceProvider implements StrategyAwareEvidenceProvider {
     whyItMatters:
         'Price moves accompanied by unusually high volume can carry more information than moves occurring on normal or weak participation.',
     calculation:
-        'Current candle volume divided by an appropriate historical volume baseline. Trader preserves the recent-candle calculation. Swing daily analysis compares daily volume with prior daily candles, while 4H Swing requires comparable session-position history before RVOL is allowed to participate.',
+        'Current candle volume divided by an appropriate historical volume baseline. Synthetic Trader fixtures preserve the recent-candle calculation. LIVE intraday Trader withholds RVOL until comparable session-position history exists. Swing daily analysis compares daily volume with prior daily candles, while 4H Swing also requires comparable session-position history.',
   );
 
   @override
@@ -34,6 +34,16 @@ class RelativeVolumeEvidenceProvider implements StrategyAwareEvidenceProvider {
 
   @override
   EvidenceResult evaluate(MarketSnapshot snapshot) {
+    if (snapshot.provenance.isLiveUsable &&
+        _isIntradayTraderTimeframe(snapshot.timeframe)) {
+      return _strategyUnavailable(
+        'LIVE Trader Relative Volume is unavailable until TradePilot has '
+        'comparable same-session-position history. Sequential intraday '
+        'candles are not a valid RVOL baseline because volume changes '
+        'systematically through the trading session.',
+      );
+    }
+
     final candles = snapshot.candles;
 
     if (lookback <= 0) {
@@ -471,6 +481,16 @@ class RelativeVolumeEvidenceProvider implements StrategyAwareEvidenceProvider {
       explanation: 'Relative volume could not be calculated.',
       unavailableReason: reason,
     );
+  }
+
+  bool _isIntradayTraderTimeframe(String timeframe) {
+    return const {
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+    }.contains(timeframe.toLowerCase());
   }
 
   EvidenceDirection _directionForLatestCandle(MarketCandle candle) {

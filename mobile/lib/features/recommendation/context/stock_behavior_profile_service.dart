@@ -27,8 +27,15 @@ class StockBehaviorProfileService {
       return const StockBehaviorProfile.unknown();
     }
 
-    final averageVolume = _averageHistoricalVolume(candles);
-    final relativeVolume = averageVolume <= 0
+    final hasComparableShortTermVolume =
+        !(snapshot.provenance.isLiveUsable &&
+            _isIntradayTimeframe(snapshot.timeframe));
+
+    final averageVolume = hasComparableShortTermVolume
+        ? _averageHistoricalVolume(candles)
+        : 0.0;
+
+    final relativeVolume = !hasComparableShortTermVolume || averageVolume <= 0
         ? 1.0
         : snapshot.currentVolume / averageVolume;
 
@@ -63,6 +70,7 @@ class StockBehaviorProfileService {
         historicalProfile: historicalProfile,
         averageVolume: averageVolume,
         relativeVolume: relativeVolume,
+        hasComparableShortTermVolume: hasComparableShortTermVolume,
         atrPercent: atrPercent,
         baselineAtrPercent: baselineAtrPercent,
         volatilityRatio: volatilityRatio,
@@ -82,6 +90,7 @@ class StockBehaviorProfileService {
       volatilityRegime: _snapshotVolatilityRegime(volatilityRatio),
       averageVolume: averageVolume,
       relativeVolume: relativeVolume,
+      hasComparableShortTermVolume: hasComparableShortTermVolume,
       atrPercent: atrPercent,
       baselineAtrPercent: baselineAtrPercent,
       volatilityRatio: volatilityRatio,
@@ -95,6 +104,7 @@ class StockBehaviorProfileService {
     required HistoricalStockProfile historicalProfile,
     required double averageVolume,
     required double relativeVolume,
+    required bool hasComparableShortTermVolume,
     required double atrPercent,
     required double baselineAtrPercent,
     required double volatilityRatio,
@@ -105,6 +115,7 @@ class StockBehaviorProfileService {
       volatilityRegime: _historicalVolatilityRegime(historicalProfile),
       averageVolume: averageVolume,
       relativeVolume: relativeVolume,
+      hasComparableShortTermVolume: hasComparableShortTermVolume,
       atrPercent: atrPercent,
       baselineAtrPercent: baselineAtrPercent,
       volatilityRatio: volatilityRatio,
@@ -125,6 +136,17 @@ class StockBehaviorProfileService {
       historicalTrendEfficiency20: historicalProfile.trendEfficiency20,
       historicalTrendEfficiency60: historicalProfile.trendEfficiency60,
     );
+  }
+
+  bool _isIntradayTimeframe(String timeframe) {
+    return const {
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+      '4h',
+    }.contains(timeframe.toLowerCase());
   }
 
   double _averageHistoricalVolume(List<MarketCandle> candles) {

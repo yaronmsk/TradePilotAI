@@ -29,25 +29,37 @@ void main() {
       },
     );
 
-    test('Trader remains the active validated strategy', () {
+    test('Trader remains active with explicit LIVE calibration decisions', () {
       final policy = StrategyAnalysisPolicyCatalog.trader;
 
       expect(policy.status, StrategyAnalysisPolicyStatus.active);
       expect(policy.isRecommendationActive, isTrue);
-
-      expect(
-        policy.evidencePolicies.values.every(
-          (entry) =>
-              entry.applicability ==
-              StrategyEvidenceApplicability.reuseCurrentBehavior,
-        ),
-        isTrue,
-      );
-
       expect(
         policy.eligibleEvidenceKinds.length,
         EvidenceKind.values.length - 1,
       );
+
+      expect(
+        policy.policyFor(EvidenceKind.candleTrend)!.applicability,
+        StrategyEvidenceApplicability.recalibrateForStrategy,
+      );
+      expect(
+        policy.policyFor(EvidenceKind.vwapPosition)!.applicability,
+        StrategyEvidenceApplicability.recalibrateForStrategy,
+      );
+      expect(
+        policy.policyFor(EvidenceKind.relativeVolume)!.applicability,
+        StrategyEvidenceApplicability.conditionalOnDataQuality,
+      );
+      expect(
+        policy.policyFor(EvidenceKind.volumeConfirmation)!.applicability,
+        StrategyEvidenceApplicability.conditionalOnDataQuality,
+      );
+      expect(
+        policy.policyFor(EvidenceKind.emaStructure)!.applicability,
+        StrategyEvidenceApplicability.reuseCurrentBehavior,
+      );
+      expect(policy.isComplete, isTrue);
     });
 
     test('Swing recommendation backend is active after Batch 7A', () {

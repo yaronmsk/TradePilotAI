@@ -22,7 +22,7 @@ class VolumeConfirmationEvidenceProvider
     whyItMatters:
         'A directional move with expanding participation is generally more convincing than the same move occurring on fading activity.',
     calculation:
-        'Trader preserves the validated recent-half versus prior-half volume comparison with its existing price-move threshold. Swing compares equal recent and prior volume windows but measures price-move significance in ATR units using strategy-specific 1D or 4H policy.',
+        'Synthetic Trader fixtures preserve the validated adjacent-window comparison. LIVE intraday Trader withholds this signal until session-position-aware volume history exists. Swing compares equal windows and measures price-move significance in ATR units using strategy-specific 1D or 4H policy.',
   );
 
   @override
@@ -37,6 +37,16 @@ class VolumeConfirmationEvidenceProvider
 
   @override
   EvidenceResult evaluate(MarketSnapshot snapshot) {
+    if (snapshot.provenance.isLiveUsable &&
+        _isIntradayTraderTimeframe(snapshot.timeframe)) {
+      return _strategyUnavailable(
+        'LIVE Trader Volume Confirmation is unavailable until TradePilot can '
+        'compare volume using session-position-appropriate history. Adjacent '
+        'intraday windows can otherwise confuse normal time-of-day volume '
+        'patterns with confirmation or divergence.',
+      );
+    }
+
     final candles = snapshot.candles;
 
     if (lookback < 8) {
@@ -325,6 +335,16 @@ class VolumeConfirmationEvidenceProvider
           'Volume Confirmation remain inside the same Participation family, '
           'so they cannot become two independent participation votes.',
     );
+  }
+
+  bool _isIntradayTraderTimeframe(String timeframe) {
+    return const {
+      '1m',
+      '5m',
+      '15m',
+      '30m',
+      '1h',
+    }.contains(timeframe.toLowerCase());
   }
 
   String _formatVolume(double volume) {

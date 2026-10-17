@@ -15,6 +15,7 @@ class StockBehaviorProfile {
     required this.volatilityRatio,
     required this.trendEfficiency,
     required this.sampleSize,
+    this.hasComparableShortTermVolume = true,
     this.baselineSource = StockBaselineSource.shortTermSnapshot,
     this.historicalSampleSize = 0,
     this.typicalDailyAtrPercent = 0,
@@ -34,6 +35,7 @@ class StockBehaviorProfile {
       volatilityRegime = VolatilityRegime.unknown,
       averageVolume = 0,
       relativeVolume = 1,
+      hasComparableShortTermVolume = false,
       atrPercent = 0,
       baselineAtrPercent = 0,
       volatilityRatio = 1,
@@ -60,6 +62,10 @@ class StockBehaviorProfile {
 
   /// Current active-analysis volume relative to its recent short-term average.
   final double relativeVolume;
+
+  /// Whether the active short-term volume baseline is genuinely comparable.
+  /// False for LIVE intraday data until same-session-position history exists.
+  final bool hasComparableShortTermVolume;
 
   /// Short-term normalized ATR from the active analysis snapshot.
   final double atrPercent;

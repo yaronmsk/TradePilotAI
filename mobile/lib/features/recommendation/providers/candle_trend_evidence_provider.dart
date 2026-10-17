@@ -32,10 +32,13 @@ class CandleTrendEvidenceProvider implements StrategyAwareEvidenceProvider {
   @override
   EvidenceDefinition get definition => kDefinition;
 
-  /// Existing callers continue to receive the validated Trader calculation.
+  /// Synthetic fixtures keep the legacy deterministic Trader calculation.
+  /// LIVE/PARTIAL_LIVE snapshots use volatility-normalized Trader calibration.
   @override
   EvidenceResult evaluate(MarketSnapshot snapshot) {
-    return _evaluateTrader(snapshot);
+    return snapshot.provenance.isLiveUsable
+        ? _evaluateLiveTrader(snapshot)
+        : _evaluateTrader(snapshot);
   }
 
   @override
@@ -44,7 +47,7 @@ class CandleTrendEvidenceProvider implements StrategyAwareEvidenceProvider {
     required StrategyType strategy,
   }) {
     return switch (strategy) {
-      StrategyType.trader => _evaluateTrader(snapshot),
+      StrategyType.trader => evaluate(snapshot),
       StrategyType.swing => _evaluateSwing(snapshot),
       StrategyType.investor => _unsupportedStrategyResult(
         'Candle Trend has not been calibrated for Investor yet.',
@@ -154,6 +157,125 @@ class CandleTrendEvidenceProvider implements StrategyAwareEvidenceProvider {
       score: 50,
       reliabilityMetrics: reliabilityMetrics,
       explanation: 'The recent candle sequence is moving mostly sideways.',
+    );
+  }
+
+  EvidenceResult _evaluateLiveTrader(MarketSnapshot snapshot) {
+    final policy = CandleTrendStrategyPolicy.liveTraderForTimeframe(
+      snapshot.timeframe,
+    );
+
+    if (policy == null) {
+      return _unsupportedStrategyResult(
+        'LIVE Trader Candle Trend supports 1m, 5m, 15m, 30m and 1h.',
+      );
+    }
+
+    if (snapshot.candles.length < policy.minimumCandleCount) {
+      return EvidenceResult(
+        providerName: name,
+        definition: definition,
+        status: EvidenceStatus.insufficientData,
+        direction: EvidenceDirection.unknown,
+        strength: EvidenceStrength.veryWeak,
+        score: 0,
+        baseWeight: 1,
+        dynamicWeight: 1,
+        reliability: 0,
+        currentValue: 'Not enough LIVE Trader history',
+        baselineValue:
+            'At least ${policy.minimumCandleCount} '
+            '${_timeframeLabel(snapshot.timeframe)} candles required',
+        relativeValue: 'Not available',
+        explanation:
+            'There is not enough LIVE history to evaluate Trader trend with '
+            'volatility normalization.',
+        unavailableReason:
+            'At least ${policy.minimumCandleCount} candles are required.',
+      );
+    }
+
+    final window = snapshot.candles.length > policy.targetCandleCount
+        ? snapshot.candles.sublist(
+            snapshot.candles.length - policy.targetCandleCount,
+          )
+        : snapshot.candles;
+
+    if (window.any((candle) => candle.close <= 0)) {
+      return _unsupportedStrategyResult(
+        'LIVE Trader Candle Trend requires positive closing prices.',
+      );
+    }
+
+    final firstClose = window.first.close;
+    final lastClose = window.last.close;
+    final changePercent = ((lastClose - firstClose) / firstClose) * 100;
+
+    final metrics = _calculateSwingMetrics(
+      candles: window,
+      policy: policy,
+      changePercent: changePercent,
+    );
+
+    final absoluteNormalizedMove = metrics.normalizedMove.abs();
+
+    if (absoluteNormalizedMove < policy.directionalThreshold) {
+      return _availableSwingResult(
+        snapshot: snapshot,
+        metrics: metrics,
+        changePercent: changePercent,
+        direction: EvidenceDirection.neutral,
+        strength: EvidenceStrength.weak,
+        score: 35,
+        conclusion:
+            'The LIVE Trader move is not large enough relative to the '
+            'volatility of the selected interval to establish a reliable '
+            'short-term trend.',
+      );
+    }
+
+    final direction = changePercent > 0
+        ? EvidenceDirection.bullish
+        : EvidenceDirection.bearish;
+
+    if (absoluteNormalizedMove >= policy.exceptionalThreshold) {
+      return _availableSwingResult(
+        snapshot: snapshot,
+        metrics: metrics,
+        changePercent: changePercent,
+        direction: direction,
+        strength: EvidenceStrength.exceptional,
+        score: 95,
+        conclusion:
+            'The LIVE Trader move is exceptionally strong relative to '
+            'expected noise on the selected interval.',
+      );
+    }
+
+    if (absoluteNormalizedMove >= policy.strongThreshold) {
+      return _availableSwingResult(
+        snapshot: snapshot,
+        metrics: metrics,
+        changePercent: changePercent,
+        direction: direction,
+        strength: EvidenceStrength.strong,
+        score: 80,
+        conclusion:
+            'The LIVE Trader move is strong relative to expected noise on the '
+            'selected interval.',
+      );
+    }
+
+    return _availableSwingResult(
+      snapshot: snapshot,
+      metrics: metrics,
+      changePercent: changePercent,
+      direction: direction,
+      strength: EvidenceStrength.moderate,
+      score: 60,
+      conclusion:
+          'The LIVE Trader move is directionally meaningful after volatility '
+          'normalization, but it is not yet a strong trend.',
     );
   }
 
@@ -518,6 +640,11 @@ class CandleTrendEvidenceProvider implements StrategyAwareEvidenceProvider {
 
   String _timeframeLabel(String timeframe) {
     return switch (timeframe.toLowerCase()) {
+      '1m' => '1-minute',
+      '5m' => '5-minute',
+      '15m' => '15-minute',
+      '30m' => '30-minute',
+      '1h' => '1-hour',
       '1d' => 'daily',
       '4h' => '4-hour',
       _ => timeframe,

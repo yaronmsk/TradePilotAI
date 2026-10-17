@@ -2,6 +2,7 @@ import '../models/strategy_summary.dart';
 
 enum CandleTrendCalibrationMode {
   traderLegacyFixedPercent,
+  traderLiveVolatilityNormalized,
   swingVolatilityNormalized,
 }
 
@@ -30,6 +31,41 @@ class CandleTrendStrategyPolicy {
     atrNoiseFactor: 0,
     volatilityFloorPercent: 0,
   );
+
+  /// LIVE Trader policy. The same normalized signal-to-noise thresholds are
+  /// used across supported Trader intervals because volatility is estimated
+  /// from candles at the selected interval itself.
+  static const traderLiveOneMinute = CandleTrendStrategyPolicy(
+    strategy: StrategyType.trader,
+    calibrationMode: CandleTrendCalibrationMode.traderLiveVolatilityNormalized,
+    targetCandleCount: 60,
+    minimumCandleCount: 20,
+    directionalThreshold: 0.90,
+    strongThreshold: 1.50,
+    exceptionalThreshold: 2.50,
+    atrNoiseFactor: 0.60,
+    volatilityFloorPercent: 0.02,
+  );
+
+  static const traderLiveStandard = CandleTrendStrategyPolicy(
+    strategy: StrategyType.trader,
+    calibrationMode: CandleTrendCalibrationMode.traderLiveVolatilityNormalized,
+    targetCandleCount: 48,
+    minimumCandleCount: 20,
+    directionalThreshold: 0.90,
+    strongThreshold: 1.50,
+    exceptionalThreshold: 2.50,
+    atrNoiseFactor: 0.60,
+    volatilityFloorPercent: 0.02,
+  );
+
+  static CandleTrendStrategyPolicy? liveTraderForTimeframe(String timeframe) {
+    return switch (timeframe.toLowerCase()) {
+      '1m' => traderLiveOneMinute,
+      '5m' || '15m' || '30m' || '1h' => traderLiveStandard,
+      _ => null,
+    };
+  }
 
   /// Initial deterministic Swing policy for the default 1D primary interval.
   ///

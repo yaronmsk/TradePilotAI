@@ -53,15 +53,15 @@ class StockBehaviorExplainabilityCatalog {
     StockBehaviorMetric.volumePattern: MetricExplainability(
       semanticRole: MetricSemanticRole.contextConfiguration,
       whatItIs:
-          'Describes whether the stock\'s daily trading volume is normally stable or naturally erratic.',
+          'With a daily historical baseline, this describes whether the stock\'s volume is normally stable or erratic. Without that baseline, TradePilot may show short-term Relative Volume only when the comparison is valid.',
       calculation:
-          'TradePilot uses the coefficient of variation of the latest 60 daily volume observations. A value up to 0.25 is Stable, up to 0.50 is Variable, and above 0.50 is Highly variable.',
+          'Historical Volume Pattern uses the coefficient of variation of the latest 60 daily volume observations. Short-term Relative Volume compares current volume with a recent comparable baseline. LIVE intraday RVOL is withheld when comparable same-session-position history is unavailable.',
       whyItMatters:
-          'A moderate volume expansion is more unusual and informative for a stock whose volume is normally stable than for one whose volume routinely jumps around.',
+          'A volume expansion is more informative when it is genuinely unusual for that stock and that point in the trading session.',
       recommendationImpact:
-          'Volume Pattern does not create or flip Buy/Sell direction. Swing uses it only to modestly adjust existing Participation evidence; it does not create another volume vote.',
+          'This context does not create or flip Buy/Sell direction. It may only adjust existing Participation evidence when its volume baseline is valid.',
       limitations:
-          'Historical volume variability does not explain why volume changed and can be distorted by corporate events, index changes or unusual market periods.',
+          'Intraday volume changes systematically through the session. Ordinary adjacent candles are not interchangeable time-of-day baselines, so TradePilot reports the short-term value as unavailable rather than inventing a comparison.',
     ),
   };
 

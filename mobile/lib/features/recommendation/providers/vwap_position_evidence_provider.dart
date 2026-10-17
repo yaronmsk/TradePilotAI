@@ -28,6 +28,10 @@ class VwapPositionEvidenceProvider implements EvidenceProvider {
 
   @override
   EvidenceResult evaluate(MarketSnapshot snapshot) {
+    if (snapshot.provenance.isLiveUsable) {
+      return _evaluateLiveTrader(snapshot);
+    }
+
     final candles = snapshot.candles;
 
     if (candles.length < 3) {
@@ -89,6 +93,81 @@ class VwapPositionEvidenceProvider implements EvidenceProvider {
               : direction == EvidenceDirection.bearish
               ? 'Price is trading below the analysis-window VWAP.'
               : 'Price is close to the analysis-window VWAP.'} VWAP and support/resistance share the Price Structure evidence group, so related structure signals cannot multiply confidence independently.',
+    );
+  }
+
+  EvidenceResult _evaluateLiveTrader(MarketSnapshot snapshot) {
+    final candles = snapshot.candles;
+
+    if (candles.length < 15) {
+      return _insufficient();
+    }
+
+    final price = snapshot.currentPrice;
+    final vwap = TechnicalIndicatorMath.windowVwap(candles);
+    final atr = TechnicalIndicatorMath.atr(candles, period: 14);
+
+    if (price <= 0 || vwap <= 0 || atr <= 0) {
+      return _error(
+        'LIVE Trader VWAP requires positive price, VWAP and ATR values.',
+      );
+    }
+
+    final distancePercent = ((price - vwap) / vwap) * 100;
+    final distanceAtr = (price - vwap) / atr;
+    final magnitudeAtr = distanceAtr.abs();
+
+    final direction = distanceAtr > 0.25
+        ? EvidenceDirection.bullish
+        : distanceAtr < -0.25
+        ? EvidenceDirection.bearish
+        : EvidenceDirection.neutral;
+
+    final strength = direction == EvidenceDirection.neutral
+        ? EvidenceStrength.weak
+        : magnitudeAtr >= 1.50
+        ? EvidenceStrength.exceptional
+        : magnitudeAtr >= 0.75
+        ? EvidenceStrength.strong
+        : EvidenceStrength.moderate;
+
+    final score = direction == EvidenceDirection.neutral
+        ? 48.0
+        : magnitudeAtr >= 1.50
+        ? 88.0
+        : magnitudeAtr >= 0.75
+        ? 76.0
+        : 62.0;
+
+    final reliability = (0.55 + ((candles.length / 48).clamp(0.0, 1.0) * 0.35))
+        .clamp(0.55, 0.90);
+
+    return EvidenceResult(
+      providerName: name,
+      definition: definition,
+      status: EvidenceStatus.available,
+      direction: direction,
+      strength: strength,
+      score: score,
+      baseWeight: 0.75,
+      dynamicWeight: 1,
+      reliability: reliability,
+      currentValue: 'Price ${price.toStringAsFixed(2)}',
+      baselineValue:
+          'Analysis-window VWAP ${vwap.toStringAsFixed(2)} · '
+          'ATR ${atr.toStringAsFixed(2)}',
+      relativeValue:
+          '${distanceAtr >= 0 ? '+' : ''}${distanceAtr.toStringAsFixed(2)} ATR · '
+          '${distancePercent >= 0 ? '+' : ''}${distancePercent.toStringAsFixed(2)}%',
+      explanation:
+          '${direction == EvidenceDirection.bullish
+              ? 'Price is meaningfully above the analysis-window VWAP after normalizing distance by current volatility.'
+              : direction == EvidenceDirection.bearish
+              ? 'Price is meaningfully below the analysis-window VWAP after normalizing distance by current volatility.'
+              : 'Price is close to the analysis-window VWAP after accounting for current volatility.'} '
+          'This is an analysis-window reference, not a claim that full-session '
+          'VWAP is available. VWAP and support/resistance remain inside the '
+          'same Price Structure family.',
     );
   }
 

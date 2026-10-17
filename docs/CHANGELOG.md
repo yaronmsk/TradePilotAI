@@ -7,13 +7,13 @@ Document:
 Project Changelog
 
 Version:
-1.4
+1.5
 
 Status:
 Approved
 
 Last Updated:
-2026-10-03
+2026-10-04
 
 Owner:
 TradePilot AI
@@ -64,6 +64,33 @@ Added correctness safeguards discovered during LIVE usage:
 - recommendation action thresholds are unchanged.
 
 Validation is defined by `tools/validate-v0.13-batch3b1.sh`.
+
+### Batch 3B2 — Trader LIVE Timeframe Calibration
+
+Corrected LIVE Trader calculations that could not safely reuse one
+timeframe-insensitive interpretation across 1m/5m/15m/30m/1h.
+
+Changes:
+
+- LIVE Candle Trend is volatility-normalized using the active interval's own
+  realized movement/range instead of fixed ±2%/±5% raw-move gates;
+- LIVE intraday Relative Volume and Volume Confirmation are withheld until
+  comparable session-position history exists;
+- Stock Behavior exposes that missing short-term volume baseline explicitly and
+  does not use it for contextual weighting;
+- LIVE analysis-window VWAP distance is normalized by ATR;
+- the 1m interval is visibly labeled experimental for the current REST-candle
+  Personal Beta path;
+- strategy-policy metadata now records which Trader inputs are recalibrated or
+  conditional on data quality;
+- synthetic deterministic Trader behavior remains unchanged;
+- Buy/Sell action thresholds, family caps and attribution rules are unchanged.
+
+EMA/RSI/MACD periods are intentionally not changed in this batch. They remain
+bar-interval inputs and will be changed only if LIVE distribution testing
+identifies a specific defect rather than by speculative retuning.
+
+Validation is defined by `tools/validate-v0.13-batch3b2.sh`.
 
 ## v0.12.0 — Investor Strategy Brain
 

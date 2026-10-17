@@ -11,23 +11,7 @@ class StrategyAnalysisPolicyCatalog {
     strategy: StrategyType.trader,
     status: StrategyAnalysisPolicyStatus.active,
     evidencePolicies: Map.unmodifiable(
-      _productionPolicies(
-        strategy: StrategyType.trader,
-        builder: (kind) => _entry(
-          strategy: StrategyType.trader,
-          kind: kind,
-          applicability: StrategyEvidenceApplicability.reuseCurrentBehavior,
-          implementationReady: true,
-          affectsDirection: true,
-          affectsConfidence: true,
-          affectsRiskOrEntryQuality:
-              kind == EvidenceKind.priceExtension ||
-              kind == EvidenceKind.supportResistance,
-          rationale:
-              'Preserves the validated v0.10.1 Trader behavior while the '
-              'strategy-policy architecture is introduced.',
-        ),
-      ),
+      _productionPolicies(strategy: StrategyType.trader, builder: _traderEntry),
     ),
   );
 
@@ -266,6 +250,98 @@ class StrategyAnalysisPolicyCatalog {
       StrategyType.swing => swing,
       StrategyType.investor => investor,
     };
+  }
+
+  static StrategyEvidencePolicy _traderEntry(EvidenceKind kind) {
+    switch (kind) {
+      case EvidenceKind.candleTrend:
+        return _entry(
+          strategy: StrategyType.trader,
+          kind: kind,
+          applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+          implementationReady: true,
+          affectsDirection: true,
+          affectsConfidence: true,
+          affectsRiskOrEntryQuality: false,
+          rationale:
+              'LIVE Trader trend must scale with the volatility of the selected '
+              '1m/5m/15m/30m/1h interval rather than reuse one raw-percent '
+              'movement threshold across every horizon.',
+          calibrationNotes:
+              'Use volatility-normalized net movement and trend efficiency. '
+              'Synthetic deterministic fixtures keep the legacy calculation '
+              'for regression stability.',
+        );
+      case EvidenceKind.relativeVolume:
+        return _entry(
+          strategy: StrategyType.trader,
+          kind: kind,
+          applicability: StrategyEvidenceApplicability.conditionalOnDataQuality,
+          implementationReady: true,
+          affectsDirection: true,
+          affectsConfidence: true,
+          affectsRiskOrEntryQuality: false,
+          rationale:
+              'Intraday volume is strongly time-of-day dependent, so ordinary '
+              'adjacent candles are not a safe LIVE Relative Volume baseline.',
+          calibrationNotes:
+              'Withhold LIVE intraday RVOL until comparable session-position '
+              'history is available; never manufacture a neutral replacement.',
+          dataQualityRequirement:
+              'Comparable same-session-position intraday volume history is '
+              'required before LIVE Trader RVOL may participate.',
+        );
+      case EvidenceKind.volumeConfirmation:
+        return _entry(
+          strategy: StrategyType.trader,
+          kind: kind,
+          applicability: StrategyEvidenceApplicability.conditionalOnDataQuality,
+          implementationReady: true,
+          affectsDirection: true,
+          affectsConfidence: true,
+          affectsRiskOrEntryQuality: false,
+          rationale:
+              'Sequential intraday volume windows can confuse ordinary '
+              'time-of-day volume changes with confirmation or divergence.',
+          calibrationNotes:
+              'Withhold LIVE intraday Volume Confirmation until session-aware '
+              'comparison history exists. Preserve the legacy deterministic '
+              'fixture path for regression tests.',
+          dataQualityRequirement:
+              'Session-position-aware intraday volume history is required.',
+        );
+      case EvidenceKind.vwapPosition:
+        return _entry(
+          strategy: StrategyType.trader,
+          kind: kind,
+          applicability: StrategyEvidenceApplicability.recalibrateForStrategy,
+          implementationReady: true,
+          affectsDirection: true,
+          affectsConfidence: true,
+          affectsRiskOrEntryQuality: false,
+          rationale:
+              'A fixed percent distance from VWAP has different meaning on '
+              '1-minute and 1-hour candles.',
+          calibrationNotes:
+              'For LIVE Trader, normalize analysis-window VWAP distance by '
+              'ATR and clearly retain the analysis-window limitation.',
+        );
+      default:
+        return _entry(
+          strategy: StrategyType.trader,
+          kind: kind,
+          applicability: StrategyEvidenceApplicability.reuseCurrentBehavior,
+          implementationReady: true,
+          affectsDirection: true,
+          affectsConfidence: true,
+          affectsRiskOrEntryQuality:
+              kind == EvidenceKind.priceExtension ||
+              kind == EvidenceKind.supportResistance,
+          rationale:
+              'Preserves the validated Trader behavior because this evidence '
+              'does not require a Batch 3B2 LIVE-timeframe correction.',
+        );
+    }
   }
 
   static Map<EvidenceKind, StrategyEvidencePolicy> _productionPolicies({

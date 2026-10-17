@@ -74,7 +74,9 @@ class StockBehaviorCard extends StatelessWidget {
                   label: hasHistory ? 'Volume Pattern' : 'Relative Volume',
                   value: hasHistory
                       ? _volumePattern(profile.volumeVariability)
-                      : '${profile.relativeVolume.toStringAsFixed(2)}x',
+                      : profile.hasComparableShortTermVolume
+                      ? '${profile.relativeVolume.toStringAsFixed(2)}x'
+                      : 'Unavailable',
                 ),
               ],
             ),
@@ -285,11 +287,15 @@ class StockBehaviorCard extends StatelessWidget {
   }
 
   String _technicalBaseline(StockBehaviorProfile profile) {
+    final currentVolumeContext = profile.hasComparableShortTermVolume
+        ? 'current analysis-window volume ${profile.relativeVolume.toStringAsFixed(2)}x its recent comparable average'
+        : 'current intraday RVOL unavailable until comparable session-position history exists';
+
     return 'Historical baseline: ${profile.historicalSampleSize} daily sessions · '
         '20-day realized volatility ${profile.recentRealizedVolatilityPercent.toStringAsFixed(1)}% '
         'vs typical ${profile.typicalRealizedVolatilityPercent.toStringAsFixed(1)}% · '
         '20D/60D average volume ${profile.volumeTrendRatio.toStringAsFixed(2)}x · '
-        'current intraday volume ${profile.relativeVolume.toStringAsFixed(2)}x its recent analysis-window average.';
+        '$currentVolumeContext.';
   }
 }
 

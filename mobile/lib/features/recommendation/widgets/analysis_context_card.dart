@@ -71,6 +71,18 @@ class AnalysisContextCard extends StatelessWidget {
             'feed the primary ${strategy.title} evidence. Confirmation and broader context are selected automatically.',
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          if (strategy == StrategyType.trader &&
+              timeframePlan.primaryTimeframe == '1m') ...[
+            const SizedBox(height: 6),
+            Text(
+              '1-minute Trader analysis is experimental in the Personal Beta. '
+              'LIVE mode uses completed REST candles, volatility-normalized '
+              'trend logic and withholds intraday volume signals when a valid '
+              'session-position baseline is unavailable. It is not a '
+              'sub-minute execution feed.',
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+          ],
           const SizedBox(height: 12),
           const Divider(),
           _ContextRow(

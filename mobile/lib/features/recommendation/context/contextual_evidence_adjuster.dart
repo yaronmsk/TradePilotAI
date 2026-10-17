@@ -131,6 +131,10 @@ class ContextualEvidenceAdjuster {
 
       case EvidenceKind.relativeVolume:
       case EvidenceKind.volumeConfirmation:
+        if (!profile.hasComparableShortTermVolume) {
+          break;
+        }
+
         if (profile.relativeVolume >= 2) {
           multiplier = 1.30;
           reasons.add(
@@ -172,7 +176,8 @@ class ContextualEvidenceAdjuster {
             'VWAP distance is slightly discounted because volatile stocks naturally travel farther around intraday reference prices.',
           );
         }
-        if (profile.relativeVolume >= 1.50) {
+        if (profile.hasComparableShortTermVolume &&
+            profile.relativeVolume >= 1.50) {
           multiplier *= 1.10;
           reasons.add(
             'VWAP structure receives extra weight because elevated participation makes the current price location more informative.',
